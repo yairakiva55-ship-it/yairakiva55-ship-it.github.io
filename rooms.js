@@ -240,11 +240,36 @@ function closeRoomsPanel() {
   document.body.classList.remove("room-panel-open");
 }
 function updateRoomsBadge() {
+  if ($("tableCard")) renderTable();
   const badge = $("roomsBtnBadge");
   if (!badge) return;
   badge.textContent = room && room.status !== "finished" ? room.code : "";
   badge.hidden = !badge.textContent;
 }
+function profileInitialsSafe(name) { return String(name || "?").trim().split(/\s+/).slice(0, 2).map(part => part[0] || "").join("") || "?"; }
+function renderTable() {
+  const active = Boolean(user && room && room.status !== "finished");
+  $("tableEmpty").hidden = active;
+  $("tableActive").hidden = !active;
+  $("tableHistoryBtn").hidden = active || !rooms.length;
+  const seats = $("seatsPanel");
+  if (!active) { seats.hidden = true; closeSeats(); return; }
+  const host = room.host_id === user.id;
+  const count = members.length;
+  $("tableName").textContent = room.name;
+  $("tableSub").textContent = `${count ? count + " בשולחן" : "ממתין לחברים"} · ${host ? "אתה המנהל" : "אתה משתתף"}`;
+  $("tableCode").textContent = room.code;
+  seats.hidden = !count;
+  $("seatsCount").textContent = count;
+  $("seatsSub").textContent = room.name;
+  $("seatsList").innerHTML = members.map(member => {
+    const me = member.user_id === user.id, isHost = member.user_id === room.host_id;
+    const tags = `${isHost ? '<span class="seat-tag">מנהל</span>' : ""}${me ? '<span class="seat-tag me">אתה</span>' : ""}`;
+    return `<li class="seat${me ? " me" : ""}"><span class="seat-avatar" aria-hidden="true">${escapeHtml(profileInitialsSafe(member.display_name))}</span><span class="seat-name">${escapeHtml(member.display_name)}</span>${tags}</li>`;
+  }).join("");
+}
+function openSeats() { $("seatsPanel").classList.add("open"); $("seatsToggle").setAttribute("aria-expanded", "true"); }
+function closeSeats() { $("seatsPanel").classList.remove("open"); $("seatsToggle").setAttribute("aria-expanded", "false"); }
 function hostsOpenRoom() {
   return Boolean(user && rooms.some(item => item.host_id === user.id && item.status !== "finished"));
 }
@@ -255,6 +280,10 @@ function updateCreateRoomButton() {
 }
 function renderRoomList() {
   updateCreateRoomButton();
+  renderTable();
+  // The list is only useful for switching between tables; with a single table it just repeats the name.
+  const lobby = $("roomLobby");
+  if (lobby) lobby.hidden = rooms.length <= 1 && Boolean(room);
   $("roomList").innerHTML = rooms.length
     ? rooms.map(item => `<button type="button" data-room-id="${escapeHtml(item.id)}" class="${room?.id === item.id ? "is-active" : ""}">${escapeHtml(item.name)} · ${item.status === "finished" ? "הסתיים" : item.status === "started" ? "במשחק" : "פתוח"}</button>`).join("")
     : "<span class=\"room-note\">עדיין אין לך חדרים. פתח שולחן או הצטרף עם קוד.</span>";
@@ -309,7 +338,7 @@ async function enterUser(nextUser, { provisional = false } = {}) {
   if (shownUser === user.id) return;
   shownUser = user.id;
   notice();
-  $("roomActionName").value = safeGet("wwcd_display_name") || displayName();
+  if (!$("roomActionModal").classList.contains("show")) $("roomActionName").value = safeGet("wwcd_display_name") || displayName();
   await Promise.allSettled([loadProfileRow(), loadWins(), loadCloudGame()]);
   await loadRooms({ restoreActive: true });
 }
@@ -437,6 +466,7 @@ async function openRoom(id, { reveal = true } = {}) {
   message("פותח חדר...");
   const { data, error } = await client.from("wwcd_rooms").select("*").eq("id", id).maybeSingle();
   if (error || !data) return message("פתיחת החדר נכשלה. נסה שוב.", "error");
+  if (room?.id !== data.id) members = [];
   room = data;
   rooms = rooms.map(item => item.id === data.id ? { ...item, ...data } : item);
   safeSet("wwcd_active_room", room.id);
@@ -445,7 +475,7 @@ async function openRoom(id, { reveal = true } = {}) {
   $("activeRoomCode").textContent = room.code;
   const host = room.host_id === user.id;
   const finished = room.status === "finished";
-  $("activeRoomMeta").textContent = `${finished ? "המשחק הסתיים" : room.status === "started" ? "המשחק התחיל" : "המשחק פתוח — שתף את הקוד עם החברים"} · ${host ? "אתה מנהל החדר" : "מנהל: " + (room.host_id ? "מארח החדר" : "—")} · יחס ${Number(room.ratio_money)} ₪ = ${Number(room.ratio_chips).toLocaleString("he-IL")} ג׳טונים`;
+  $("activeRoomMeta").textContent = `${finished ? "המשחק הסתיים" : room.status === "started" ? "המשחק התחיל" : "המשחק פתוח"} · ${host ? "אתה מנהל החדר" : "מנהל: " + (room.host_id ? "מארח החדר" : "—")} · יחס ${Number(room.ratio_money)} ₪ = ${Number(room.ratio_chips).toLocaleString("he-IL")} ג׳טונים`;
   $("hostRatioControls").hidden = !host || finished;
   $("roomRatioMoney").value = room.ratio_money;
   $("roomRatioChips").value = room.ratio_chips;
@@ -505,6 +535,7 @@ function renderRoom() {
     return `<div class="room-entry"><span>${escapeHtml(owner?.display_name || "שחקן")} · ${label(item.kind)} · ${sign}${nis(Math.abs(Number(item.amount_agorot)))}</span>${own ? `<button class="btn danger" type="button" data-delete-money="${escapeHtml(item.id)}">מחק</button>` : ""}</div>`;
   }).join("") : "<div class=\"room-note\">עוד לא נרשמו קניות או פדיונות.</div>";
   $("addMoneyEntryBtn").disabled = room.status === "finished";
+  renderTable();
 }
 function friendlyRpcError(error) {
   const text = String(error?.message || "");
@@ -526,8 +557,8 @@ async function createRoom() {
   if (error) return actionMessage("יצירת השולחן נכשלה: " + friendlyRpcError(error), "error");
   closeRoomAction();
   await loadRooms();
-  if (data?.id) await openRoom(data.id);
-  message("השולחן נוצר! לחץ \"שתף את החדר\" כדי לשלוח לחברים את השם והקוד.", "success");
+  if (data?.id) await openRoom(data.id, { reveal: false });
+  toast("השולחן נפתח! לחץ \"שתף שולחן\" כדי לשלוח לחברים את הקוד");
 }
 async function joinRoom() {
   const name = $("roomActionName").value.trim(), code = $("roomJoinCode").value.trim().toUpperCase();
@@ -540,8 +571,8 @@ async function joinRoom() {
   $("roomJoinCode").value = "";
   closeRoomAction();
   await loadRooms();
-  if (data?.id) await openRoom(data.id);
-  message("הצטרפת לשולחן.", "success");
+  if (data?.id) await openRoom(data.id, { reveal: false });
+  toast("הצטרפת לשולחן");
 }
 async function addMoney() {
   if (!room || room.status === "finished") return message("המשחק הסתיים ואי אפשר לשנות רישומים.", "error");
@@ -678,7 +709,14 @@ $("roomViewBackBtn").addEventListener("click", () => { setRoomView(); closeRooms
 $("roomViewBackInlineBtn").addEventListener("click", () => { setRoomView(); closeRoomsPanel(); });
 $("openCreateRoomBtn").addEventListener("click", event => openRoomAction("create", event.currentTarget));
 $("openJoinRoomBtn").addEventListener("click", event => openRoomAction("join", event.currentTarget));
-$("openRoomsPanelBtn").addEventListener("click", openRoomsPanel);
+$("openRoomsPanelBtn")?.addEventListener("click", openRoomsPanel);
+$("tableManageBtn").addEventListener("click", openRoomsPanel);
+$("tableHistoryBtn").addEventListener("click", openRoomsPanel);
+// The seats drawer floats above everything, so it lives at the top level of the page.
+document.body.appendChild($("seatsPanel"));
+$("seatsToggle").addEventListener("click", openSeats);
+$("seatsClose").addEventListener("click", closeSeats);
+document.addEventListener("click", event => { if ($("seatsPanel").classList.contains("open") && !event.target.closest("#seatsPanel")) closeSeats(); });
 $("closeRoomsPanelBtn").addEventListener("click", closeRoomsPanel);
 $("roomPanelOverlay").addEventListener("click", event => { if (event.target === $("roomPanelOverlay")) closeRoomsPanel(); });
 $("roomActionCancel").addEventListener("click", closeRoomAction);
@@ -692,6 +730,7 @@ document.addEventListener("keydown", event => {
   if ($("profileModal").classList.contains("show")) closeProfile();
   else if ($("roomActionModal").classList.contains("show")) closeRoomAction();
   else if ($("roomPanelOverlay").classList.contains("show")) closeRoomsPanel();
+  else if ($("seatsPanel").classList.contains("open")) closeSeats();
 });
 $("roomList").addEventListener("click", event => { const button = event.target.closest("[data-room-id]"); if (button) void openRoom(button.dataset.roomId); });
 $("addMoneyEntryBtn").addEventListener("click", () => void addMoney());

@@ -822,6 +822,54 @@ body.room-authenticated:not(.room-view-active) .room-account .room-actions{flex-
 .room-share-btn{width:100%;min-height:46px;margin:10px 0 4px;font-weight:800;font-size:15px}
 .room-lobby-actions.single{grid-template-columns:1fr}
 .action-strip.single{grid-template-columns:1fr}
+/* ===== Shared table card + seats drawer (v2026.10.27) ===== */
+.table-card{margin:10px 0 0;border:1px solid rgba(240,213,108,.22);border-radius:18px;background:linear-gradient(150deg,rgba(212,175,55,.08),rgba(16,42,31,.6));padding:12px 14px}
+.table-empty{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px 14px}
+.table-empty-text strong,.table-active-text strong{display:block;font-size:1rem;color:var(--text)}
+.table-empty-text span,.table-active-text span{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}
+.table-empty-actions,.table-active-actions{display:flex;gap:8px}
+.table-empty-actions .btn,.table-active-actions .btn{min-height:42px;padding:9px 14px;white-space:nowrap}
+.table-link{grid-column:1/-1;justify-self:start;background:none;border:0;padding:0;color:var(--gold2);font-size:.8rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.table-active{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px 14px}
+.table-active-info{display:flex;align-items:center;gap:10px;min-width:0}
+.table-active-text{min-width:0}.table-active-text strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.table-live{flex:none;width:10px;height:10px;border-radius:50%;background:var(--green2);box-shadow:0 0 0 4px rgba(53,173,121,.18)}
+.table-code{flex:none;margin-inline-start:auto;padding:5px 9px;border-radius:10px;border:1px solid rgba(240,213,108,.3);color:var(--gold2);font-size:.82rem;letter-spacing:.12em;font-weight:800}
+.table-card [hidden]{display:none!important}
+.room-panel .room-message:empty{display:none}
+body.room-panel-open .seats-panel,body:has(.modal.show) .seats-panel,body:has(.admin-overlay:not([hidden])) .seats-panel{display:none!important}
+/* seats: a calm drawer on the side; always open on wide screens */
+.seats-panel{position:fixed;left:0;top:0;z-index:400;direction:rtl}
+.seats-panel[hidden]{display:none!important}
+.seats-toggle{position:fixed;left:0;top:calc(50% - 36px);display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 8px;border:1px solid rgba(240,213,108,.3);border-left:0;border-radius:0 14px 14px 0;background:rgba(12,29,21,.94);color:var(--text);box-shadow:0 8px 24px rgba(0,0,0,.3);cursor:pointer}
+.seats-toggle:active{transform:none}
+.seats-toggle b{font-size:1rem;color:var(--gold2)}.seats-toggle-icon{font-size:.9rem;color:var(--gold2)}
+.seats-toggle-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.seats-body{display:none;position:fixed;left:0;top:0;bottom:0;width:min(260px,78vw);padding:16px 14px calc(16px + env(safe-area-inset-bottom));overflow:auto;background:linear-gradient(160deg,#122c20,#08170f);border-right:1px solid rgba(240,213,108,.22);box-shadow:20px 0 60px rgba(0,0,0,.45)}
+.seats-panel.open .seats-body{display:block;animation:seatsIn .22s ease}
+.seats-panel.open .seats-toggle{visibility:hidden}
+@keyframes seatsIn{from{transform:translateX(-18px);opacity:.6}to{transform:none;opacity:1}}
+.seats-head{display:flex;align-items:baseline;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.seats-head strong{font-size:1.05rem}.seats-head span{color:var(--muted);font-size:.78rem}
+.seats-close{margin-inline-start:auto;width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);font-size:18px;line-height:1;cursor:pointer}
+.seats-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.seat{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.05)}
+.seat-avatar{flex:none;width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(145deg,#b82328,#661014);color:#fff;font-size:.78rem;font-weight:800}
+.seat-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:650}
+.seat-tag{flex:none;font-size:.68rem;padding:2px 7px;border-radius:999px;color:var(--gold2);border:1px solid rgba(240,213,108,.3)}
+.seat.me .seat-tag.me{color:#77d3a7;border-color:rgba(119,211,167,.35)}
+@media(min-width:1620px){
+  .seats-panel{top:110px;left:16px}
+  .seats-toggle{display:none}
+  .seats-body{display:block;position:static;width:230px;max-height:calc(100vh - 140px);border:1px solid rgba(240,213,108,.22);border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+  .seats-close{display:none}
+}
+@media(max-width:560px){
+  .table-card{padding:11px 12px}
+  .table-empty,.table-active{grid-template-columns:1fr}
+  .table-empty-actions,.table-active-actions{display:grid;grid-template-columns:1fr 1fr}
+  .seats-toggle{padding:10px 6px}
+}
 /* ===== Phone fit (v2026.10.26b) ===== */
 /* Summary goes below the players section on every screen size */
 .layout>.summary-card{order:1!important}
@@ -1031,8 +1079,51 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     </div>
     <div class="login-footer"><span class="login-lock">✓</span> הכניסה מאובטחת. פרטי החשבון שלך לא מוצגים לשחקנים אחרים.</div>
     <div id="roomDashboard" hidden>
-      <div class="room-account"><span id="roomUserLabel"></span><div class="room-actions"><button id="roomViewBackBtn" class="btn room-view-back" type="button">חזרה למשחק</button><button id="profileOpenBtn" class="btn profile-open" type="button" aria-haspopup="dialog" aria-controls="profileModal" aria-label="הפרופיל שלי"><span id="profileMiniAvatar" class="profile-mini-avatar" aria-hidden="true">י</span><span class="profile-open-text">הפרופיל שלי</span></button><button id="openRoomsPanelBtn" class="btn" type="button" aria-haspopup="dialog" aria-controls="roomPanelOverlay">חדרים<span id="roomsBtnBadge" class="rooms-badge" hidden></span></button><button id="adminOpenBtn" class="btn" type="button" hidden>ADMIN</button><button id="googleSignOutBtn" class="btn danger" type="button">התנתק</button></div></div>
+      <div class="room-account"><span id="roomUserLabel"></span><div class="room-actions"><button id="roomViewBackBtn" class="btn room-view-back" type="button">חזרה למשחק</button><button id="profileOpenBtn" class="btn profile-open" type="button" aria-haspopup="dialog" aria-controls="profileModal" aria-label="הפרופיל שלי"><span id="profileMiniAvatar" class="profile-mini-avatar" aria-hidden="true">י</span><span class="profile-open-text">הפרופיל שלי</span></button><button id="adminOpenBtn" class="btn" type="button" hidden>ADMIN</button><button id="googleSignOutBtn" class="btn danger" type="button">התנתק</button></div></div>
       <div id="appNotice" class="app-notice" role="status" aria-live="polite" hidden></div>
+      <section id="tableCard" class="table-card" aria-label="שולחן משותף">
+        <div id="tableEmpty" class="table-empty">
+          <div class="table-empty-text"><strong>שולחן משותף</strong><span>פתח שולחן לחברים או הצטרף עם קוד</span></div>
+          <div class="table-empty-actions">
+            <button id="openCreateRoomBtn" class="btn primary" type="button">פתח שולחן</button>
+            <button id="openJoinRoomBtn" class="btn" type="button">הצטרף עם קוד</button>
+          </div>
+          <button id="tableHistoryBtn" class="table-link" type="button" hidden>השולחנות הקודמים שלי</button>
+        </div>
+        <div id="tableActive" class="table-active" hidden>
+          <div class="table-active-info">
+            <span class="table-live" aria-hidden="true"></span>
+            <div class="table-active-text"><strong id="tableName"></strong><span id="tableSub"></span></div>
+            <b id="tableCode" class="table-code" dir="ltr"></b>
+          </div>
+          <div class="table-active-actions">
+            <button id="copyRoomCodeBtn" class="btn share-btn" type="button">שתף שולחן</button>
+            <button id="tableManageBtn" class="btn" type="button" aria-haspopup="dialog" aria-controls="roomPanelOverlay">כסף ורישומים</button>
+          </div>
+        </div>
+      </section>
+      <aside id="seatsPanel" class="seats-panel" aria-label="מי בשולחן" hidden>
+        <button id="seatsToggle" class="seats-toggle" type="button" aria-expanded="false" aria-controls="seatsBody"><span class="seats-toggle-icon" aria-hidden="true">👥</span><b id="seatsCount">0</b><span class="seats-toggle-label">בשולחן</span></button>
+        <div id="seatsBody" class="seats-body">
+          <header class="seats-head"><strong>בשולחן</strong><span id="seatsSub"></span><button id="seatsClose" class="seats-close" type="button" aria-label="סגור">×</button></header>
+          <ol id="seatsList" class="seats-list"></ol>
+        </div>
+      </aside>
+          <div id="roomActionModal" class="modal room-action-modal" aria-hidden="true">
+        <section class="sheet room-action-sheet" role="dialog" aria-modal="true" aria-labelledby="roomActionTitle">
+          <h3 id="roomActionTitle">פתיחת שולחן</h3>
+          <p id="roomActionSubtitle">הזן את השם שיופיע לחברים בחדר.</p>
+          <div class="room-action-fields">
+            <label class="room-action-field">השם שלך בחדר<input id="roomActionName" class="input" maxlength="40" autocomplete="name" placeholder="השם שלך"></label>
+            <label id="roomActionCodeField" class="room-action-field" hidden>קוד הצטרפות<input id="roomJoinCode" class="input" maxlength="8" placeholder="קוד בן 8 תווים" autocomplete="off" autocapitalize="characters"></label>
+          </div>
+          <p id="roomActionMessage" class="room-action-message" role="status" aria-live="polite"></p>
+          <div class="sheet-actions">
+            <button id="roomActionCancel" class="btn" type="button">ביטול</button>
+            <button id="roomActionSubmit" class="btn primary" type="button">צור שולחן</button>
+          </div>
+        </section>
+      </div>
       <div id="profileModal" class="modal profile-overlay" aria-hidden="true">
         <section class="sheet profile-sheet" role="dialog" aria-modal="true" aria-labelledby="profileTitle" dir="rtl">
           <header class="profile-head"><div><h3 id="profileTitle">הפרופיל שלי</h3><p id="profileEmail"></p></div><button id="profileCloseBtn" class="btn" type="button" aria-label="סגור פרופיל">סגור</button></header>
@@ -1050,37 +1141,17 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
       </div>
       <div id="roomPanelOverlay" class="room-panel-overlay" aria-hidden="true">
         <section class="room-panel" role="dialog" aria-modal="true" aria-labelledby="roomPanelTitle" dir="rtl">
-          <header class="room-panel-head"><div><h3 id="roomPanelTitle">חדרי המשחק שלך</h3><p>פתיחת שולחן, הצטרפות וניהול משחק</p></div><button id="closeRoomsPanelBtn" class="btn" type="button" aria-label="סגור חלונית חדרים">סגור</button></header>
-          <div class="room-lobby">
-        <div class="room-lobby-actions">
-          <button id="openCreateRoomBtn" class="btn primary" type="button">פתח שולחן</button>
-          <button id="openJoinRoomBtn" class="btn" type="button">הצטרף עם קוד</button>
-        </div>
+          <header class="room-panel-head"><div><h3 id="roomPanelTitle">ניהול השולחן</h3><p>כסף, רישומים וחישוב העברות</p></div><button id="closeRoomsPanelBtn" class="btn" type="button" aria-label="סגור חלונית חדרים">סגור</button></header>
+          <p id="roomMessage" class="room-message" role="status" aria-live="polite"></p>
+          <div id="roomLobby" class="room-lobby">
         <div id="roomList" class="room-list"></div>
-        <p id="roomMessage" class="room-message" role="status" aria-live="polite"></p>
           </div>
-          <div id="roomActionModal" class="modal room-action-modal" aria-hidden="true">
-        <section class="sheet room-action-sheet" role="dialog" aria-modal="true" aria-labelledby="roomActionTitle">
-          <h3 id="roomActionTitle">פתיחת שולחן</h3>
-          <p id="roomActionSubtitle">הזן את השם שיופיע לחברים בחדר.</p>
-          <div class="room-action-fields">
-            <label class="room-action-field">השם שלך בחדר<input id="roomActionName" class="input" maxlength="40" autocomplete="name" placeholder="השם שלך"></label>
-            <label id="roomActionCodeField" class="room-action-field" hidden>קוד הצטרפות<input id="roomJoinCode" class="input" maxlength="8" placeholder="קוד בן 8 תווים" autocomplete="off" autocapitalize="characters"></label>
-          </div>
-          <p id="roomActionMessage" class="room-action-message" role="status" aria-live="polite"></p>
-          <div class="sheet-actions">
-            <button id="roomActionCancel" class="btn" type="button">ביטול</button>
-            <button id="roomActionSubmit" class="btn primary" type="button">צור שולחן</button>
-          </div>
-        </section>
-      </div>
       <div id="activeRoom" class="active-room" hidden>
         <button id="roomViewBackInlineBtn" class="btn room-view-back" type="button">חזרה למשחק הראשי</button>
         <div class="room-title-row">
           <div><h3 id="activeRoomName"></h3><div class="room-meta" id="activeRoomMeta"></div></div>
           <div class="room-code" id="activeRoomCode"></div>
         </div>
-        <button id="copyRoomCodeBtn" class="btn share-btn room-share-btn" type="button"><span aria-hidden="true">📤</span> שתף את החדר — שם וקוד</button>
         <div class="room-actions">
           <button id="finishRoomBtn" class="btn primary" type="button" hidden>סיים משחק</button>
           <button id="leaveRoomBtn" class="btn danger" type="button">צא מהחדר</button>
@@ -1100,7 +1171,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
           <button id="addMoneyEntryBtn" class="btn primary" type="button">עדכן את הכסף שלי</button>
         </div>
         <p class="room-note">כל שחקן יכול להוסיף, לתקן או למחוק את הרישומים שלו. חברי החדר רואים את הסכומים לצורך סיכום המשחק.</p>
-        <div class="room-roster-head"><h4>משתתפים</h4><span id="roomMembersCount" class="room-note"></span></div>
+        <div class="room-roster-head"><h4>מאזן לפי שחקן</h4><span id="roomMembersCount" class="room-note"></span></div>
         <div id="roomRoster" class="room-roster"></div>
         <div class="room-actions"><button id="settleRoomBtn" class="btn green" type="button">חשב העברות</button></div>
         <div id="roomTransfers" class="room-transfers"></div>
