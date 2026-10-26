@@ -17,6 +17,8 @@ export function initAdminArea(user, supabase) {
   currentUser = user || null;
   const isAdmin = currentUser?.email?.toLowerCase() === ADMIN_EMAIL;
   $("adminOpenBtn").hidden = !isAdmin;
+  // Only the admin gets a sign-out button.
+  $("googleSignOutBtn").hidden = !isAdmin;
   if (!isAdmin) {
     $("adminOverlay").hidden = true;
     return;
