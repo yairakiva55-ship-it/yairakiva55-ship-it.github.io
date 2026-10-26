@@ -256,7 +256,7 @@ function updateCreateRoomButton() {
 function renderRoomList() {
   updateCreateRoomButton();
   $("roomList").innerHTML = rooms.length
-    ? rooms.map(item => `<button type="button" data-room-id="${escapeHtml(item.id)}" class="${room?.id === item.id ? "is-active" : ""}">${escapeHtml(item.name)} · ${item.status === "finished" ? "הסתיים" : item.status === "started" ? "במשחק" : "ממתין"}</button>`).join("")
+    ? rooms.map(item => `<button type="button" data-room-id="${escapeHtml(item.id)}" class="${room?.id === item.id ? "is-active" : ""}">${escapeHtml(item.name)} · ${item.status === "finished" ? "הסתיים" : item.status === "started" ? "במשחק" : "פתוח"}</button>`).join("")
     : "<span class=\"room-note\">עדיין אין לך חדרים. פתח שולחן או הצטרף עם קוד.</span>";
 }
 
@@ -445,12 +445,11 @@ async function openRoom(id, { reveal = true } = {}) {
   $("activeRoomCode").textContent = room.code;
   const host = room.host_id === user.id;
   const finished = room.status === "finished";
-  $("activeRoomMeta").textContent = `${finished ? "המשחק הסתיים" : room.status === "started" ? "המשחק התחיל" : "ממתין לשחקנים — שתף את הקוד"} · ${host ? "אתה מנהל החדר" : "מנהל: " + (room.host_id ? "מארח החדר" : "—")} · יחס ${Number(room.ratio_money)} ₪ = ${Number(room.ratio_chips).toLocaleString("he-IL")} ג׳טונים`;
+  $("activeRoomMeta").textContent = `${finished ? "המשחק הסתיים" : room.status === "started" ? "המשחק התחיל" : "המשחק פתוח — שתף את הקוד עם החברים"} · ${host ? "אתה מנהל החדר" : "מנהל: " + (room.host_id ? "מארח החדר" : "—")} · יחס ${Number(room.ratio_money)} ₪ = ${Number(room.ratio_chips).toLocaleString("he-IL")} ג׳טונים`;
   $("hostRatioControls").hidden = !host || finished;
   $("roomRatioMoney").value = room.ratio_money;
   $("roomRatioChips").value = room.ratio_chips;
-  $("startRoomBtn").hidden = !host || room.status !== "waiting";
-  $("finishRoomBtn").hidden = !host || room.status !== "started";
+  $("finishRoomBtn").hidden = !host || finished;
   $("addMoneyEntryBtn").disabled = finished;
   renderRoomList();
   updateRoomsBadge();
@@ -699,7 +698,6 @@ $("addMoneyEntryBtn").addEventListener("click", () => void addMoney());
 $("moneyAmount").addEventListener("keydown", event => { if (event.key === "Enter") void addMoney(); });
 $("roomLedger").addEventListener("click", event => { const button = event.target.closest("[data-delete-money]"); if (button) void deleteMoney(button.dataset.deleteMoney); });
 $("saveRoomRatioBtn").addEventListener("click", () => void updateRatio());
-$("startRoomBtn").addEventListener("click", () => { if (confirm("להתחיל את המשחק? אחרי ההתחלה שחקנים חדשים לא יוכלו להצטרף.")) void roomAction("wwcd_start_room"); });
 $("finishRoomBtn").addEventListener("click", () => { if (confirm("לסיים את המשחק? לאחר מכן הרישומים יינעלו.")) void roomAction("wwcd_finish_room"); });
 $("leaveRoomBtn").addEventListener("click", () => void leaveRoom());
 $("copyRoomCodeBtn").addEventListener("click", async () => {

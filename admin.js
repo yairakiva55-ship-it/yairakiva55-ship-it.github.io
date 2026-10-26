@@ -3,7 +3,7 @@ const $ = (id) => document.getElementById(id);
 const escapeHtml = (value) => String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
 const nisFromAgorot = (value) => "₪" + (Number(value || 0) / 100).toLocaleString("he-IL", { maximumFractionDigits: 2 });
 const prettyDate = (value) => value ? new Intl.DateTimeFormat("he-IL", { dateStyle: "medium" }).format(new Date(value)) : "—";
-const statusLabel = (status) => ({ waiting: "ממתין", started: "במשחק", finished: "הסתיים" })[status] || status;
+const statusLabel = (status) => ({ waiting: "פתוח", started: "במשחק", finished: "הסתיים" })[status] || status;
 
 let client = null;
 let currentUser = null;
@@ -170,10 +170,7 @@ function renderUsers(users, search = $("adminUserSearch")?.value || "") {
 function renderRooms(rooms) {
   const cards = rooms.map((room) => {
     const isFinished = room.status === "finished";
-    const canStart = room.status === "waiting";
-    const action = canStart
-      ? `<button class="btn green" type="button" data-admin-action="start-room" data-room-id="${escapeHtml(room.id)}">התחל משחק</button>`
-      : room.status === "started"
+    const action = room.status === "waiting" || room.status === "started"
         ? `<button class="btn danger" type="button" data-admin-action="finish-room" data-room-id="${escapeHtml(room.id)}">סיים משחק</button>`
         : "";
     const members = (room.members || []).map((member) => member.name).filter(Boolean);
