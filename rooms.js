@@ -27,6 +27,13 @@ let roomActionMode = "create", roomActionOpener = null, pendingProfileAvatar;
 let signOutRequested = false, verifyTimer = null, verifyAttempts = 0;
 let profileRow = null, profilesTable = true, gamesTable = true, wins = null;
 let cloudSaveTimer = null, cloudReady = false;
+// Login gate: the app opens only after the visitor taps Google or Guest on the login screen.
+// A remembered account is kept so the tap re-enters it instantly instead of creating a new one.
+const LOGIN_TAP_KEY = "wwcd_oauth_tap";
+let loginGateOpen = false, rememberedUser = null;
+const safeSessionGet = key => { try { return sessionStorage.getItem(key); } catch { return null; } };
+const safeSessionSet = (key, value) => { try { sessionStorage.setItem(key, value); } catch {} };
+const safeSessionRemove = key => { try { sessionStorage.removeItem(key); } catch {} };
 
 /* ---------- small UI helpers ---------- */
 function message(text = "", type = "") {
@@ -253,8 +260,18 @@ function storedSession() {
     return parsed?.user && parsed?.refresh_token ? parsed : null;
   } catch { return null; }
 }
+function holdAtLoginGate(account) {
+  rememberedUser = account;
+  user = null;
+  showSignedOut();
+  $("roomHubSubtitle").textContent = isGuest(account)
+    ? "חשבון האורח שלך שמור במכשיר. לחץ \"כניסה כאורח\" כדי לחזור אליו."
+    : "החשבון שלך שמור במכשיר. לחץ \"המשך עם Google\" כדי להיכנס.";
+}
 async function enterUser(nextUser, { provisional = false } = {}) {
   if (!nextUser) return;
+  if (!loginGateOpen) { holdAtLoginGate(nextUser); return; }
+  rememberedUser = null;
   user = nextUser;
   if (client) initAdminArea(user, client);
   document.body.classList.add("room-authenticated");
@@ -295,11 +312,11 @@ async function verifySession() {
       verifyTimer = setTimeout(verifySession, 1500);
       return;
     }
-    user = null; shownUser = null;
+    user = null; shownUser = null; rememberedUser = null;
     showSignedOut();
   } catch (error) {
     if (isFatalAuthError(error)) {
-      user = null; shownUser = null;
+      user = null; shownUser = null; rememberedUser = null;
       safeRemove(AUTH_STORAGE_KEY);
       showSignedOut("ההתחברות פגה. התחבר שוב עם Google.");
       return;
@@ -317,21 +334,28 @@ async function verifySession() {
 }
 async function signIn() {
   if (!client) return;
+  loginGateOpen = true;
+  if (rememberedUser && !isGuest(rememberedUser)) { await enterUser(rememberedUser); return; }
+  safeSessionSet(LOGIN_TAP_KEY, "1");
   $("authMessage").textContent = "פותח התחברות Google...";
   $("googleSignInBtn").disabled = true;
   const { error } = await client.auth.signInWithOAuth({ provider: "google", options: { redirectTo: SITE_AUTH_REDIRECT_URL, queryParams: { prompt: "select_account" } } });
   if (error) {
+    loginGateOpen = false; safeSessionRemove(LOGIN_TAP_KEY);
     $("googleSignInBtn").disabled = false;
     $("authMessage").textContent = "ההתחברות עם Google לא נפתחה: " + error.message;
   }
 }
 async function signInGuest() {
   if (!client) return;
+  loginGateOpen = true;
+  if (rememberedUser && isGuest(rememberedUser)) { await enterUser(rememberedUser); toast("נכנסת כאורח"); return; }
   $("authMessage").textContent = "נכנס כאורח...";
   $("guestSignInBtn").disabled = true; $("googleSignInBtn").disabled = true;
   const { data, error } = await client.auth.signInAnonymously();
   $("guestSignInBtn").disabled = false; $("googleSignInBtn").disabled = false;
   if (error || !data?.user) {
+    loginGateOpen = false;
     $("authMessage").textContent = /anonymous.*disabled|not enabled/i.test(error?.message || "") ? "כניסת אורח עוד לא הופעלה בשרת. נסה שוב בעוד רגע או היכנס עם Google." : "הכניסה כאורח נכשלה: " + (error?.message || "נסה שוב.");
     return;
   }
@@ -346,6 +370,7 @@ async function signOut() {
   if (channel) { try { await client.removeChannel(channel); } catch {} channel = null; }
   try { await client.auth.signOut({ scope: "local" }); } catch {}
   safeRemove(AUTH_STORAGE_KEY);
+  loginGateOpen = false; rememberedUser = null;
   user = null; shownUser = null; room = null; rooms = []; members = []; entries = []; profileRow = null; wins = null; cloudReady = false;
   updateRoomsBadge();
   showSignedOut("התנתקת. אפשר להתחבר שוב בכל רגע.");
@@ -676,6 +701,7 @@ async function loadSdk() {
   $("googleSignInBtn").disabled = true;
   $("guestSignInBtn").disabled = true;
   const oauthError = readOAuthError();
+  if (safeSessionGet(LOGIN_TAP_KEY)) { safeSessionRemove(LOGIN_TAP_KEY); if (!oauthError) loginGateOpen = true; }
   const cached = storedSession();
   // Show the table immediately for a returning user; the server check follows.
   if (cached && !oauthError) await enterUser(cached.user, { provisional: true });
@@ -696,6 +722,7 @@ async function loadSdk() {
         // Unexpected sign-out event: re-check before showing the login screen.
         void verifySession();
       } else if (session?.user) {
+        if (!loginGateOpen) { rememberedUser = session.user; return; }
         if (event === "USER_UPDATED" || event === "TOKEN_REFRESHED") { user = session.user; renderProfileIdentity(); if (client) initAdminArea(user, client); }
         else void enterUser(session.user);
       }
