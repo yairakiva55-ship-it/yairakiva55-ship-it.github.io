@@ -813,6 +813,51 @@ body.room-authenticated:not(.room-view-active) .room-account .room-actions{flex-
 #shekelValueDisplay{margin-top:-4px}
 @media(max-width:520px){.player-actions{flex-wrap:wrap}.player-actions .btn{flex:1 1 45%}.player-actions .mini{flex-basis:100%;text-align:center}}
 
+/* ===== Phone fit (v2026.10.26b) ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media(max-width:760px){
+  /* iOS zooms into any field under 16px — keep every field at 16px+ on phones */
+  input,select,textarea,.input{font-size:16px!important}
+  .ratio-box input{font-size:24px!important}
+  .shell{padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+  .modal{padding:12px 10px calc(12px + env(safe-area-inset-bottom))}
+  .sheet{max-height:calc(100dvh - 24px)}
+}
+@media(max-width:560px){
+  /* Compact top bar that scrolls away instead of covering a third of the screen */
+  .topbar{position:relative;top:auto;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:9px 10px;border-radius:18px}
+  .topbar .brand{grid-column:1;grid-row:1;gap:8px;min-width:0;overflow:hidden}
+  .topbar .brand>div:last-child{min-width:0;overflow:hidden}
+  .topbar .app-icon{width:34px;height:34px;min-width:34px;font-size:18px;border-radius:11px}
+  .topbar .brand-title{font-size:13px;direction:ltr;text-align:right}
+  /* Account bar: one row, name shortens instead of pushing buttons down */
+  body.room-authenticated:not(.room-view-active) .room-account{gap:6px}
+  body.room-authenticated:not(.room-view-active) #roomUserLabel{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+  body.room-authenticated:not(.room-view-active) .room-account .room-actions{flex:0 1 auto;flex-wrap:nowrap;gap:4px}
+  body.room-authenticated:not(.room-view-active) .room-account .room-actions .btn{min-height:36px;padding:7px 9px;font-size:12px;white-space:nowrap}
+  .topbar .brand-sub{display:none}
+  .topbar .top-pot{grid-column:2;grid-row:1;justify-self:end;min-width:0;padding:6px 10px;gap:8px}
+  .topbar .top-pot span{font-size:11px}
+  .topbar .top-pot strong{font-size:16px}
+  .topbar .top-actions{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:100%}
+  .topbar .top-actions .btn{min-height:38px;padding:8px 4px;font-size:12.5px;white-space:nowrap;line-height:1.1}
+  /* Smaller hero so the game starts higher on the screen */
+  .hero{padding:10px 6px 6px}
+  .hero .poker-showcase{display:none}
+  .hero h1{font-size:24px;margin:6px auto}
+  .hero p{font-size:13px;line-height:1.5;margin:0 auto}
+  .flowbar{margin-bottom:10px}
+  /* Room ratio row: tidy grid instead of a ragged wrap */
+  .room-ratio{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto;gap:6px 8px;align-items:center}
+  .room-ratio>strong{grid-column:1/-1}
+  .room-ratio input{width:100%}
+  .room-ratio .btn{grid-column:1/-1}
+  .room-finance-form{grid-template-columns:1fr 1fr}
+  .room-finance-form .btn{grid-column:1/-1}
+  .room-actions{flex-wrap:wrap}
+  /* Comfortable tap targets */
+  .btn{min-height:40px}
+}
 </style>
 </head>
 <body>
