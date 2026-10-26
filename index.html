@@ -811,6 +811,12 @@ body.room-authenticated:not(.room-view-active) .room-account .room-actions{flex-
 .profile-stat-main{grid-column:1/-1}.profile-stat-main strong{font-size:1.6rem}.profile-stat-main small{color:var(--muted);font-size:.72rem}
 .profile-stat strong.neg{color:var(--red2,#ff8a8a)}
 .profile-guest-note{margin:-4px 0 12px;color:var(--muted);font-size:.78rem}
+.profile-link{margin:0 0 12px;padding:12px 13px;border-radius:13px;border:1px solid rgba(66,133,244,.35);background:rgba(66,133,244,.08)}
+.profile-link strong{display:block;font-size:.95rem}
+.profile-link p{margin:4px 0 10px;color:var(--muted);font-size:.8rem;line-height:1.5}
+.profile-link-btn{width:100%;min-height:44px;border:0;border-radius:12px;background:#f7f5ef;color:#20231f;font-weight:750}
+.profile-link[hidden]{display:none!important}
+.profile-signout{display:block;margin:14px auto 0;padding:8px 14px;background:none;border:0;color:var(--red2);font-size:.85rem;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .profile-wins{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;padding:10px 13px;border:1px solid rgba(212,175,55,.2);border-radius:13px;background:rgba(212,175,55,.06)}
 .profile-wins span{color:var(--muted);font-size:.84rem}.profile-wins strong{color:var(--gold2);font-size:1.15rem}
 .app-version{margin-top:6px;opacity:.6;font-size:11px}
@@ -1133,10 +1139,15 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
             <div class="profile-stat"><span>משחקים</span><strong id="profileGames">—</strong></div>
             <div class="profile-stat"><span>ניצחונות</span><strong id="profileWins">—</strong></div>
           </div>
-          <p id="profileGuestNote" class="profile-guest-note" hidden>נקודות נצברות רק למשתמשים שנכנסו עם Google.</p>
+          <div id="profileLinkBox" class="profile-link" hidden>
+            <strong>שמור את החשבון עם Google</strong>
+            <p>השם, השולחנות וההיסטוריה שלך יישארו, ומעכשיו תצבור נקודות. גם משחקים ששיחקת כאורח ייספרו.</p>
+            <button id="profileLinkGoogleBtn" class="btn room-google-btn profile-link-btn" type="button"><span class="room-google-mark" aria-hidden="true">G</span>חבר לחשבון Google</button>
+          </div>
           <div class="profile-fields"><label class="profile-field">השם שיופיע לשחקנים<input id="profileName" class="input" type="text" maxlength="40" autocomplete="name" placeholder="השם שלך"></label></div>
           <p id="profileMessage" class="profile-message" role="status" aria-live="polite"></p>
           <div class="sheet-actions"><button id="profileCancelBtn" class="btn" type="button">ביטול</button><button id="profileSaveBtn" class="btn primary" type="button">שמור פרופיל</button></div>
+          <button id="profileSignOutBtn" class="profile-signout" type="button">התנתק מהחשבון</button>
         </section>
       </div>
       <div id="roomPanelOverlay" class="room-panel-overlay" aria-hidden="true">

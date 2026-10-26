@@ -30,6 +30,7 @@ let cloudSaveTimer = null, cloudReady = false;
 // Login gate: the app opens only after the visitor taps Google or Guest on the login screen.
 // A remembered account is kept so the tap re-enters it instantly instead of creating a new one.
 const LOGIN_TAP_KEY = "wwcd_oauth_tap";
+const LINK_KEY = "wwcd_link_google";
 let loginGateOpen = false, rememberedUser = null;
 const safeSessionGet = key => { try { return sessionStorage.getItem(key); } catch { return null; } };
 const safeSessionSet = (key, value) => { try { sessionStorage.setItem(key, value); } catch {} };
@@ -115,7 +116,7 @@ function renderProfileIdentity() {
     pointsEl.className = value < 0 ? "neg" : "";
   }
   if (gamesEl) gamesEl.textContent = gamesPlayed === null || guest ? "—" : Number(gamesPlayed).toLocaleString("he-IL");
-  if ($("profileGuestNote")) $("profileGuestNote").hidden = !guest;
+  if ($("profileLinkBox")) $("profileLinkBox").hidden = !guest;
 }
 function profileMessage(text = "", type = "") {
   $("profileMessage").textContent = text;
@@ -398,6 +399,34 @@ async function signIn() {
     $("googleSignInBtn").disabled = false;
     $("authMessage").textContent = "ההתחברות עם Google לא נפתחה: " + error.message;
   }
+}
+function friendlyLinkError(text) {
+  const t = String(text || "");
+  if (/manual linking/i.test(t)) return "החיבור ל-Google עוד לא הופעל בשרת. נסה שוב מאוחר יותר.";
+  if (/already|exists|linked to another/i.test(t)) return "חשבון ה-Google הזה כבר רשום אצלנו כמשתמש אחר, ולכן אי אפשר לחבר אליו את חשבון האורח.";
+  return "החיבור ל-Google לא הושלם. נסה שוב.";
+}
+async function linkGoogle() {
+  if (!client || !user || !isGuest()) return;
+  profileMessage("פותח את Google...");
+  $("profileLinkGoogleBtn").disabled = true;
+  safeSessionSet(LINK_KEY, "1");
+  const { error } = await client.auth.linkIdentity({ provider: "google", options: { redirectTo: SITE_AUTH_REDIRECT_URL, queryParams: { prompt: "select_account" } } });
+  if (error) {
+    safeSessionRemove(LINK_KEY);
+    $("profileLinkGoogleBtn").disabled = false;
+    profileMessage(friendlyLinkError(error.message), "error");
+  }
+}
+async function finishGoogleLink() {
+  // The guest is now a Google user with the same id: their guest games start counting.
+  try {
+    const { data } = await client.rpc("wwcd_claim_guest_results");
+    const games = Number(data?.games || 0);
+    toast(games ? `החשבון חובר ל-Google — ${games} משחקים נוספו לנקודות שלך` : "החשבון חובר ל-Google");
+  } catch { toast("החשבון חובר ל-Google"); }
+  await loadWins();
+  renderProfileIdentity();
 }
 async function signInGuest() {
   if (!client) return;
@@ -704,6 +733,8 @@ $("profileRemoveAvatarBtn").addEventListener("click", () => {
   profileMessage("התמונה תוסר לאחר שמירת הפרופיל.");
 });
 $("profileSaveBtn").addEventListener("click", () => void saveProfile());
+$("profileLinkGoogleBtn").addEventListener("click", () => void linkGoogle());
+$("profileSignOutBtn").addEventListener("click", () => void signOut());
 $("profileName").addEventListener("keydown", event => { if (event.key === "Enter") void saveProfile(); });
 $("roomViewBackBtn").addEventListener("click", () => { setRoomView(); closeRoomsPanel(); });
 $("roomViewBackInlineBtn").addEventListener("click", () => { setRoomView(); closeRoomsPanel(); });
@@ -763,7 +794,11 @@ async function loadSdk() {
   $("roomConnectionStatus").textContent = "בודק חיבור...";
   $("googleSignInBtn").disabled = true;
   $("guestSignInBtn").disabled = true;
-  const oauthError = readOAuthError();
+  const linking = safeSessionGet(LINK_KEY) === "1";
+  if (linking) safeSessionRemove(LINK_KEY);
+  const rawOauthError = readOAuthError();
+  // A failed Google link must not sign the guest out: they stay in and see a notice.
+  const oauthError = linking ? "" : rawOauthError;
   if (safeSessionGet(LOGIN_TAP_KEY)) { safeSessionRemove(LOGIN_TAP_KEY); if (!oauthError) loginGateOpen = true; }
   const cached = storedSession();
   // Remember me: a returning user who already signed in on this device goes straight in.
@@ -794,5 +829,9 @@ async function loadSdk() {
   });
   if (oauthError) showSignedOut(oauthError);
   await verifySession();
+  if (linking) {
+    if (rawOauthError) notice(friendlyLinkError(rawOauthError), "warn");
+    else if (user && !isGuest()) await finishGoogleLink();
+  }
   if (!user && !oauthError && !$("authMessage").textContent) $("roomConnectionStatus").textContent = "מוכן להתחברות";
 })();
