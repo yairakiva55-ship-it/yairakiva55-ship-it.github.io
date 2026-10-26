@@ -821,6 +821,7 @@ body.room-authenticated:not(.room-view-active) .room-account .room-actions{flex-
 
 .room-share-btn{width:100%;min-height:46px;margin:10px 0 4px;font-weight:800;font-size:15px}
 .room-lobby-actions.single{grid-template-columns:1fr}
+.action-strip.single{grid-template-columns:1fr}
 /* ===== Phone fit (v2026.10.26b) ===== */
 /* Summary goes below the players section on every screen size */
 .layout>.summary-card{order:1!important}
@@ -1182,8 +1183,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
           <button type="button" data-quick-buyin="200">200 ₪</button>
         </div>
 
-        <div class="action-strip">
-          <button id="focusPlayersBtn" class="btn green" type="button">התחל משחק</button>
+        <div class="action-strip single">
           <button id="finishGameBtn" class="btn primary" type="button">סיום המשחק</button>
         </div>
 
@@ -1395,7 +1395,7 @@ function scrollToControl(id){const e=$(id);if(!e)return;e.scrollIntoView({behavi
 
 $("applyRatioBtn").addEventListener("click",applyRatio);$("addPlayerBtn").addEventListener("click",addPlayer);$("newGameBtn").addEventListener("click",newGame);$("resetBtn").addEventListener("click",newGame);$("settleBtn").addEventListener("click",settle);$("shareSummaryBtn").addEventListener("click",shareSummary);$("shareAppBtn").addEventListener("click",shareApp);$("pokerCalcBtn").addEventListener("click",openPokerCalc);
 $("pokerCalcClose").addEventListener("click",closePokerCalc);$("pokerCalcModal").addEventListener("click",e=>{if(e.target===$("pokerCalcModal"))closePokerCalc()});$("pokerCalcRun").addEventListener("click",calculatePokerOdds);$("pokerCalcReset").addEventListener("click",resetPokerCalc);["pokerOuts","pokerPotSize","pokerCallAmount"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")calculatePokerOdds()}));
-$("focusPlayersBtn").addEventListener("click",()=>{if(!state.players.length){scrollToControl("playerName");showToast("הוסף שחקנים כדי להתחיל")}else{scrollToControl("players");showToast("המשחק מוכן — בהצלחה")}});$("finishGameBtn").addEventListener("click",()=>{if(!state.players.length){scrollToControl("playerName");return showToast("הוסף שחקנים כדי להתחיל")}const input=document.querySelector(".final-chips");input.scrollIntoView({behavior:"smooth",block:"center"});input.focus();input.select();showToast("הכנס לכל שחקן את הג׳טונים שנשארו")});
+$("finishGameBtn").addEventListener("click",()=>{if(!state.players.length){scrollToControl("playerName");return showToast("הוסף שחקנים כדי להתחיל")}const input=document.querySelector(".final-chips");input.scrollIntoView({behavior:"smooth",block:"center"});input.focus();input.select();showToast("הכנס לכל שחקן את הג׳טונים שנשארו")});
 $("playerName").addEventListener("keydown",e=>{if(e.key==="Enter")addPlayer()});$("buyIn").addEventListener("keydown",e=>{if(e.key==="Enter")addPlayer()});$("ratioMoney").addEventListener("keydown",e=>{if(e.key==="Enter")applyRatio()});$("ratioChips").addEventListener("keydown",e=>{if(e.key==="Enter")applyRatio()});
 document.querySelectorAll("[data-quick-buyin]").forEach(b=>b.addEventListener("click",()=>{$("buyIn").value=b.dataset.quickBuyin;$("playerName").focus()}));document.querySelectorAll("[data-scroll]").forEach(b=>b.addEventListener("click",()=>scrollToControl(b.dataset.scroll)));
 $("players").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.classList.contains("player-remove"))return removePlayer(b.dataset.id);if(b.classList.contains("player-buy"))return openRebuy(b.dataset.id,"קנייה");if(b.classList.contains("player-rebuy"))return openRebuy(b.dataset.id,"Rebuy");if(b.classList.contains("player-history"))return openBuyHistory(b.dataset.id);if(b.classList.contains("player-undo-buy"))return cancelLastBuy(b.dataset.id)});$("players").addEventListener("change",e=>{if(e.target.matches(".final-chips"))updateFinalChips(e.target.dataset.id,e.target.value)});$("players").addEventListener("input",e=>{if(e.target.matches(".final-chips"))updateFinalChips(e.target.dataset.id,e.target.value)});
