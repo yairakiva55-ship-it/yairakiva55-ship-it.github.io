@@ -814,6 +814,8 @@ body.room-authenticated:not(.room-view-active) .room-account .room-actions{flex-
 @media(max-width:520px){.player-actions{flex-wrap:wrap}.player-actions .btn{flex:1 1 45%}.player-actions .mini{flex-basis:100%;text-align:center}}
 
 /* ===== Phone fit (v2026.10.26b) ===== */
+/* Summary goes below the players section on every screen size */
+.layout>.summary-card{order:1!important}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 @media(max-width:760px){
   /* iOS zooms into any field under 16px — keep every field at 16px+ on phones */
@@ -843,7 +845,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .topbar .top-actions .btn{min-height:38px;padding:8px 4px;font-size:12.5px;white-space:nowrap;line-height:1.1}
   /* Smaller hero so the game starts higher on the screen */
   .hero{padding:10px 6px 6px}
-  .hero .poker-showcase{display:none}
+  .hero .poker-showcase{display:block;height:96px;transform:scale(.8);margin:4px auto -6px}
   .hero h1{font-size:24px;margin:6px auto}
   .hero p{font-size:13px;line-height:1.5;margin:0 auto}
   .flowbar{margin-bottom:10px}
