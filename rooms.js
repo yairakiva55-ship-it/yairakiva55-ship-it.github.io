@@ -483,7 +483,7 @@ function renderRoom() {
     <div><small>פדיון ותיקונים</small><strong>${nis(item.cashed)}</strong></div>
     <div><small>${item.net > 0 ? "צריך להעביר" : item.net < 0 ? "מקבל" : "מאוזן"}</small><strong>${nis(Math.abs(item.net))}</strong></div>
   </div>`).join("") : "<div class=\"room-note\">אין עדיין שחקנים בחדר.</div>";
-  $("roomMembersCount").textContent = `${players.length} / ${Number(room.max_members || 8)} משתתפים`;
+  $("roomMembersCount").textContent = `${players.length} / ${Number(room.max_members || 100)} משתתפים`;
   $("roomLedger").innerHTML = entries.length ? entries.map(item => {
     const owner = members.find(member => member.user_id === item.user_id);
     const sign = item.kind === "adjustment" && Number(item.amount_agorot) < 0 ? "−" : "+";
