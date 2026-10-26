@@ -813,6 +813,8 @@ body.room-authenticated:not(.room-view-active) .room-account .room-actions{flex-
 #shekelValueDisplay{margin-top:-4px}
 @media(max-width:520px){.player-actions{flex-wrap:wrap}.player-actions .btn{flex:1 1 45%}.player-actions .mini{flex-basis:100%;text-align:center}}
 
+.room-share-btn{width:100%;min-height:46px;margin:10px 0 4px;font-weight:800;font-size:15px}
+.room-lobby-actions.single{grid-template-columns:1fr}
 /* ===== Phone fit (v2026.10.26b) ===== */
 /* Summary goes below the players section on every screen size */
 .layout>.summary-card{order:1!important}
@@ -1061,8 +1063,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
           <div><h3 id="activeRoomName"></h3><div class="room-meta" id="activeRoomMeta"></div></div>
           <div class="room-code" id="activeRoomCode"></div>
         </div>
+        <button id="copyRoomCodeBtn" class="btn share-btn room-share-btn" type="button"><span aria-hidden="true">📤</span> שתף את החדר — שם וקוד</button>
         <div class="room-actions">
-          <button id="copyRoomCodeBtn" class="btn" type="button">הזמן חברים עם הקוד</button>
           <button id="startRoomBtn" class="btn green" type="button" hidden>התחל משחק</button>
           <button id="finishRoomBtn" class="btn primary" type="button" hidden>סיים משחק</button>
           <button id="leaveRoomBtn" class="btn danger" type="button">צא מהחדר</button>

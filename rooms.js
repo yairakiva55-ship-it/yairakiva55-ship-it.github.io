@@ -230,7 +230,16 @@ function updateRoomsBadge() {
   badge.textContent = room && room.status !== "finished" ? room.code : "";
   badge.hidden = !badge.textContent;
 }
+function hostsOpenRoom() {
+  return Boolean(user && rooms.some(item => item.host_id === user.id && item.status !== "finished"));
+}
+function updateCreateRoomButton() {
+  const hide = hostsOpenRoom();
+  $("openCreateRoomBtn").hidden = hide;
+  $("openCreateRoomBtn").parentElement.classList.toggle("single", hide);
+}
 function renderRoomList() {
+  updateCreateRoomButton();
   $("roomList").innerHTML = rooms.length
     ? rooms.map(item => `<button type="button" data-room-id="${escapeHtml(item.id)}" class="${room?.id === item.id ? "is-active" : ""}">${escapeHtml(item.name)} · ${item.status === "finished" ? "הסתיים" : item.status === "started" ? "במשחק" : "ממתין"}</button>`).join("")
     : "<span class=\"room-note\">עדיין אין לך חדרים. פתח שולחן או הצטרף עם קוד.</span>";
@@ -414,6 +423,7 @@ async function openRoom(id, { reveal = true } = {}) {
   const { data, error } = await client.from("wwcd_rooms").select("*").eq("id", id).maybeSingle();
   if (error || !data) return message("פתיחת החדר נכשלה. נסה שוב.", "error");
   room = data;
+  rooms = rooms.map(item => item.id === data.id ? { ...item, ...data } : item);
   safeSet("wwcd_active_room", room.id);
   $("activeRoom").hidden = false;
   $("activeRoomName").textContent = room.name;
@@ -493,6 +503,7 @@ function friendlyRpcError(error) {
   return text || "הפעולה נכשלה. נסה שוב.";
 }
 async function createRoom() {
+  if (hostsOpenRoom()) { closeRoomAction(); return message("כבר יש לך שולחן פתוח. סיים אותו כדי לפתוח שולחן חדש.", "error"); }
   const name = $("roomActionName").value.trim();
   if (!name) return actionMessage("הזן את השם שיוצג בחדר.", "error");
   safeSet("wwcd_display_name", name);
@@ -502,7 +513,7 @@ async function createRoom() {
   closeRoomAction();
   await loadRooms();
   if (data?.id) await openRoom(data.id);
-  message("השולחן נוצר. שתף את הקוד עם החברים.", "success");
+  message("השולחן נוצר! לחץ \"שתף את החדר\" כדי לשלוח לחברים את השם והקוד.", "success");
 }
 async function joinRoom() {
   const name = $("roomActionName").value.trim(), code = $("roomJoinCode").value.trim().toUpperCase();
