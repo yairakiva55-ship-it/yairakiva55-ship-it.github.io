@@ -1,0 +1,1350 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07140f">
+<link rel="apple-touch-icon" sizes="180x180" href="/spade-home-icon-v2.png">
+<link rel="icon" type="image/png" sizes="180x180" href="/spade-home-icon-v2.png?v=13">
+<title>Winner winner chicken dinner</title>
+<style>
+:root{
+  --bg:#07140f;
+  --bg2:#0b1f17;
+  --card:rgba(15,35,26,.92);
+  --card2:#0d241a;
+  --text:#f8f4e7;
+  --muted:#b8b1a0;
+  --line:rgba(255,255,255,.10);
+  --gold:#d4af37;
+  --gold2:#f0d56c;
+  --green:#21885d;
+  --green2:#35ad79;
+  --red:#c73b3b;
+  --red2:#ff7d77;
+  --shadow:0 20px 60px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  min-height:100vh;
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",Arial,sans-serif;
+  background:
+    radial-gradient(circle at 10% 0%,rgba(212,175,55,.12),transparent 28%),
+    radial-gradient(circle at 95% 8%,rgba(33,136,93,.18),transparent 26%),
+    linear-gradient(180deg,var(--bg),#0a1c15 46%,var(--bg));
+  -webkit-font-smoothing:antialiased;
+}
+button,input{font:inherit}
+button{cursor:pointer}
+.shell{width:min(1180px,calc(100% - 26px));margin:auto;padding:16px 0 50px}
+.topbar{
+  position:sticky;top:10px;z-index:20;
+  display:grid;grid-template-columns:1fr auto auto;
+  gap:12px;align-items:center;
+  padding:11px 12px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:rgba(12,29,21,.84);
+  backdrop-filter:blur(22px) saturate(170%);
+  -webkit-backdrop-filter:blur(22px) saturate(170%);
+  box-shadow:0 10px 30px rgba(0,0,0,.20);
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.app-icon{
+  width:46px;height:46px;border-radius:14px;display:grid;place-items:center;
+  background:linear-gradient(145deg,#b82328,#661014);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 8px 18px rgba(0,0,0,.25);
+  font-size:25px;
+}
+.brand-title{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.top-pot{
+  display:flex;align-items:center;gap:9px;
+  padding:9px 13px;border-radius:15px;
+  background:linear-gradient(145deg,rgba(212,175,55,.18),rgba(212,175,55,.07));
+  border:1px solid rgba(212,175,55,.23);
+  white-space:nowrap;
+}
+.top-pot span{font-size:12px;color:#d1c5a5}
+.top-pot strong{font-size:18px;color:var(--gold2)}
+.hero{text-align:center;padding:50px 12px 24px}
+.eyebrow{color:var(--gold2);font-weight:800;font-size:14px}
+.hero h1{
+  margin:8px auto 10px;max-width:900px;
+  font-size:clamp(38px,7vw,72px);
+  line-height:.96;letter-spacing:-.045em;
+}
+.hero p{margin:auto;max-width:700px;color:var(--muted);font-size:clamp(16px,2.2vw,20px);line-height:1.5}
+.suits{display:flex;justify-content:center;gap:14px;margin-top:18px;font-size:24px}
+.red{color:#ea5757}.white{color:#f7f3e8}
+.layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.8fr);gap:18px;align-items:start}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:28px;
+  box-shadow:var(--shadow);overflow:hidden;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+}
+.card-head{padding:22px 22px 14px}
+.card-title{margin:0;font-size:24px;letter-spacing:-.025em}
+.card-sub{margin-top:5px;color:var(--muted);font-size:14px}
+.section{padding:0 22px 22px}
+.conversion{
+  display:grid;gap:14px;padding:17px;border-radius:22px;margin-bottom:16px;
+  background:linear-gradient(145deg,rgba(212,175,55,.14),rgba(33,136,93,.12));
+  border:1px solid rgba(212,175,55,.18);
+}
+.conversion-title{display:flex;align-items:center;gap:12px}
+.conv-icon{
+  width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
+  background:linear-gradient(145deg,#d4af37,#8e6e13);color:#171006;font-size:22px;font-weight:900
+}
+.conversion-title b{font-size:16px}
+.conversion-title small{display:block;color:var(--muted);margin-top:3px}
+.convert-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.convert-field{
+  background:#0a1c15;border:1px solid var(--line);border-radius:16px;padding:12px
+}
+.convert-field label{display:block;color:var(--muted);font-size:12px;margin-bottom:7px}
+.convert-field .inline{display:flex;align-items:center;gap:7px}
+.convert-field input{
+  width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--text);
+  font-size:22px;font-weight:800;text-align:center
+}
+.convert-field span{color:var(--gold2);font-weight:800;white-space:nowrap}
+.preset-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.preset{
+  border:1px solid rgba(212,175,55,.18);background:#0c2419;color:#e9e0ca;
+  padding:9px 13px;border-radius:999px;font-weight:750
+}
+.preset.active{background:linear-gradient(145deg,#d4af37,#9b7918);color:#171006;border-color:transparent}
+.note{color:var(--muted);font-size:12px;text-align:center}
+.add-row{display:grid;grid-template-columns:1.4fr .8fr auto;gap:10px}
+.input{
+  width:100%;border:1px solid var(--line);background:#081a13;color:var(--text);
+  border-radius:16px;padding:14px 15px;outline:none;transition:.2s
+}
+.input:focus{border-color:rgba(212,175,55,.60);box-shadow:0 0 0 4px rgba(212,175,55,.08)}
+.btn{
+  border:0;border-radius:16px;padding:13px 16px;font-weight:800;
+  background:#193329;color:var(--text);transition:.18s
+}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:scale(.985)}
+.btn.primary{background:linear-gradient(145deg,#d4af37,#a5811c);color:#171006}
+.btn.green{background:linear-gradient(145deg,#239363,#146342);color:white}
+.btn.danger{background:rgba(199,59,59,.16);color:#ff9a95}
+.btn.full{width:100%}
+.players{display:grid;gap:12px;margin-top:16px}
+.player{
+  background:#0b2017;border:1px solid var(--line);border-radius:22px;padding:16px;
+  box-shadow:0 8px 20px rgba(0,0,0,.12)
+}
+.player-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
+.identity{display:flex;align-items:center;gap:11px}
+.avatar{
+  width:42px;height:42px;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(145deg,#c73b3b,#6d1518);font-weight:900
+}
+.name{font-size:18px;font-weight:850}
+.mini{font-size:12px;color:var(--muted);margin-top:3px}
+.player-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.metric{background:#0d261b;border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:11px}
+.metric label{display:block;color:var(--muted);font-size:12px;margin-bottom:7px}
+.metric strong{font-size:19px;letter-spacing:-.02em}
+.metric .input{padding:10px 11px;border-radius:12px;background:#071711}
+.pos{color:#72d6a8}.neg{color:#ff9690}.zero{color:var(--muted)}
+.player-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+.summary-card{position:sticky;top:90px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.stat{background:#0b2017;border:1px solid var(--line);border-radius:18px;padding:15px}
+.stat span{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}
+.stat strong{font-size:22px}
+.status{
+  padding:14px 15px;border-radius:18px;margin-bottom:15px;font-size:14px;line-height:1.45;
+  background:rgba(212,175,55,.10);color:#e4ce86;border:1px solid rgba(212,175,55,.16)
+}
+.status.ok{background:rgba(33,136,93,.15);color:#a5e4c3;border-color:rgba(33,136,93,.25)}
+.status.bad{background:rgba(199,59,59,.14);color:#ffaaa5;border-color:rgba(199,59,59,.23)}
+.transfer-list{display:grid;gap:10px}
+.transfer{padding:14px 15px;border-radius:17px;background:#0b2017;border:1px solid var(--line)}
+.transfer-top{display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:800}
+.transfer-amount{color:var(--gold2);font-size:18px}
+.transfer-sub{margin-top:6px;color:var(--muted);font-size:12px}
+.empty{
+  padding:18px;text-align:center;color:var(--muted);border:1px dashed rgba(255,255,255,.14);
+  border-radius:17px;background:rgba(5,16,11,.28)
+}
+.bottom-actions{display:flex;gap:9px;margin-top:15px}
+.bottom-actions .btn{flex:1}
+.footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 0}
+
+/* Modals */
+.modal{
+  position:fixed;inset:0;z-index:100;display:none;align-items:flex-end;justify-content:center;
+  padding:18px;background:rgba(0,0,0,.62);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)
+}
+.modal.show{display:flex}
+.sheet{
+  width:min(460px,100%);background:#10251b;border:1px solid var(--line);
+  border-radius:26px;padding:20px;box-shadow:0 28px 90px rgba(0,0,0,.48);
+  animation:up .18s ease-out
+}
+@keyframes up{from{transform:translateY(18px);opacity:.45}to{transform:none;opacity:1}}
+.sheet h3{margin:0 0 7px;font-size:22px}
+.sheet p{margin:0 0 16px;color:var(--muted);line-height:1.45}
+.sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+.quick-money{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.quick-money button{
+  border:1px solid rgba(212,175,55,.17);background:#0b2118;color:#eadfbf;
+  border-radius:14px;padding:11px 8px;font-weight:800
+}
+
+@media(max-width:900px){.layout{grid-template-columns:1fr}.summary-card{position:static}}
+@media(max-width:680px){
+  .topbar{grid-template-columns:1fr auto}.brand{grid-column:1/-1}
+  .top-pot{justify-self:start}.topbar>.btn{justify-self:end}
+  .add-row{grid-template-columns:1fr}.convert-grid{grid-template-columns:1fr}
+}
+@media(max-width:760px){.player-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.player-grid{grid-template-columns:1fr}.quick-money{grid-template-columns:repeat(2,1fr)}}
+
+.chip-value-control{
+  display:grid;
+  grid-template-columns:58px 1fr 58px;
+  gap:12px;
+  align-items:center;
+  margin:4px 0 2px;
+}
+.rate-step{
+  width:58px;height:58px;
+  border:1px solid rgba(212,175,55,.22);
+  border-radius:18px;
+  background:#0b2118;
+  color:var(--gold2);
+  font-size:32px;
+  line-height:1;
+  font-weight:500;
+}
+.rate-step:active{transform:scale(.96)}
+.rate-center{
+  min-width:0;
+  border:1px solid rgba(212,175,55,.20);
+  border-radius:20px;
+  padding:12px 16px;
+  background:#081a13;
+  text-align:center;
+}
+.rate-label{
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:4px;
+}
+.rate-number-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  direction:ltr;
+}
+.rate-currency{
+  color:var(--gold2);
+  font-size:20px;
+  font-weight:850;
+  white-space:nowrap;
+}
+.rate-number-row input{
+  width:125px;
+  max-width:55vw;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:var(--text);
+  font-size:34px;
+  line-height:1.1;
+  font-weight:900;
+  text-align:center;
+  appearance:textfield;
+  -moz-appearance:textfield;
+}
+.rate-number-row input::-webkit-outer-spin-button,
+.rate-number-row input::-webkit-inner-spin-button{
+  -webkit-appearance:none;
+  margin:0;
+}
+.conversion-result{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  min-height:46px;
+  padding:10px 14px;
+  border-radius:16px;
+  background:rgba(212,175,55,.08);
+  border:1px solid rgba(212,175,55,.14);
+  color:#eadfbf;
+  font-weight:800;
+}
+.conversion-result strong{color:var(--gold2)}
+.chip-value-result{margin-top:8px}
+@media(max-width:430px){
+  .chip-value-control{grid-template-columns:50px 1fr 50px;gap:8px}
+  .rate-step{width:50px;height:50px;border-radius:15px}
+  .rate-number-row input{font-size:30px;width:105px}
+}
+
+
+.ratio-editor{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1.2fr);
+  gap:10px;
+  align-items:center;
+}
+.ratio-box{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-width:0;
+  padding:12px 14px;
+  border-radius:18px;
+  background:#081a13;
+  border:1px solid rgba(212,175,55,.20);
+}
+.ratio-box input{
+  width:100%;
+  min-width:0;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:var(--text);
+  text-align:center;
+  font-size:clamp(24px,4vw,34px);
+  font-weight:900;
+  appearance:textfield;
+  -moz-appearance:textfield;
+}
+.ratio-box input::-webkit-outer-spin-button,
+.ratio-box input::-webkit-inner-spin-button{
+  -webkit-appearance:none;
+  margin:0;
+}
+.ratio-unit{
+  color:var(--gold2);
+  font-weight:850;
+  white-space:nowrap;
+}
+.ratio-equals{
+  color:var(--gold2);
+  font-size:30px;
+  font-weight:900;
+  text-align:center;
+}
+@media(max-width:560px){
+  .ratio-editor{
+    grid-template-columns:1fr;
+  }
+  .ratio-equals{
+    line-height:1;
+  }
+}
+
+
+.top-actions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.share-btn{
+  background:linear-gradient(145deg,#21885d,#146343);
+  color:#fff;
+}
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:24px;
+  z-index:200;
+  transform:translate(-50%,18px);
+  opacity:0;
+  pointer-events:none;
+  padding:12px 16px;
+  border-radius:16px;
+  background:#10251b;
+  color:#f8f4e7;
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 18px 50px rgba(0,0,0,.35);
+  transition:.2s ease;
+  font-weight:750;
+  text-align:center;
+  max-width:min(90vw,520px);
+}
+.toast.show{
+  opacity:1;
+  transform:translate(-50%,0);
+}
+@media(max-width:680px){
+  .top-actions{
+    justify-self:end;
+  }
+  .top-actions .btn{
+    padding:11px 12px;
+  }
+}
+@media(max-width:520px){
+  .topbar{
+    grid-template-columns:1fr;
+  }
+  .brand{grid-column:auto}
+  .top-pot,
+  .top-actions{
+    justify-self:stretch;
+  }
+  .top-pot{
+    justify-content:space-between;
+  }
+  .top-actions .btn{
+    flex:1;
+  }
+}
+
+
+/* ===== v10 friendlier operation ===== */
+.flowbar{
+  max-width:860px;
+  margin:0 auto 18px;
+  padding:8px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:rgba(10,28,21,.76);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+.flow-btn{
+  border:0;
+  border-radius:14px;
+  padding:10px 7px;
+  background:#0c2419;
+  color:#d7cfbd;
+  font-weight:800;
+  font-size:13px;
+}
+.flow-btn b{
+  display:block;
+  color:var(--gold2);
+  font-size:15px;
+  margin-bottom:2px;
+}
+.friendly-note{
+  margin-bottom:14px;
+  padding:13px 15px;
+  border-radius:17px;
+  background:rgba(212,175,55,.08);
+  border:1px solid rgba(212,175,55,.14);
+  color:#e7dcc2;
+  font-size:14px;
+  line-height:1.45;
+}
+.quick-buyins{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:10px 0 2px;
+}
+.quick-buyins button{
+  flex:1 1 72px;
+  border:1px solid rgba(212,175,55,.18);
+  background:#0b2118;
+  color:#eadfbf;
+  border-radius:13px;
+  padding:10px 8px;
+  font-weight:800;
+}
+.action-strip{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-top:15px;
+}
+.action-strip .btn{
+  min-height:50px;
+  font-size:16px;
+}
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:24px;
+  z-index:250;
+  transform:translate(-50%,18px);
+  opacity:0;
+  pointer-events:none;
+  padding:12px 16px;
+  border-radius:16px;
+  background:#10251b;
+  color:#f8f4e7;
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 18px 50px rgba(0,0,0,.38);
+  transition:.2s ease;
+  font-weight:800;
+  text-align:center;
+  max-width:min(90vw,520px);
+}
+.toast.show{
+  opacity:1;
+  transform:translate(-50%,0);
+}
+.share-summary{
+  margin-top:10px;
+}
+@media(max-width:600px){
+  .flowbar{grid-template-columns:repeat(2,1fr)}
+  .action-strip{grid-template-columns:1fr}
+}
+
+
+/* ===== v11: animated poker experience ===== */
+.poker-ambient{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:-1}
+.ambient-card{position:absolute;font-size:clamp(42px,7vw,88px);opacity:.055;animation:floatCard 11s ease-in-out infinite;filter:drop-shadow(0 12px 22px rgba(0,0,0,.35))}
+.red-card{color:#e34747}.a1{top:14%;left:5%;transform:rotate(-18deg)}.a2{top:30%;right:7%;animation-delay:-3s;transform:rotate(20deg)}.a3{bottom:12%;left:12%;animation-delay:-6s;transform:rotate(14deg)}.a4{bottom:26%;right:13%;animation-delay:-8s;transform:rotate(-20deg)}
+@keyframes floatCard{0%,100%{translate:0 0;rotate:0deg}50%{translate:0 -22px;rotate:6deg}}
+.ambient-chip{position:absolute;width:86px;height:86px;border-radius:50%;border:10px dashed rgba(212,175,55,.10);box-shadow:inset 0 0 0 5px rgba(212,175,55,.05);animation:spinChip 18s linear infinite}
+.c1{top:55%;left:2%}.c2{top:8%;right:18%;width:58px;height:58px;animation-delay:-8s}.c3{bottom:4%;right:4%;width:120px;height:120px;animation-delay:-12s}
+@keyframes spinChip{to{transform:rotate(360deg)}}
+.fx-layer{position:fixed;inset:0;pointer-events:none;z-index:300;overflow:hidden}
+.fx-chip{position:absolute;width:54px;height:54px;border-radius:50%;border:7px dashed #f0d56c;background:radial-gradient(circle,#b92429 0 38%,#7b1116 39% 60%,#d4af37 61% 66%,#7b1116 67%);box-shadow:0 12px 30px rgba(0,0,0,.35);animation:chipPop .75s cubic-bezier(.2,.75,.25,1) forwards}
+@keyframes chipPop{0%{opacity:0;transform:translate(-50%,15px) scale(.45) rotate(0)}35%{opacity:1;transform:translate(-50%,-44px) scale(1.1) rotate(160deg)}100%{opacity:0;transform:translate(-50%,-95px) scale(.75) rotate(390deg)}}
+.fx-card{position:absolute;width:50px;height:68px;display:grid;place-items:center;border-radius:9px;background:#f7f1e5;color:#141414;font-size:26px;font-weight:900;border:1px solid rgba(0,0,0,.15);box-shadow:0 12px 28px rgba(0,0,0,.25);animation:dealCard .7s ease-out forwards}
+@keyframes dealCard{0%{opacity:0;transform:translate(80px,-80px) rotate(35deg) scale(.6)}100%{opacity:0;transform:translate(0,30px) rotate(-7deg) scale(1)}}
+.icon-btn{min-width:48px;padding-inline:12px}
+
+
+.buy-history-list{display:grid;gap:9px;max-height:52vh;overflow:auto}.buy-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px 13px;border-radius:16px;background:#0a1c15;border:1px solid var(--line)}.buy-row strong{display:block}.buy-row small{display:block;color:var(--muted);margin-top:3px}
+.player-actions .btn{min-height:42px}.history-btn{background:rgba(212,175,55,.10);color:#ecd985}.undo-buy-btn{background:rgba(199,59,59,.12);color:#ffaaa5}
+@media(max-width:760px){.top-actions{display:grid;grid-template-columns:repeat(2,1fr);width:100%}.top-actions .btn{padding:10px 8px;font-size:12px}}
+
+
+/* Chips scatter and cards fan out on game actions. */
+@keyframes chipPop{0%{opacity:0;transform:translate(-50%,15px) scale(.4)}20%{opacity:1}65%{opacity:1;transform:translate(calc(-50% + var(--dx)), -100px) rotate(var(--turn)) scale(1)}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),30px) rotate(var(--turn)) scale(.6)}}
+.fx-chip{animation-duration:1.05s;width:44px;height:44px;border-width:6px}
+@keyframes dealCard{0%{opacity:0;transform:translate(95px,-100px) rotate(35deg) scale(.5)}25%{opacity:1}65%{opacity:1;transform:translate(var(--fan),-15px) rotate(var(--angle)) scale(1)}100%{opacity:0;transform:translate(var(--fan),40px) rotate(var(--angle)) scale(.9)}}
+.fx-card{animation-duration:1.15s;font-size:21px}
+@keyframes potPulse{50%{box-shadow:0 0 28px rgba(212,175,55,.5);transform:scale(1.04)}}
+.pot-pulse{animation:potPulse .65s ease}
+.suits span{display:inline-block;animation:suitWave 4s ease-in-out infinite}.suits span:nth-child(2){animation-delay:.2s}.suits span:nth-child(3){animation-delay:.4s}.suits span:nth-child(4){animation-delay:.6s}
+@keyframes suitWave{0%,35%,100%{transform:translateY(0) rotate(0)}15%{transform:translateY(-9px) rotate(12deg)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
+
+.poker-showcase{position:relative;width:270px;height:155px;margin:18px auto 8px;pointer-events:none}
+.show-card{position:absolute;top:8px;width:76px;height:108px;border-radius:12px;background:#fff6e5;color:#15251d;font:900 23px Georgia,serif;text-align:left;padding:9px;box-shadow:0 12px 28px #0005;animation:showDeal 4s ease-in-out infinite}
+.show-card span{display:block;text-align:center;font-size:43px;line-height:1.15}.left-card{left:65px;--tilt:-16deg}.right-card{left:125px;color:#bc272d;--tilt:16deg;animation-delay:.2s}
+.show-chip{position:absolute;bottom:8px;width:62px;height:62px;border:7px dashed #f8e5b5;border-radius:50%;display:grid;place-items:center;color:#fff4d3;font-size:25px;box-shadow:0 7px 0 #0005,0 12px 20px #0004;animation:showChip 2.8s ease-in-out infinite}
+.chip-red{left:35px;background:#b02732}.chip-green{left:104px;background:#14805c;animation-delay:.3s}.chip-gold{left:173px;background:#ae8421;animation-delay:.6s}
+@keyframes showDeal{0%,100%{transform:translateY(0) rotate(var(--tilt))}50%{transform:translateY(-15px) rotate(calc(var(--tilt) * 1.4))}}
+@keyframes showChip{0%,100%{transform:translateY(0) rotate(-10deg)}50%{transform:translateY(-14px) rotate(25deg)}}
+.update-badge{display:inline-block;border:1px solid #d4af3755;border-radius:999px;padding:7px 14px;color:var(--gold2);background:#d4af3710;font-size:13px;font-weight:800}
+@media(prefers-reduced-motion:reduce){.show-card,.show-chip{animation:none}}
+
+/* Refined surfaces and interaction; retain the established poker palette. */
+:root{--shadow:0 8px 32px #0002,0 1px 0 #ffffff05 inset;--muted:#b8c2b8}
+body{line-height:1.5;font-feature-settings:"kern";font-variant-numeric:tabular-nums}
+.shell{width:min(1120px,calc(100% - 40px));padding-top:20px;padding-bottom:48px}
+.topbar{top:12px;padding:14px 18px;border-radius:24px;background:rgba(12,29,21,.8);box-shadow:0 4px 24px #0002,inset 0 1px 0 #ffffff08}
+.brand-title{font-weight:650;letter-spacing:-.025em}.brand-sub{letter-spacing:.04em}
+.app-icon{box-shadow:inset 0 1px 1px #ffffff35,0 4px 10px #0002}
+.top-pot{background:rgba(212,175,55,.08);border-color:rgba(212,175,55,.16)}
+.hero{padding:36px 12px 32px}.eyebrow{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.hero h1{font-size:clamp(32px,5.4vw,58px);font-weight:650;line-height:1.08;max-width:700px;letter-spacing:-.045em;margin:12px auto}
+.hero p{font-size:15px;max-width:540px;line-height:1.7}.suits{display:none}.update-badge{display:none}
+.poker-showcase{transform:scale(.8);margin-top:8px;margin-bottom:-12px}
+.show-card{animation:refinedDeal 7s ease-in-out infinite;box-shadow:0 8px 18px #0003}
+.show-chip{animation:refinedChip 6s ease-in-out infinite,slowJetonSpin 18s linear infinite;box-shadow:0 4px 0 #0004,0 8px 14px #0002}
+@keyframes refinedDeal{0%,100%{transform:translateY(0) rotate(var(--tilt))}50%{transform:translateY(-5px) rotate(var(--tilt))}}
+@keyframes refinedChip{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-4px) rotate(1deg)}}
+@keyframes slowJetonSpin{to{rotate:1turn}}
+.layout{gap:24px}.card{border-radius:28px;background:linear-gradient(155deg,rgba(20,43,32,.96),rgba(13,32,23,.97));border-color:#ffffff0e}
+.card-head{padding:26px 26px 18px}.card-title{font-size:23px;font-weight:650;letter-spacing:-.025em}.section{padding:0 26px 26px}.card-sub{line-height:1.65}
+.conversion{padding:20px;gap:16px;background:rgba(212,175,55,.045);border-color:rgba(212,175,55,.13)}
+.conv-icon{border-radius:13px;background:rgba(212,175,55,.14);color:var(--gold2);font-weight:600}
+.ratio-box{padding:14px;border-color:#ffffff12;box-shadow:inset 0 1px 3px #0002}
+.ratio-box input{font-weight:600}.ratio-unit{font-size:13px;font-weight:600}.ratio-equals{font-size:24px;font-weight:400}
+.input{min-height:48px;background:rgba(4,17,11,.4);border-color:#ffffff16;border-radius:14px;padding:13px 15px}
+button,input,textarea{touch-action:manipulation}button{-webkit-tap-highlight-color:transparent}
+.btn,.preset,.flow-btn,.quick-buyins button,.quick-money button{font-weight:600;min-height:44px;transition:transform .2s cubic-bezier(.2,.8,.2,1),background .2s,box-shadow .2s,border-color .2s}
+.btn{border-radius:14px;padding:12px 17px;border:1px solid #ffffff08;background:rgba(255,255,255,.065);box-shadow:inset 0 1px 0 #ffffff06}
+.btn.primary{background:linear-gradient(180deg,#dfbf55,#c6a034);color:#211b09;box-shadow:inset 0 1px 0 #fff5,0 3px 8px #0002}
+.btn.green,.share-btn{background:linear-gradient(180deg,#278c64,#1c714e);box-shadow:inset 0 1px 0 #ffffff20,0 3px 8px #0002}
+.btn.danger{border-color:rgba(199,59,59,.12);background:rgba(199,59,59,.10)}
+button:active{transform:scale(.97)}button:focus-visible{outline:2px solid var(--gold2);outline-offset:4px}
+input:focus-visible,textarea:focus-visible{outline:2px solid var(--gold2);outline-offset:3px}
+.flowbar{padding:6px;gap:4px;background:rgba(5,20,13,.45);border-radius:19px;border-color:#ffffff0c;margin-bottom:24px}
+.flow-btn{background:transparent;border-radius:13px;color:#c7cbbd;font-size:12px}.flow-btn b{font-size:12px;font-weight:500;opacity:.75;margin-bottom:4px}
+.player{padding:20px;border-radius:22px;background:rgba(6,23,15,.35);box-shadow:0 2px 8px #0001;border-color:#ffffff0e}
+.players{gap:16px;margin-top:22px}.name{font-weight:650}.avatar{font-weight:600;box-shadow:inset 0 1px 1px #ffffff20}
+.player-grid{gap:10px}.metric{background:rgba(255,255,255,.025);border-color:#ffffff08;padding:13px;border-radius:14px}.metric strong{font-weight:600}.player-actions{gap:10px;margin-top:16px}
+.stat{padding:17px;background:rgba(255,255,255,.025);border-color:#ffffff0d}.stat strong{font-weight:600}.status{line-height:1.65}
+.friendly-note{font-size:13px;background:rgba(212,175,55,.04);border-color:rgba(212,175,55,.1);line-height:1.7}
+.transfer{padding:17px;background:rgba(255,255,255,.025)}.transfer-top{font-weight:600}.empty{line-height:1.7;background:transparent;padding:24px 16px}
+.sheet{background:linear-gradient(160deg,#183125,#10251b);border-radius:28px;padding:26px;box-shadow:0 24px 80px #0006;animation:polishedSheet .32s cubic-bezier(.2,.8,.2,1);max-height:85dvh;overflow:auto}
+.sheet h3{font-weight:650;letter-spacing:-.025em}.sheet p{font-size:14px;line-height:1.7}.modal{background:#0007;padding:20px}
+@keyframes polishedSheet{from{transform:translateY(24px) scale(.98);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.toast{font-weight:500;border-radius:18px;background:rgba(16,37,27,.95);backdrop-filter:blur(20px);box-shadow:0 8px 30px #0003}
+.ambient-card{opacity:.025}.ambient-chip{opacity:.4}.suits span{animation:none}
+@media(hover:hover){button:hover{filter:brightness(1.08)}.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px #0002}.flow-btn:hover{background:#ffffff08}}
+@media(max-width:680px){.shell{width:calc(100% - 24px);padding-top:12px}.topbar{top:8px;padding:14px;gap:10px}.hero{padding:28px 8px}.card-head{padding:22px 20px 16px}.section{padding:0 20px 22px}.layout{gap:18px}.conversion{padding:16px}.player{padding:16px}.hero p{font-size:14px}.sheet{padding:24px 20px}}
+@media(max-width:520px){.topbar{grid-template-columns:1fr 1fr}.brand{grid-column:1/-1}.top-pot{min-width:0;padding:10px}.top-pot strong{font-size:17px}.top-actions{gap:6px}.top-actions .btn{font-size:12px;padding:10px 8px}.brand-title{font-size:14px}.flowbar{grid-template-columns:repeat(4,minmax(0,1fr))}.flow-btn{font-size:11px;padding:8px 2px}.hero h1{font-size:34px}.player-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.metric strong{font-size:17px}.ratio-editor{grid-template-columns:minmax(0,1fr) auto minmax(0,1.2fr);gap:7px}.ratio-box{padding:12px 8px;gap:4px;flex-wrap:wrap}.ratio-box input{font-size:27px}.ratio-unit{font-size:12px}.ratio-equals{font-size:20px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+.poker-showcase{display:block;height:105px;transform:scale(.9);margin:10px auto 0}
+.poker-calc-sheet{width:min(560px,100%)}
+.poker-calc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.poker-calc-head h3{margin-bottom:6px}
+.poker-calc-head p{margin-bottom:16px}
+.poker-calc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.poker-calc-field{display:grid;gap:6px;color:var(--muted);font-size:13px;font-weight:600}
+.poker-calc-field .input{min-height:46px;padding:11px 13px;color:var(--text)}
+.poker-calc-actions{display:grid;grid-template-columns:1fr auto;gap:9px;margin-top:14px}
+.poker-calc-results{margin-top:14px;padding:15px;border-radius:18px;background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.14)}
+.poker-calc-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.poker-calc-stat{padding:11px 9px;border-radius:14px;background:rgba(255,255,255,.035);text-align:center}
+.poker-calc-stat span{display:block;color:var(--muted);font-size:11px;line-height:1.4}
+.poker-calc-stat strong{display:block;margin-top:4px;color:var(--gold2);font-size:20px}
+.poker-calc-advice{margin:11px 0 0!important;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);font-size:13px}
+.poker-calc-note{margin:11px 0 0!important;font-size:11px!important;line-height:1.55!important}
+@media(max-width:500px){.poker-calc-grid{grid-template-columns:1fr}.poker-calc-stats{grid-template-columns:1fr 1fr}.poker-calc-sheet{padding:20px}}
+
+/* iOS and Instagram in-app browser stacking/viewport fallback. */
+html{min-height:100%;background:var(--bg)}
+body{position:relative;isolation:isolate;min-height:100vh;min-height:100svh}
+.poker-ambient{z-index:0}
+.shell{position:relative;z-index:1;min-height:100vh;min-height:100svh;padding-bottom:calc(48px + env(safe-area-inset-bottom,0px))}
+.modal{z-index:100}
+.room-hub{margin:14px 0 22px;padding:20px;border:1px solid rgba(212,175,55,.24);border-radius:24px;background:linear-gradient(145deg,rgba(16,42,31,.97),rgba(8,25,18,.96));box-shadow:var(--shadow)}
+.room-hub [hidden]{display:none!important}
+body:not(.room-authenticated) .shell>:not(.room-hub){display:none!important}
+.room-hub-head,.room-row,.room-actions,.room-title-row,.room-account{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.room-hub-head{margin-bottom:14px}
+.room-hub-head h2{margin:0;font-size:1.25rem}
+.room-hub-head p,.room-note,.room-meta{margin:5px 0 0;color:var(--muted);font-size:.9rem}
+.room-pill{border:1px solid var(--line);border-radius:999px;padding:6px 10px;color:var(--muted);font-size:.82rem;white-space:nowrap}
+.room-auth-panel,.room-lobby,.active-room{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.035);padding:16px}
+.room-auth-panel{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.room-auth-panel p{color:var(--muted);margin:5px 0 0}
+.room-google-btn{min-width:190px;display:inline-flex;justify-content:center;align-items:center;gap:9px}
+.room-google-mark{width:20px;height:20px;border-radius:50%;background:#fff;color:#4285f4;font-weight:800;display:inline-grid;place-items:center;font-family:Arial,sans-serif}
+.room-account{margin-bottom:14px;color:var(--muted)}
+.room-account .room-actions{margin:0;align-items:center}
+.room-account .room-actions .btn{min-height:42px}
+.profile-open{display:inline-flex;align-items:center;gap:8px}
+.profile-mini-avatar{width:26px;height:26px;display:inline-grid;place-items:center;overflow:hidden;border-radius:50%;background:linear-gradient(145deg,#b82328,#661014);color:#fff;font-size:12px;font-weight:800}
+.profile-mini-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-overlay{z-index:720;align-items:center;padding:14px}
+.profile-sheet{width:min(420px,100%);padding:20px;border:1px solid rgba(224,190,83,.16);border-radius:24px;background:linear-gradient(155deg,#183125,#10251b);max-height:min(88dvh,680px);overflow:auto}
+.profile-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.profile-head h3{margin:0 0 4px;font-size:1.15rem;font-weight:650}
+.profile-head p{margin:0 0 14px;color:var(--muted);font-size:.84rem}
+.profile-avatar-wrap{display:grid;justify-items:center;gap:12px;padding:10px 0 18px}
+.profile-avatar{width:104px;height:104px;display:grid;place-items:center;overflow:hidden;border:1px solid rgba(240,213,108,.35);border-radius:50%;background:linear-gradient(145deg,#b82328,#661014);color:#fff;font-size:30px;font-weight:700;box-shadow:0 8px 24px #0003}
+.profile-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-file-input{display:none}
+.profile-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.profile-actions .btn{min-height:40px;padding:9px 12px}
+.profile-fields{display:grid;gap:10px}
+.profile-field{display:grid;gap:5px;color:var(--muted);font-size:.82rem}
+.profile-field .input{min-height:44px}
+.profile-message{min-height:1.25em;margin:9px 0 0;color:var(--muted);font-size:.82rem}
+.profile-message.error{color:var(--red2)}
+.profile-message.success{color:#77d3a7}
+.room-view-back{display:none}
+.room-view-active .room-view-back{display:inline-flex}
+body.room-view-active .shell>:not(.room-hub){display:none!important}
+.room-view-active .room-hub{margin:0 auto;max-width:850px;padding:clamp(16px,4vw,28px)}
+.room-view-active .room-account{padding-bottom:12px;border-bottom:1px solid var(--line)}
+.room-view-active .active-room{padding:clamp(14px,3vw,22px);margin-top:12px}
+.room-view-active .room-title-row{align-items:flex-start}
+.room-view-active .room-title-row h3{font-size:1.25rem}
+.room-view-active .room-meta{font-size:.82rem;line-height:1.5}
+.room-view-active .room-code{padding:8px 12px;border:1px solid rgba(212,175,55,.17);border-radius:13px;background:rgba(212,175,55,.06);font-size:1rem}
+.room-view-active .room-finance-form{padding:12px;border-radius:16px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05)}
+.room-view-active .room-player{background:rgba(255,255,255,.025);border-color:#ffffff0c}
+@media(max-width:560px){
+  .profile-sheet{padding:17px;border-radius:21px}
+  .profile-avatar{width:92px;height:92px}
+  .room-account{align-items:flex-start;flex-direction:column;gap:8px}
+  .room-account .room-actions{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .room-account .room-actions .btn{padding:8px 7px;font-size:.78rem}
+  .profile-open{justify-content:center}
+  .room-view-active .room-hub{width:100%;min-height:calc(100svh - 24px);border-radius:20px}
+  .room-view-active .room-title-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+  .room-view-active .room-code{font-size:.86rem;letter-spacing:.1em}
+  .room-view-active .room-finance-form{grid-template-columns:1fr}
+  .room-view-active .room-finance-form button{grid-column:auto}
+  .room-view-active .room-roster{gap:7px}
+  .room-view-active .room-player{padding:10px;gap:8px;font-size:.88rem}
+  .room-view-active .room-player small{font-size:.72rem}
+}
+.room-panel-overlay{position:fixed;inset:0;z-index:500;display:none;background:rgba(0,0,0,.55);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+.room-panel-overlay.show{display:block}
+body.room-panel-open{overflow:hidden}
+.room-panel{position:absolute;inset-block:0;right:0;width:min(470px,96vw);overflow:auto;padding:18px;background:linear-gradient(155deg,#10271d,#081710 72%);border-left:1px solid rgba(224,190,83,.23);box-shadow:-24px 0 70px rgba(0,0,0,.38);animation:roomDrawerIn .2s ease-out}
+@keyframes roomDrawerIn{from{transform:translateX(24px);opacity:.7}to{transform:translateX(0);opacity:1}}
+.room-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;padding-bottom:11px;border-bottom:1px solid var(--line)}.room-panel-head h3{margin:0;font-size:1.08rem}.room-panel-head p{margin:3px 0 0;color:var(--muted);font-size:.82rem}.room-panel-head .btn{padding:8px 11px;border-radius:12px}
+.room-lobby-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.room-lobby h3,.active-room h3{margin:0 0 8px}
+.room-form{display:flex;gap:8px;margin-top:10px}
+.room-form .input{min-width:0;flex:1}
+.room-lobby-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.room-lobby-actions .btn{min-height:44px}
+.room-action-modal{z-index:650;align-items:center;padding:12px}.room-action-sheet{width:min(360px,100%);padding:16px;border-radius:18px}.room-action-sheet h3{font-size:18px;margin:0 0 4px}.room-action-sheet p{font-size:13px;margin:0 0 12px}.room-action-fields{display:grid;gap:9px}.room-action-field{display:grid;gap:5px;color:var(--muted);font-size:.82rem}.room-action-field[hidden]{display:none!important}.room-action-sheet .sheet-actions{margin-top:12px;gap:7px}.room-action-message{min-height:1.2em;margin:8px 0 0;color:var(--muted);font-size:.8rem}.room-action-message.error{color:var(--red2)}.room-action-message.success{color:#77d3a7}
+.room-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.room-list button{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);border-radius:999px;padding:9px 13px}
+.room-list button:hover{border-color:var(--gold)}
+.active-room{margin-top:14px}
+.room-title-row{align-items:flex-start;flex-wrap:wrap}
+.room-code{font-size:1.15rem;letter-spacing:.16em;color:var(--gold2);font-weight:800}
+.room-actions{justify-content:flex-start;flex-wrap:wrap;margin:14px 0}
+.room-ratio{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px;border-radius:14px;background:rgba(0,0,0,.14);margin:12px 0}
+.room-ratio input{width:100px}
+.room-finance-form{display:grid;grid-template-columns:1fr 1fr auto;gap:9px;align-items:end;margin:14px 0}
+.room-field{display:grid;gap:6px;color:var(--muted);font-size:.86rem}
+.room-roster{display:grid;gap:8px;margin-top:10px}
+.room-player{display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr;gap:10px;align-items:center;border:1px solid var(--line);border-radius:13px;padding:11px}
+.room-player small{display:block;color:var(--muted);font-size:.78rem}
+.room-player strong{font-variant-numeric:tabular-nums}
+.room-ledger{display:grid;gap:7px;margin:10px 0}
+.room-entry{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,.035);padding:9px 11px;border-radius:11px;font-size:.9rem}
+.room-entry button{padding:4px 8px;min-height:32px}
+.room-transfers{display:grid;gap:6px;margin-top:10px}
+.room-message{min-height:1.3em;color:var(--muted);font-size:.88rem;margin:9px 0 0}
+.room-message.error{color:var(--red2)}
+.room-message.success{color:#77d3a7}
+@media(max-width:760px){.room-hub{padding:14px;border-radius:18px}.room-auth-panel{align-items:stretch;flex-direction:column}.room-google-btn{width:100%}.room-lobby-grid{grid-template-columns:1fr}.room-lobby-actions{grid-template-columns:1fr 1fr}.room-panel{width:min(430px,100vw);padding:14px}.room-finance-form{grid-template-columns:1fr 1fr}.room-finance-form button{grid-column:1/-1}.room-player{grid-template-columns:1fr 1fr}.room-player>div:nth-child(3),.room-player>div:nth-child(4){padding-top:6px;border-top:1px solid var(--line)}}
+body:not(.room-authenticated){display:flex;align-items:center;justify-content:center;padding:22px;overflow-x:hidden}
+body:not(.room-authenticated) .shell{width:min(570px,100%);min-height:auto;margin:0;padding:0}
+body:not(.room-authenticated) .room-hub{position:relative;isolation:isolate;overflow:hidden;width:100%;margin:0;padding:28px 34px 22px;border:1px solid rgba(240,213,108,.28);border-radius:30px;background:radial-gradient(ellipse at 50% -15%,rgba(212,175,55,.19),transparent 48%),linear-gradient(150deg,rgba(16,42,31,.98),rgba(6,20,14,.99));box-shadow:0 32px 100px rgba(0,0,0,.48)}
+body:not(.room-authenticated) .room-hub:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(135deg,rgba(255,255,255,.035),transparent 34%,rgba(33,136,93,.04));}
+body:not(.room-authenticated) .room-pill{display:none}
+.login-brand{display:flex;align-items:center;justify-content:center;gap:12px;color:var(--text);text-align:right}
+.login-brand-icon{display:grid;place-items:center;width:54px;height:54px;border-radius:17px;background:linear-gradient(145deg,#d4af37,#9d7920);color:#fff;font-size:29px;box-shadow:0 12px 28px rgba(212,175,55,.2)}
+.login-brand strong,.login-brand span{display:block}
+.login-brand strong{font-size:1.2rem;letter-spacing:.01em}
+.login-brand span{margin-top:2px;color:var(--muted);font-size:.82rem;letter-spacing:.09em;text-transform:uppercase}
+.login-showcase{position:relative;height:128px;margin:10px auto 3px;width:min(330px,100%)}
+.login-playing-card{position:absolute;top:19px;left:50%;width:67px;height:92px;display:flex;flex-direction:column;justify-content:space-between;padding:8px;border-radius:9px;box-shadow:0 14px 30px rgba(0,0,0,.35);font-family:Georgia,serif}
+.card-back{margin-left:-28px;transform:rotate(-16deg);border:1px solid rgba(240,213,108,.76);background:repeating-linear-gradient(45deg,#a42f3d 0 7px,#b7404b 7px 14px);color:#f8e1a6;font-size:27px;align-items:center;justify-content:center}
+.card-front{margin-left:8px;transform:rotate(12deg);border:1px solid #eee5d2;background:#f5f0e6;color:#bd3844;font-size:23px}
+.card-front b{font-size:17px;line-height:1}.card-front span{align-self:flex-end;font-size:24px}
+.login-chip{position:absolute;z-index:2;display:grid;place-items:center;width:48px;height:48px;border:4px dotted rgba(255,255,255,.82);outline:2px solid rgba(0,0,0,.2);outline-offset:-7px;border-radius:50%;color:#fff;font-size:21px;font-weight:800;box-shadow:0 10px 22px rgba(0,0,0,.32);animation:login-chip-float 4.6s ease-in-out infinite}
+.login-chip.chip-red{left:calc(50% - 128px);top:50px;background:#b83745}
+.login-chip.chip-gold{right:calc(50% - 129px);top:18px;background:#bb932a;animation-delay:-1.2s}
+.login-chip.chip-green{right:calc(50% - 105px);bottom:3px;background:#21885d;animation-delay:-2.3s}
+@keyframes login-chip-float{0%,100%{transform:translateY(0) rotate(-7deg)}50%{transform:translateY(-6px) rotate(7deg)}}
+body:not(.room-authenticated) .room-hub-head{display:block;margin:8px 0 18px;text-align:center}
+.login-kicker{display:block;margin-bottom:8px;color:var(--gold2);font-size:.68rem;font-weight:800;letter-spacing:.18em}
+body:not(.room-authenticated) .room-hub-head h2{font-size:1.62rem;line-height:1.25}
+body:not(.room-authenticated) .room-hub-head p{max-width:360px;margin:8px auto 0;font-size:.96rem;line-height:1.65}
+body:not(.room-authenticated) .room-auth-panel{display:flex;align-items:stretch;flex-direction:column;gap:16px;padding:18px;border:1px solid rgba(240,213,108,.2);border-radius:19px;background:rgba(255,255,255,.045);text-align:center}
+body:not(.room-authenticated) .room-auth-panel strong{font-size:1.02rem}
+body:not(.room-authenticated) .room-auth-panel p{margin:5px 0 0;font-size:.86rem}
+body:not(.room-authenticated) .room-google-btn{width:100%;min-height:54px;border:0;border-radius:14px;background:#f7f5ef;color:#20231f;font-weight:750;box-shadow:0 8px 20px rgba(0,0,0,.18);transition:transform .18s ease,box-shadow .18s ease}
+body:not(.room-authenticated) .room-google-btn:hover{transform:translateY(-2px);box-shadow:0 13px 25px rgba(0,0,0,.26)}
+body:not(.room-authenticated) .room-google-mark{width:23px;height:23px;background:#fff;color:#4285f4;font-size:18px}
+.login-footer{display:flex;align-items:center;justify-content:center;gap:7px;margin:15px 0 0;color:rgba(248,244,231,.67);font-size:.76rem;text-align:center}
+.login-lock{display:inline-grid;place-items:center;width:17px;height:17px;border:1px solid rgba(119,211,167,.65);border-radius:50%;color:#77d3a7;font-size:11px;font-weight:800}
+body.room-authenticated .login-brand,body.room-authenticated .login-showcase,body.room-authenticated .login-footer{display:none}
+body.room-authenticated .login-kicker{display:none}
+/* After sign-in, keep account controls compact and show the poker table immediately. */
+body.room-authenticated:not(.room-view-active) .shell{min-height:auto}
+body.room-authenticated:not(.room-view-active) .room-hub{margin:0 0 8px;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+body.room-authenticated:not(.room-view-active) .room-hub-head,
+body.room-authenticated:not(.room-view-active) .room-auth-panel{display:none!important}
+body.room-authenticated:not(.room-view-active) .room-account{margin:0;padding:8px 10px;border:1px solid var(--line);border-radius:15px;background:rgba(16,42,31,.78)}
+body.room-authenticated:not(.room-view-active) .room-account .room-actions{flex-wrap:wrap}
+@media(max-width:560px){body.room-authenticated:not(.room-view-active) .room-account{align-items:center;flex-direction:row;gap:6px}body.room-authenticated:not(.room-view-active) .room-account .room-actions{width:auto;display:flex;flex:1;justify-content:flex-end;gap:5px}body.room-authenticated:not(.room-view-active) .room-account .room-actions .btn{min-height:36px;padding:7px 8px;font-size:.72rem}}
+@media(max-width:560px){body:not(.room-authenticated){padding:14px}body:not(.room-authenticated) .room-hub{padding:22px 18px 18px;border-radius:24px}.login-showcase{height:116px}.login-playing-card{top:13px}.login-chip.chip-red{left:calc(50% - 115px);top:46px}.login-chip.chip-gold{right:calc(50% - 116px);top:12px}.login-chip.chip-green{right:calc(50% - 96px);bottom:1px}body:not(.room-authenticated) .room-hub-head h2{font-size:1.4rem}}
+@media(prefers-reduced-motion:reduce){.login-chip{animation:none}.room-google-btn{transition:none}}
+.admin-overlay{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:12px;background:rgba(2,9,6,.82);backdrop-filter:blur(10px)}
+.admin-overlay[hidden]{display:none!important}.admin-panel{width:min(1080px,100%);max-height:94vh;overflow:auto;border:1px solid rgba(224,190,83,.24);border-radius:18px;background:linear-gradient(150deg,#0e241a,#07130e 70%);color:var(--text);box-shadow:0 24px 80px rgba(0,0,0,.5);padding:16px}
+.admin-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--line)}.admin-head h2{margin:0;font-size:1.15rem}.admin-head p{margin:3px 0 0;color:var(--muted);font-size:.8rem}
+.admin-nav{display:flex;gap:6px;overflow:auto;padding:9px 0;border-bottom:1px solid var(--line)}.admin-nav button{flex:none;border:1px solid var(--line);border-radius:999px;padding:7px 11px;background:rgba(255,255,255,.035);color:var(--muted);font:inherit;cursor:pointer}.admin-nav button[aria-selected="true"]{color:#151208;background:var(--gold2);border-color:var(--gold2);font-weight:800}
+.admin-body{min-height:180px;padding:10px 0 2px}.admin-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 9px}.admin-toolbar h3{margin:0;font-size:1rem}.admin-muted{color:var(--muted);font-size:.78rem}
+.admin-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.admin-kpi{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 11px;border:1px solid var(--line);border-radius:11px;background:rgba(255,255,255,.035)}.admin-kpi span{color:var(--muted);font-size:.78rem}.admin-kpi strong{font-size:1.12rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.admin-chart{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));align-items:end;gap:8px;height:106px;margin-top:8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025)}.admin-chart-day{height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;font-size:.7rem;color:var(--muted)}.admin-chart-bar{width:min(100%,32px);min-height:4px;border-radius:6px 6px 2px 2px;background:linear-gradient(0deg,#a87919,var(--gold2));box-shadow:0 0 16px rgba(212,175,55,.1)}
+.admin-table-wrap{overflow:auto;border:1px solid var(--line);border-radius:11px}.admin-table{width:100%;border-collapse:collapse;min-width:600px}.admin-table th,.admin-table td{padding:7px 9px;text-align:right;border-bottom:1px solid rgba(255,255,255,.07);vertical-align:middle;font-size:.8rem}.admin-table th{color:var(--muted);font-size:.72rem;font-weight:600;background:rgba(255,255,255,.03)}.admin-table tr:last-child td{border-bottom:0}.admin-table .btn{padding:5px 9px;font-size:.76rem}
+.admin-room-grid{display:block;border:1px solid var(--line);border-radius:11px;overflow:auto}.admin-room-header,.admin-room-card{display:grid;grid-template-columns:minmax(150px,1.4fr) minmax(110px,1fr) 90px minmax(130px,1.2fr) 100px;align-items:center;gap:9px;padding:8px 10px}.admin-room-header{color:var(--muted);font-size:.7rem;background:rgba(255,255,255,.04);border-bottom:1px solid var(--line)}.admin-room-card{border-bottom:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02);font-size:.78rem}.admin-room-card:last-child{border-bottom:0}.admin-room-top{display:flex;align-items:center;gap:7px;min-width:0}.admin-room-card h4{margin:0;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.admin-room-meta{display:contents;color:var(--muted)}.admin-room-meta>span:nth-child(1){grid-column:2;grid-row:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.admin-room-meta>span:nth-child(2){grid-column:3;grid-row:1;white-space:nowrap}.admin-room-meta>span:nth-child(3){grid-column:4;grid-row:1;white-space:nowrap}.admin-room-actions{display:contents}.admin-room-actions .btn{grid-column:5;grid-row:1;padding:5px 8px;font-size:.72rem}.admin-room-code{direction:ltr;letter-spacing:.08em;font-weight:800;color:var(--gold2)}
+.admin-badge{display:inline-block;border:1px solid rgba(212,175,55,.25);border-radius:999px;padding:3px 7px;color:var(--gold2);font-size:.7rem;white-space:nowrap}.admin-badge.done{border-color:rgba(130,160,145,.25);color:#aebfb4}.admin-badge.suspended{border-color:rgba(211,105,90,.45);color:#ff9b8e}
+.admin-settings{display:flex;align-items:end;gap:8px;max-width:680px}.admin-setting-card{flex:1;padding:9px 10px;border:1px solid var(--line);border-radius:11px;background:rgba(255,255,255,.03)}.admin-setting-card label{display:grid;gap:4px;color:var(--muted);font-size:.78rem}.admin-setting-card input{width:100%;padding:7px}.admin-note{margin:7px 0;color:var(--muted);font-size:.76rem;line-height:1.4}.admin-empty,.admin-error{padding:15px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:11px}.admin-error{color:#ff9b8e}.admin-footer{min-height:18px;color:var(--muted);font-size:.78rem;padding-top:6px}
+@media(max-width:760px){.admin-overlay{padding:6px}.admin-panel{max-height:97vh;padding:11px;border-radius:15px}.admin-kpis{grid-template-columns:1fr 1fr}.admin-toolbar{align-items:flex-start}.admin-chart{gap:4px;padding:8px}.admin-head h2{font-size:1rem}.admin-nav button{padding:7px 10px}.admin-room-header,.admin-room-card{grid-template-columns:minmax(135px,1.3fr) minmax(90px,1fr) 78px minmax(110px,1fr) 85px;gap:6px;font-size:.72rem}.admin-room-top{gap:5px}.admin-room-code{font-size:.68rem}.admin-settings{align-items:stretch;flex-wrap:wrap}.admin-setting-card{min-width:calc(50% - 4px)}.admin-table{min-width:560px}}
+@media(max-width:520px){.admin-room-header,.admin-room-card{grid-template-columns:minmax(125px,1fr) 74px 82px;gap:5px;padding:7px}.admin-room-header span:nth-child(2),.admin-room-header span:nth-child(4),.admin-room-meta>span:nth-child(1),.admin-room-meta>span:nth-child(3){display:none}.admin-room-actions .btn{grid-column:3}.admin-room-top{gap:4px}.admin-room-card h4{max-width:90px}.admin-badge{padding:2px 5px}}
+
+/* Compact, calmer game layout */
+.shell{width:min(1080px,calc(100% - 28px));padding-top:14px}
+.hero{padding:22px 10px 14px}.hero h1{font-size:clamp(28px,4.5vw,46px);line-height:1.12;margin:8px auto}.hero p{font-size:14px}.update-badge{display:none}
+.flowbar{max-width:760px;margin:0 auto 14px;padding:5px;border-radius:15px;gap:3px}
+.flow-btn{padding:8px 5px;font-size:12px}.flow-btn b{font-size:12px;margin-bottom:1px}
+.layout{grid-template-columns:minmax(0,1.35fr) minmax(280px,.75fr);gap:14px}
+.card{border-radius:20px}.card-head{padding:18px 20px 12px}.card-title{font-size:20px}.section{padding:0 20px 20px}
+.conversion{padding:15px;gap:11px;border-radius:18px;margin-bottom:12px}.conversion-title{gap:9px}.conv-icon{width:36px;height:36px;border-radius:11px;font-size:18px}
+.ratio-box{padding:10px}.ratio-box input{font-size:24px}.add-row{grid-template-columns:1.2fr .8fr auto;gap:8px}.input,.btn{min-height:44px}
+.players{gap:9px;margin-top:12px}.player{padding:14px;border-radius:17px}.player-head{margin-bottom:9px}.name{font-size:16px}.player-grid{gap:7px}.metric{padding:9px;border-radius:12px}.metric strong{font-size:16px}.player-actions{gap:7px;margin-top:10px}.player-actions .btn{min-height:40px;padding:9px 11px}
+.summary-card{top:82px}.stats{gap:7px}.stat{padding:12px;border-radius:14px}.stat strong{font-size:19px}.status{padding:11px 12px;margin-bottom:10px}.transfer{padding:12px}
+@media(max-width:760px){.shell{width:calc(100% - 20px);padding-top:9px}.hero{padding:14px 6px 10px}.hero h1{font-size:28px}.layout{grid-template-columns:1fr;gap:10px}.summary-card{order:-1}.summary-card .card-head{padding-bottom:8px}.summary-card .section{padding-bottom:14px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.add-row{grid-template-columns:1fr 1fr}.add-row .btn{grid-column:1/-1}.card-head{padding:15px 16px 10px}.section{padding:0 16px 16px}.conversion{padding:13px}.player{padding:12px}.player-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.flow-btn{font-size:10px}.flow-btn b{font-size:11px}.hero h1{font-size:25px}.player-grid{gap:6px}.metric{padding:8px}.metric label{font-size:11px}.metric strong{font-size:15px}}
+
+/* v2026.10.26 — compact rooms, notices, profile wins, buy buttons */
+.room-guest-btn{width:100%;min-height:48px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(240,213,108,.28);color:var(--text);font-weight:700}
+.room-guest-note{margin:-6px 0 0!important;color:var(--muted);font-size:.76rem!important;line-height:1.5}
+.auth-message{min-height:1.2em;margin:0;color:#ffb3ad;font-size:.84rem;line-height:1.5}
+.auth-message:empty{display:none}
+.app-notice{margin:8px 0 0;padding:9px 12px;border-radius:13px;font-size:.82rem;line-height:1.5;background:rgba(212,175,55,.10);border:1px solid rgba(212,175,55,.22);color:#f3e6b0}
+.app-notice.warn{background:rgba(199,59,59,.12);border-color:rgba(199,59,59,.28);color:#ffc2bd}
+.rooms-badge{display:inline-block;margin-inline-start:6px;padding:1px 7px;border-radius:999px;background:var(--gold2);color:#1b1606;font-size:.7rem;font-weight:800;letter-spacing:.06em;direction:ltr}
+.rooms-badge[hidden]{display:none}
+.room-list button.is-active{border-color:var(--gold2);color:var(--gold2)}
+.room-roster-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}.room-roster-head h4{margin:0}
+.room-transfers .transfer{padding:11px 12px}
+.profile-wins{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;padding:10px 13px;border:1px solid rgba(212,175,55,.2);border-radius:13px;background:rgba(212,175,55,.06)}
+.profile-wins span{color:var(--muted);font-size:.84rem}.profile-wins strong{color:var(--gold2);font-size:1.15rem}
+.app-version{margin-top:6px;opacity:.6;font-size:11px}
+.player-actions .btn.player-buy{background:rgba(212,175,55,.14);color:#f3e38a}
+.player-actions .btn.player-rebuy{background:rgba(19,215,103,.16);color:#bff5d4}
+#shekelValueDisplay{margin-top:-4px}
+@media(max-width:520px){.player-actions{flex-wrap:wrap}.player-actions .btn{flex:1 1 45%}.player-actions .mini{flex-basis:100%;text-align:center}}
+
+</style>
+</head>
+<body>
+<div class="poker-ambient" aria-hidden="true">
+  <span class="ambient-chip c1"></span>
+  <span class="ambient-chip c2"></span>
+  <span class="ambient-chip c3"></span>
+</div>
+<div id="fxLayer" class="fx-layer" aria-hidden="true"></div>
+
+<div id="confirmModal" class="modal" aria-hidden="true">
+  <div class="sheet">
+    <h3 id="confirmTitle">אישור</h3>
+    <p id="confirmText"></p>
+    <div class="sheet-actions">
+      <button id="confirmCancel" class="btn" type="button">ביטול</button>
+      <button id="confirmOk" class="btn danger" type="button">אישור</button>
+    </div>
+  </div>
+</div>
+
+<div id="rebuyModal" class="modal" aria-hidden="true">
+  <div class="sheet">
+    <h3 id="rebuyTitle">קנייה נוספת</h3>
+    <p>בחר סכום או הקלד סכום אחר. הסכום יתווסף מיד לקופה ולג׳טונים של השחקן.</p>
+    <div class="quick-money">
+      <button type="button" data-rebuy="20">₪20</button>
+      <button type="button" data-rebuy="50">₪50</button>
+      <button type="button" data-rebuy="100">₪100</button>
+      <button type="button" data-rebuy="200">₪200</button>
+    </div>
+    <input id="rebuyAmount" class="input" type="number" min="1" step="1" placeholder="סכום קנייה נוספת ₪">
+    <div class="sheet-actions">
+      <button id="rebuyCancel" class="btn" type="button">ביטול</button>
+      <button id="rebuyConfirm" class="btn primary" type="button">הוסף קנייה</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="buyHistoryModal" class="modal" aria-hidden="true">
+  <div class="sheet">
+    <h3 id="buyHistoryTitle">קניות</h3>
+    <p>אפשר לבטל כל כניסה או Rebuy שנרשמו בטעות.</p>
+    <div id="buyHistoryList" class="buy-history-list"></div>
+    <button id="buyHistoryClose" class="btn full" type="button" style="margin-top:12px">סגור</button>
+  </div>
+</div>
+
+<div id="pokerCalcModal" class="modal" aria-hidden="true">
+  <div class="sheet poker-calc-sheet" role="dialog" aria-modal="true" aria-labelledby="pokerCalcTitle">
+    <div class="poker-calc-head">
+      <div>
+        <h3 id="pokerCalcTitle">מחשבון פוקר</h3>
+        <p>חשב את הסיכוי לפגוע באאוטים ואת אחוז הקופה שנדרש להשוואה.</p>
+      </div>
+      <button id="pokerCalcClose" class="btn" type="button" aria-label="סגור מחשבון">✕</button>
+    </div>
+    <div class="poker-calc-grid">
+      <label class="poker-calc-field">כמה אאוטים יש לך?
+        <input id="pokerOuts" class="input" type="number" min="0" max="47" step="1" inputmode="numeric" placeholder="לדוגמה: 9">
+      </label>
+      <label class="poker-calc-field">כמה קלפים עוד ייפתחו?
+        <select id="pokerCardsLeft" class="input">
+          <option value="2">שניים — מהפלופ עד הריבר</option>
+          <option value="1">אחד — מהטרן עד הריבר</option>
+        </select>
+      </label>
+      <label class="poker-calc-field">גודל הקופה לפני ההשוואה (₪)
+        <input id="pokerPotSize" class="input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="לדוגמה: 100">
+      </label>
+      <label class="poker-calc-field">כמה צריך להשוות (₪)
+        <input id="pokerCallAmount" class="input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="לדוגמה: 25">
+      </label>
+    </div>
+    <div class="poker-calc-actions">
+      <button id="pokerCalcRun" class="btn primary" type="button">חשב סיכויים</button>
+      <button id="pokerCalcReset" class="btn" type="button">נקה</button>
+    </div>
+    <div id="pokerCalcResults" class="poker-calc-results" role="status" aria-live="polite">
+      <div class="poker-calc-stats">
+        <div class="poker-calc-stat"><span>לפגוע בקלף הבא</span><strong id="pokerNextChance">—</strong></div>
+        <div class="poker-calc-stat"><span>לפגוע עד הריבר</span><strong id="pokerRiverChance">—</strong></div>
+        <div class="poker-calc-stat"><span>אחוז נדרש להשוואה</span><strong id="pokerPotOdds">—</strong></div>
+      </div>
+      <p id="pokerCalcAdvice" class="poker-calc-advice">הזן את מספר האאוטים ולחץ על „חשב סיכויים”.</p>
+      <p class="poker-calc-note">החישוב הוא הסתברות משוערת לפי מספר האאוטים; הוא לא מביא בחשבון את הידיים של היריבים, ולא כל אאוט בהכרח מבטיח ניצחון.</p>
+    </div>
+  </div>
+</div>
+<div id="shareModal" class="modal"><div class="sheet"><h3>העתק לשיתוף</h3><textarea id="shareText" class="input" rows="8" readonly aria-label="טקסט לשיתוף"></textarea><button id="shareClose" class="btn full" type="button">סגור</button></div></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<div id="adminOverlay" class="admin-overlay" hidden>
+  <section class="admin-panel" role="dialog" aria-modal="true" aria-labelledby="adminTitle" dir="rtl">
+    <header class="admin-head">
+      <div><span class="login-kicker">ADMIN CONSOLE</span><h2 id="adminTitle">ניהול Winner Poker</h2><p id="adminIdentity"></p></div>
+      <button id="adminCloseBtn" class="btn" type="button" aria-label="סגור אזור ניהול">סגור</button>
+    </header>
+    <nav id="adminNav" class="admin-nav" role="tablist" aria-label="מסכי ניהול">
+      <button type="button" role="tab" data-admin-tab="overview" aria-selected="true">סטטיסטיקה</button>
+      <button type="button" role="tab" data-admin-tab="users" aria-selected="false">משתמשים</button>
+      <button type="button" role="tab" data-admin-tab="rooms" aria-selected="false">חדרים</button>
+      <button type="button" role="tab" data-admin-tab="settings" aria-selected="false">הגדרות</button>
+    </nav>
+    <main id="adminContent" class="admin-body" tabindex="-1"><div class="admin-empty">טוען את אזור הניהול...</div></main>
+    <div id="adminFooter" class="admin-footer" role="status" aria-live="polite"></div>
+  </section>
+</div>
+
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="app-icon">♠</div>
+      <div>
+        <div class="brand-title">Winner winner chicken dinner</div>
+        <div class="brand-sub">Poker Night</div>
+      </div>
+    </div>
+
+    <div class="top-pot">
+      <span>סה״כ בקופה</span>
+      <strong id="topPot">₪0</strong>
+    </div>
+
+    <div class="top-actions">
+      <button id="pokerCalcBtn" class="btn" type="button">מחשבון פוקר</button>
+      <button id="shareAppBtn" class="btn share-btn" type="button">שתף</button>
+      <button id="newGameBtn" class="btn" type="button">משחק חדש</button>
+    </div>
+  </header>
+
+  <section class="room-hub" aria-labelledby="roomHubTitle">
+    <div class="login-brand">
+      <div class="login-brand-icon">♠</div>
+      <div><strong>Winner Winner</strong><span>Chicken Dinner</span></div>
+    </div>
+    <div class="login-showcase" aria-hidden="true">
+      <div class="login-playing-card card-back">♠</div>
+      <div class="login-playing-card card-front"><b>A</b><span>♠</span></div>
+      <div class="login-chip chip-red">♦</div>
+      <div class="login-chip chip-gold">♣</div>
+      <div class="login-chip chip-green">♠</div>
+    </div>
+    <div class="room-hub-head">
+      <div><span class="login-kicker">POKER NIGHT MANAGER</span><h2 id="roomHubTitle">המשחקים שלך, במקום אחד</h2><p id="roomHubSubtitle">התחבר כדי לפתוח חדרי משחק ולנהל את הכסף שלך בבטחה.</p></div>
+      <span id="roomConnectionStatus" class="room-pill">מתחבר...</span>
+    </div>
+    <div id="roomAuthPanel" class="room-auth-panel">
+      <div><strong>התחברות מאובטחת</strong><p>החשבון שלך יישמר איתך בכל מכשיר.</p></div>
+      <button id="googleSignInBtn" class="btn primary room-google-btn" type="button"><span class="room-google-mark">G</span>המשך עם Google</button>
+      <button id="guestSignInBtn" class="btn room-guest-btn" type="button">כניסה כאורח</button>
+      <p class="room-guest-note">אורח יכול לשחק ולהצטרף לחדרים בלי חשבון Google. החיבור נשמר במכשיר הזה.</p>
+      <p id="authMessage" class="auth-message" role="alert"></p>
+    </div>
+    <div class="login-footer"><span class="login-lock">✓</span> הכניסה מאובטחת. פרטי החשבון שלך לא מוצגים לשחקנים אחרים.</div>
+    <div id="roomDashboard" hidden>
+      <div class="room-account"><span id="roomUserLabel"></span><div class="room-actions"><button id="roomViewBackBtn" class="btn room-view-back" type="button">חזרה למשחק</button><button id="profileOpenBtn" class="btn profile-open" type="button" aria-haspopup="dialog" aria-controls="profileModal"><span id="profileMiniAvatar" class="profile-mini-avatar" aria-hidden="true">י</span><span>הפרופיל שלי</span></button><button id="openRoomsPanelBtn" class="btn" type="button" aria-haspopup="dialog" aria-controls="roomPanelOverlay">חדרים<span id="roomsBtnBadge" class="rooms-badge" hidden></span></button><button id="adminOpenBtn" class="btn" type="button" hidden>ADMIN</button><button id="googleSignOutBtn" class="btn danger" type="button">התנתק</button></div></div>
+      <div id="appNotice" class="app-notice" role="status" aria-live="polite" hidden></div>
+      <div id="profileModal" class="modal profile-overlay" aria-hidden="true">
+        <section class="sheet profile-sheet" role="dialog" aria-modal="true" aria-labelledby="profileTitle" dir="rtl">
+          <header class="profile-head"><div><h3 id="profileTitle">הפרופיל שלי</h3><p id="profileEmail"></p></div><button id="profileCloseBtn" class="btn" type="button" aria-label="סגור פרופיל">סגור</button></header>
+          <div class="profile-avatar-wrap"><div id="profileAvatar" class="profile-avatar" aria-label="תמונת פרופיל">י</div><div class="profile-actions"><button id="profileUploadBtn" class="btn" type="button">העלה תמונה</button><button id="profileRemoveAvatarBtn" class="btn" type="button">הסר תמונה</button><input id="profileFileInput" class="profile-file-input" type="file" accept="image/jpeg,image/png,image/webp" aria-label="בחר תמונת פרופיל"></div></div>
+          <div class="profile-wins"><span>ניצחונות בחדרים</span><strong id="profileWins">—</strong></div>
+          <div class="profile-fields"><label class="profile-field">השם שיופיע לשחקנים<input id="profileName" class="input" type="text" maxlength="40" autocomplete="name" placeholder="השם שלך"></label></div>
+          <p id="profileMessage" class="profile-message" role="status" aria-live="polite"></p>
+          <div class="sheet-actions"><button id="profileCancelBtn" class="btn" type="button">ביטול</button><button id="profileSaveBtn" class="btn primary" type="button">שמור פרופיל</button></div>
+        </section>
+      </div>
+      <div id="roomPanelOverlay" class="room-panel-overlay" aria-hidden="true">
+        <section class="room-panel" role="dialog" aria-modal="true" aria-labelledby="roomPanelTitle" dir="rtl">
+          <header class="room-panel-head"><div><h3 id="roomPanelTitle">חדרי המשחק שלך</h3><p>פתיחת שולחן, הצטרפות וניהול משחק</p></div><button id="closeRoomsPanelBtn" class="btn" type="button" aria-label="סגור חלונית חדרים">סגור</button></header>
+          <div class="room-lobby">
+        <div class="room-lobby-actions">
+          <button id="openCreateRoomBtn" class="btn primary" type="button">פתח שולחן</button>
+          <button id="openJoinRoomBtn" class="btn" type="button">הצטרף עם קוד</button>
+        </div>
+        <div id="roomList" class="room-list"></div>
+        <p id="roomMessage" class="room-message" role="status" aria-live="polite"></p>
+          </div>
+          <div id="roomActionModal" class="modal room-action-modal" aria-hidden="true">
+        <section class="sheet room-action-sheet" role="dialog" aria-modal="true" aria-labelledby="roomActionTitle">
+          <h3 id="roomActionTitle">פתיחת שולחן</h3>
+          <p id="roomActionSubtitle">הזן את השם שיופיע לחברים בחדר.</p>
+          <div class="room-action-fields">
+            <label class="room-action-field">השם שלך בחדר<input id="roomActionName" class="input" maxlength="40" autocomplete="name" placeholder="השם שלך"></label>
+            <label id="roomActionCodeField" class="room-action-field" hidden>קוד הצטרפות<input id="roomJoinCode" class="input" maxlength="8" placeholder="קוד בן 8 תווים" autocomplete="off" autocapitalize="characters"></label>
+          </div>
+          <p id="roomActionMessage" class="room-action-message" role="status" aria-live="polite"></p>
+          <div class="sheet-actions">
+            <button id="roomActionCancel" class="btn" type="button">ביטול</button>
+            <button id="roomActionSubmit" class="btn primary" type="button">צור שולחן</button>
+          </div>
+        </section>
+      </div>
+      <div id="activeRoom" class="active-room" hidden>
+        <button id="roomViewBackInlineBtn" class="btn room-view-back" type="button">חזרה למשחק הראשי</button>
+        <div class="room-title-row">
+          <div><h3 id="activeRoomName"></h3><div class="room-meta" id="activeRoomMeta"></div></div>
+          <div class="room-code" id="activeRoomCode"></div>
+        </div>
+        <div class="room-actions">
+          <button id="copyRoomCodeBtn" class="btn" type="button">הזמן חברים עם הקוד</button>
+          <button id="startRoomBtn" class="btn green" type="button" hidden>התחל משחק</button>
+          <button id="finishRoomBtn" class="btn primary" type="button" hidden>סיים משחק</button>
+          <button id="leaveRoomBtn" class="btn danger" type="button">צא מהחדר</button>
+        </div>
+        <div id="hostRatioControls" class="room-ratio" hidden>
+          <strong>יחס החדר</strong><input id="roomRatioMoney" class="input" type="number" min="0.01" step="0.01" aria-label="סכום שקלים ביחס">
+          <span>₪ =</span><input id="roomRatioChips" class="input" type="number" min="1" step="1" aria-label="מספר ג׳טונים ביחס">
+          <span>ג׳טונים</span><button id="saveRoomRatioBtn" class="btn" type="button">עדכן יחס</button>
+        </div>
+        <div class="room-finance-form">
+          <label class="room-field">סוג רישום
+            <select id="moneyKind" class="input"><option value="buyin">קנייה ראשונית</option><option value="rebuy">קנייה נוספת</option><option value="cashout">כסף שנפדה</option><option value="adjustment">תיקון (+ או −)</option></select>
+          </label>
+          <label class="room-field">סכום בשקלים
+            <input id="moneyAmount" class="input" type="number" step="0.01" inputmode="decimal" placeholder="לדוגמה: 50">
+          </label>
+          <button id="addMoneyEntryBtn" class="btn primary" type="button">עדכן את הכסף שלי</button>
+        </div>
+        <p class="room-note">כל שחקן יכול להוסיף, לתקן או למחוק את הרישומים שלו. חברי החדר רואים את הסכומים לצורך סיכום המשחק.</p>
+        <div class="room-roster-head"><h4>משתתפים</h4><span id="roomMembersCount" class="room-note"></span></div>
+        <div id="roomRoster" class="room-roster"></div>
+        <div class="room-actions"><button id="settleRoomBtn" class="btn green" type="button">חשב העברות</button></div>
+        <div id="roomTransfers" class="room-transfers"></div>
+        <h4>רישומי כסף בחדר</h4><div id="roomLedger" class="room-ledger"></div>
+      </div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <section class="hero">
+    <div class="eyebrow">Poker Night Manager</div>
+    <div class="poker-showcase" aria-hidden="true"><div class="show-chip chip-red">♠</div><div class="show-chip chip-green">♣</div><div class="show-chip chip-gold">♦</div></div>
+    <div class="update-badge">ג׳טונים בתנועה</div>
+    <h1>Winner winner chicken dinner</h1>
+    <p>ניהול קניות, ג׳טונים וסגירת חובות — באותו יחס המרה לכל השחקנים</p>
+    
+  </section>
+
+
+  <div class="flowbar">
+    <button class="flow-btn" type="button" data-scroll="ratioMoney"><b>1</b>בחר יחס</button>
+    <button class="flow-btn" type="button" data-scroll="playerName"><b>2</b>הוסף שחקנים</button>
+    <button class="flow-btn" type="button" data-scroll="players"><b>3</b>נהל משחק</button>
+    <button class="flow-btn" type="button" data-scroll="status"><b>4</b>סגור חשבון</button>
+  </div>
+
+  <section class="layout">
+    <main class="card">
+      <div class="card-head">
+        <h2 class="card-title">השחקנים</h2>
+        <div class="card-sub">הוסף שחקנים, קניות וג׳טונים</div>
+      </div>
+
+      <div class="section">
+        
+        
+        <div class="conversion">
+          <div class="conversion-title">
+            <div class="conv-icon">♣</div>
+            <div>
+              <b>יחס כסף לג׳טונים</b>
+              <small>שנה את שני המספרים לכל יחס שתרצה</small>
+            </div>
+          </div>
+
+          <div class="ratio-editor">
+            <div class="ratio-box">
+              <input id="ratioMoney" type="number" min="0.01" step="1" value="50" inputmode="decimal">
+              <span class="ratio-unit">₪</span>
+            </div>
+
+            <div class="ratio-equals">=</div>
+
+            <div class="ratio-box ratio-chips">
+              <input id="ratioChips" type="number" min="0.01" step="100" value="500" inputmode="decimal">
+              <span class="ratio-unit">ג׳טונים</span>
+            </div>
+          </div>
+
+          <button id="applyRatioBtn" class="btn primary full" type="button">עדכן יחס</button>
+
+          <div class="conversion-result chip-value-result" aria-live="polite">
+            <span>ג׳טון אחד שווה</span>
+            <strong id="chipValueDisplay">₪0.10</strong>
+          </div>
+          <div id="shekelValueDisplay" class="note">₪1 שווה 10 ג׳טונים</div>
+        </div>
+
+        <div class="add-row">
+          <input id="playerName" class="input" placeholder="שם השחקן">
+          <input id="buyIn" class="input" type="number" min="1" step="1" placeholder="קנייה התחלתית ₪">
+          <button id="addPlayerBtn" class="btn primary" type="button">הוסף שחקן</button>
+        </div>
+
+        <div class="quick-buyins" aria-label="סכומי כניסה מהירים">
+          <button type="button" data-quick-buyin="20">20 ₪</button>
+          <button type="button" data-quick-buyin="50">50 ₪</button>
+          <button type="button" data-quick-buyin="100">100 ₪</button>
+          <button type="button" data-quick-buyin="200">200 ₪</button>
+        </div>
+
+        <div class="action-strip">
+          <button id="focusPlayersBtn" class="btn green" type="button">התחל משחק</button>
+          <button id="finishGameBtn" class="btn primary" type="button">סיום המשחק</button>
+        </div>
+
+        <div id="players" class="players"></div>
+      </div>
+    </main>
+
+    <aside class="card summary-card">
+      <div class="card-head">
+        <h2 class="card-title">סיכום</h2>
+        <div class="card-sub">תמונת מצב של המשחק</div>
+      </div>
+      <div class="section">
+        <div class="stats">
+          <div class="stat"><span>סה״כ כסף שנכנס</span><strong id="totalIn">₪0</strong></div>
+          <div class="stat"><span>שווי צ׳יפים בסיום</span><strong id="totalOut">₪0</strong></div>
+          <div class="stat"><span>ג׳טונים שחולקו</span><strong id="totalChipsIn">0</strong></div>
+          <div class="stat"><span>שחקנים</span><strong id="playerCount">0</strong></div>
+        </div>
+
+        <div id="status" class="status">הוסף שחקנים כדי להתחיל</div>
+
+        <button id="settleBtn" class="btn green full" type="button">חשב מי מעביר למי</button>
+        <button id="shareSummaryBtn" class="btn full share-summary" type="button">שתף סיכום עם החברים</button>
+
+        <h3 style="margin:22px 0 10px">העברות</h3>
+        <div id="transfers" class="transfer-list">
+          <div class="empty">עדיין אין חישוב</div>
+        </div>
+
+        <div class="bottom-actions">
+          <button id="saveBtn" class="btn" type="button">שמור</button>
+          <button id="resetBtn" class="btn danger" type="button">אפס</button>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <div class="footer">המשחק נשמר במכשיר ובחשבון שלך. חדרים ורישומי כסף משותפים נשמרים בענן.<div class="app-version">גרסה 2026.10.26</div></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+function uid(prefix="id"){return prefix+"_"+Date.now()+"_"+Math.random().toString(36).slice(2,9)}
+function readStored(key,fallback){try{return localStorage.getItem(key)??fallback}catch{return fallback}}
+let state;try{state=JSON.parse(readStored("wwcd_state","null"))}catch{}
+state=state||{ratioMoney:50,ratioChips:500,players:[]};
+
+function sanitizeState(raw){
+  const s=raw&&typeof raw==="object"?raw:{};
+  const clean={ratioMoney:Number(s.ratioMoney||50),ratioChips:Number(s.ratioChips||500),players:Array.isArray(s.players)?s.players:[]};
+  if(!Number.isFinite(clean.ratioMoney)||clean.ratioMoney<=0)clean.ratioMoney=50;
+  if(!Number.isFinite(clean.ratioChips)||clean.ratioChips<=0)clean.ratioChips=500;
+  clean.players=clean.players.map((p,i)=>{
+    let history=Array.isArray(p.buyHistory)?p.buyHistory:[];
+    if(!history.length&&Number(p.buyIn||0)>0)history=[{id:uid("buy"),amount:Number(p.buyIn||0),kind:"כניסה",at:Date.now()}];
+    history=history.map(x=>({id:String(x.id||uid("buy")),amount:Math.max(0,Number(x.amount||0)),kind:x.kind==="Rebuy"?"Rebuy":x.kind==="קנייה"?"קנייה":"כניסה",at:Number(x.at||Date.now())})).filter(x=>x.amount>0);
+    return {id:String(p.id||uid("p")),name:String(p.name||("שחקן "+(i+1))),buyHistory:history,buyIn:history.reduce((a,b)=>a+b.amount,0),finalChips:Math.max(0,Number(p.finalChips||0))};
+  });
+  clean.savedAt=Number(s.savedAt||0)||0;
+  return clean;
+}
+state=sanitizeState(state);
+
+let soundEnabled=readStored("wwcd_sound","on")!=="off";
+let rebuyPlayerId=null,historyPlayerId=null,pendingConfirm=null;
+
+function localSave(){try{localStorage.setItem("wwcd_state",JSON.stringify(state));return true}catch{showToast("לא ניתן לשמור במכשיר — בדוק את הרשאות האחסון בדפדפן");return false}}
+function persist(){state=sanitizeState(state);state.savedAt=Date.now();localSave();window.wwcdCloud?.queueSave()}
+// Bridge for rooms.js (cloud save of the main game).
+window.wwcdGame={get:()=>JSON.parse(JSON.stringify(sanitizeState(state))),replace:next=>{state=sanitizeState(next);localSave();clearTransfers();render()}};
+function signedMoney(n){n=Number(n||0);return n>.009?"+"+money(n):n<-.009?"−"+money(Math.abs(n)):money(0)}
+function formatChipValue(){
+  const perChip=Number(state.ratioMoney)/Number(state.ratioChips),perShekel=Number(state.ratioChips)/Number(state.ratioMoney);
+  const value=perChip>=1?money(perChip):perChip>=.01?"₪"+perChip.toLocaleString("he-IL",{minimumFractionDigits:2,maximumFractionDigits:2})+" ("+chips(perChip*100)+" אגורות)":chips(perChip*100)+" אגורות";
+  return {value,line:"\u200F₪1 שווה "+chips(perShekel)+" ג׳טונים"};
+}
+function money(n){return "₪"+Number(n||0).toLocaleString("he-IL",{maximumFractionDigits:2})}
+function chips(n){return Number(n||0).toLocaleString("he-IL",{maximumFractionDigits:2})}
+function esc(s){return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function initials(name){return String(name).trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase()||"P"}
+function chipsPerShekel(){return Number(state.ratioChips)/Number(state.ratioMoney)}
+function initialChips(p){return Number(p.buyIn||0)*chipsPerShekel()}
+function finalValue(p){return Number(p.finalChips||0)/chipsPerShekel()}
+function parsePositive(v){const n=Number(String(v).replace(",","."));return Number.isFinite(n)&&n>0?n:null}
+function showToast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(showToast._t);showToast._t=setTimeout(()=>t.classList.remove("show"),2400)}
+function clearTransfers(){$("transfers").innerHTML='<div class="empty">עדיין אין חישוב</div>'}
+function recalcPlayer(p){p.buyIn=(p.buyHistory||[]).reduce((s,b)=>s+Number(b.amount||0),0)}
+
+function playActionSound(){
+  if(!soundEnabled)return;
+  try{
+    const C=window.AudioContext||window.webkitAudioContext,ctx=new C(),now=ctx.currentTime;
+    [620,830,1040].forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.setValueAtTime(f,now+i*.055);g.gain.setValueAtTime(.0001,now+i*.055);g.gain.exponentialRampToValueAtTime(.08,now+i*.055+.01);g.gain.exponentialRampToValueAtTime(.0001,now+i*.055+.12);o.connect(g).connect(ctx.destination);o.start(now+i*.055);o.stop(now+i*.055+.13)});setTimeout(()=>ctx.close(),500)
+  }catch{}
+}
+function motionAllowed(){return !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches}
+function chipBurst(target){
+ if(!motionAllowed())return;
+ const r=(target||$("topPot")).getBoundingClientRect(),layer=$("fxLayer");
+ for(let i=0;i<7;i++){const e=document.createElement("div");e.className="fx-chip";e.style.left=Math.min(window.innerWidth-35,Math.max(35,r.left+r.width/2))+"px";e.style.top=Math.min(window.innerHeight-50,Math.max(70,r.top+Math.min(r.height/2,80)))+"px";e.style.setProperty("--dx",((i-3)*32)+"px");e.style.setProperty("--turn",((i-3)*85)+"deg");e.style.animationDelay=(i*.045)+"s";if(i%2)e.style.filter="hue-rotate(95deg)";layer.appendChild(e);setTimeout(()=>e.remove(),1500)}
+}
+function pulsePot(){const e=document.querySelector(".top-pot");e.classList.remove("pot-pulse");void e.offsetWidth;e.classList.add("pot-pulse")}
+
+function applyRatio(){
+  const m=parsePositive($("ratioMoney").value),c=parsePositive($("ratioChips").value);
+  if(m===null||c===null)return showToast("צריך שני מספרים גדולים מ־0");
+  state.ratioMoney=m;state.ratioChips=c;persist();clearTransfers();render();playActionSound();chipBurst($("applyRatioBtn"));pulsePot();showToast("יחס הג׳טונים עודכן")
+}
+
+function addPlayer(){
+  const name=$("playerName").value.trim(),amount=parsePositive($("buyIn").value);
+  if(!name)return showToast("הכנס שם שחקן");if(amount===null)return showToast("הכנס סכום כניסה");
+  const p={id:uid("p"),name,buyHistory:[{id:uid("buy"),amount,kind:"כניסה",at:Date.now()}],buyIn:amount,finalChips:0};
+  state.players.push(p);$("playerName").value="";$("buyIn").value="";persist();clearTransfers();render();playActionSound();
+  const card=document.querySelector('.player[data-player-id="'+p.id+'"]');chipBurst(card||$("players"));pulsePot();showToast(name+" נוסף למשחק")
+}
+let rebuyKind="Rebuy";
+function openRebuy(id,kind="Rebuy"){const p=state.players.find(x=>x.id===String(id));if(!p)return;rebuyPlayerId=p.id;rebuyKind=kind==="קנייה"?"קנייה":"Rebuy";$("rebuyTitle").textContent=(rebuyKind==="Rebuy"?"Rebuy — ":"הוספת קנייה — ")+p.name;$("rebuyConfirm").textContent=rebuyKind==="Rebuy"?"הוסף Rebuy":"הוסף קנייה";$("rebuyAmount").value="";$("rebuyModal").classList.add("show");setTimeout(()=>$("rebuyAmount").focus(),80)}
+function closeRebuy(){rebuyPlayerId=null;$("rebuyModal").classList.remove("show")}
+function confirmRebuy(){
+  const amount=parsePositive($("rebuyAmount").value);if(amount===null)return showToast("הכנס סכום גדול מ־0");
+  const p=state.players.find(x=>x.id===rebuyPlayerId);if(!p)return closeRebuy();
+  p.buyHistory.push({id:uid("buy"),amount,kind:rebuyKind,at:Date.now()});recalcPlayer(p);persist();clearTransfers();closeRebuy();render();playActionSound();
+  const card=document.querySelector('.player[data-player-id="'+p.id+'"]');chipBurst(card||$("players"));pulsePot();showToast((rebuyKind==="Rebuy"?"Rebuy של ":"נוספה קנייה של ")+money(amount)+" ל־"+p.name)
+}
+function cancelLastBuy(id){
+  const p=state.players.find(x=>x.id===String(id));if(!p||!p.buyHistory.length)return showToast("אין קנייה לביטול");
+  const last=p.buyHistory[p.buyHistory.length-1];
+  openConfirm("לבטל כניסה של "+money(last.amount)+"?","הכניסה האחרונה של "+p.name+" ("+last.kind+") תוסר והכסף יירד מהקופה.","בטל כניסה",()=>{p.buyHistory.pop();recalcPlayer(p);persist();clearTransfers();render();playActionSound();showToast("הכניסה בוטלה — "+money(last.amount)+" הוחזרו")})
+}
+function openBuyHistory(id){
+  const p=state.players.find(x=>x.id===String(id));if(!p)return;historyPlayerId=p.id;$("buyHistoryTitle").textContent="קניות — "+p.name;const box=$("buyHistoryList");box.innerHTML="";
+  if(!p.buyHistory.length)box.innerHTML='<div class="empty">אין קניות רשומות</div>';
+  else p.buyHistory.slice().reverse().forEach(b=>{const row=document.createElement("div"),d=new Date(b.at);row.className="buy-row";row.innerHTML='<div><strong>'+money(b.amount)+' · '+esc(b.kind)+'</strong><small>'+d.toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"})+'</small></div><button class="btn danger delete-buy" type="button" data-buy-id="'+esc(b.id)+'">בטל</button>';box.appendChild(row)});
+  $("buyHistoryModal").classList.add("show")
+}
+function closeBuyHistory(){historyPlayerId=null;$("buyHistoryModal").classList.remove("show")}
+function deleteBuy(id){
+  const p=state.players.find(x=>x.id===historyPlayerId);if(!p)return;const b=p.buyHistory.find(x=>x.id===String(id));if(!b)return;
+  openConfirm("לבטל את הקנייה?",money(b.amount)+" יופחתו מהסכום של "+p.name+" ומהקופה.","בטל קנייה",()=>{p.buyHistory=p.buyHistory.filter(x=>x.id!==String(id));recalcPlayer(p);persist();clearTransfers();render();openBuyHistory(p.id)})
+}
+function updateFinalChips(id,v){const p=state.players.find(x=>x.id===String(id));if(!p)return;const n=Number(v);p.finalChips=Number.isFinite(n)?Math.max(0,n):0;persist();clearTransfers();render(false)}
+function removePlayer(id){const p=state.players.find(x=>x.id===String(id));if(!p)return;openConfirm("להסיר את "+p.name+"?","השחקן וכל הקניות שלו יימחקו.","הסר",()=>{state.players=state.players.filter(x=>x.id!==p.id);persist();clearTransfers();render()})}
+
+function openConfirm(t,x,o,a){$("confirmModal").style.zIndex="150";pendingConfirm=a;$("confirmTitle").textContent=t;$("confirmText").textContent=x;$("confirmOk").textContent=o;$("confirmModal").classList.add("show")}
+function closeConfirm(){pendingConfirm=null;$("confirmModal").classList.remove("show")}
+function newGame(){openConfirm("להתחיל משחק חדש?","כל השחקנים והקניות של המשחק הנוכחי יימחקו.","משחק חדש",()=>{state={ratioMoney:50,ratioChips:500,players:[]};persist();clearTransfers();render();showToast("נפתח משחק חדש")})}
+
+function render(rebuild=true){
+  state=sanitizeState(state);
+  if(document.activeElement!==$("ratioMoney"))$("ratioMoney").value=state.ratioMoney;
+  if(document.activeElement!==$("ratioChips"))$("ratioChips").value=state.ratioChips;
+  const cv=formatChipValue();$("chipValueDisplay").textContent=cv.value;$("shekelValueDisplay").textContent=cv.line;
+  if(!rebuild){
+    document.querySelectorAll(".player").forEach(el=>{const p=state.players.find(p=>p.id===el.dataset.playerId);if(!p)return;const b=finalValue(p)-p.buyIn;const balance=el.querySelector(".player-grid .metric:last-child strong");balance.className=b>.009?"pos":b<-.009?"neg":"zero";balance.textContent=signedMoney(b);el.querySelector(".player-actions .mini").textContent="שווי הצ׳יפים בסיום: "+money(finalValue(p))})
+  }
+  if(rebuild){
+    const box=$("players");box.innerHTML="";
+    state.players.forEach((p,i)=>{
+      const bal=finalValue(p)-p.buyIn,cls=bal>.009?"pos":bal<-.009?"neg":"zero",sign=bal>.009?"+":"",el=document.createElement("div");
+      el.className="player";el.dataset.playerId=p.id;
+      el.innerHTML='<div class="player-head"><div class="identity"><div class="avatar">'+esc(initials(p.name))+'</div><div><div class="name">'+esc(p.name)+'</div><div class="mini">שחקן '+(i+1)+' · '+p.buyHistory.length+' קניות</div></div></div><button class="btn danger player-remove" data-id="'+esc(p.id)+'" type="button">הסר</button></div>'+
+      '<div class="player-grid"><div class="metric"><label>כסף שהכניס</label><strong>'+money(p.buyIn)+'</strong></div><div class="metric"><label>ג׳טונים שקיבל</label><strong>'+chips(initialChips(p))+'</strong></div><div class="metric"><label>ג׳טונים בסיום</label><input class="input final-chips" data-id="'+esc(p.id)+'" type="number" min="0" step="1" value="'+p.finalChips+'"></div><div class="metric"><label>מאזן</label><strong class="'+cls+'" dir="ltr">'+signedMoney(bal)+'</strong></div></div>'+
+      '<div class="player-actions"><button class="btn player-buy" data-id="'+esc(p.id)+'" type="button">+ הוספת קנייה</button><button class="btn player-rebuy" data-id="'+esc(p.id)+'" type="button">Rebuy</button><button class="btn undo-buy-btn player-undo-buy" data-id="'+esc(p.id)+'" type="button">ביטול כניסה</button><button class="btn history-btn player-history" data-id="'+esc(p.id)+'" type="button">קניות</button><span class="mini">שווי הצ׳יפים בסיום: '+money(finalValue(p))+'</span></div>';
+      box.appendChild(el)
+    })
+  }
+  const totalIn=state.players.reduce((s,p)=>s+p.buyIn,0),totalOut=state.players.reduce((s,p)=>s+finalValue(p),0),totalChips=state.players.reduce((s,p)=>s+initialChips(p),0);
+  $("topPot").textContent=money(totalIn);$("totalIn").textContent=money(totalIn);$("totalOut").textContent=money(totalOut);$("totalChipsIn").textContent=chips(totalChips);$("playerCount").textContent=state.players.length;
+  const diff=totalOut-totalIn,status=$("status");
+  if(!state.players.length){status.className="status";status.textContent="הוסף שחקנים כדי להתחיל"}
+  else if(Math.abs(diff)<=.01){status.className="status ok";status.textContent="הכול מאוזן — אפשר לחשב את ההעברות"}
+  else{status.className="status bad";status.textContent=(diff>0?"יש יותר מדי ":"חסרים ")+money(Math.abs(diff))+" בשווי הצ׳יפים בסיום"}
+}
+function settle(){
+  if(state.players.length<2)return showToast("צריך לפחות שני שחקנים");
+  const ti=state.players.reduce((s,p)=>s+p.buyIn,0),to=state.players.reduce((s,p)=>s+finalValue(p),0);
+  if(Math.abs(ti-to)>.01)return showToast("הסכומים עדיין לא מאוזנים");
+  const c=[],d=[];state.players.forEach(p=>{const b=+(finalValue(p)-p.buyIn).toFixed(2);if(b>.009)c.push({name:p.name,amount:b});if(b<-.009)d.push({name:p.name,amount:-b})});c.sort((a,b)=>b.amount-a.amount);d.sort((a,b)=>b.amount-a.amount);
+  let i=0,j=0,a=[];while(i<d.length&&j<c.length){const m=Math.min(d[i].amount,c[j].amount);a.push({from:d[i].name,to:c[j].name,amount:+m.toFixed(2)});d[i].amount=+(d[i].amount-m).toFixed(2);c[j].amount=+(c[j].amount-m).toFixed(2);if(d[i].amount<=.009)i++;if(c[j].amount<=.009)j++}
+  const box=$("transfers");box.innerHTML="";if(!a.length)box.innerHTML='<div class="empty">אין חובות — כולם מאוזנים</div>';else a.forEach(t=>{const e=document.createElement("div");e.className="transfer";e.innerHTML='<div class="transfer-top"><span>'+esc(t.from)+' ← '+esc(t.to)+'</span><span class="transfer-amount">'+money(t.amount)+'</span></div><div class="transfer-sub">'+esc(t.from)+' צריך להעביר ל־'+esc(t.to)+'</div>';box.appendChild(e)});chipBurst($("settleBtn"))
+}
+
+function buildSummaryText(){const t=state.players.reduce((s,p)=>s+p.buyIn,0),l=["♠ Winner winner chicken dinner","","סה״כ בקופה: "+money(t),"יחס: "+state.ratioMoney+" ₪ = "+Number(state.ratioChips).toLocaleString("he-IL")+" ג׳טונים","","שחקנים:"];state.players.forEach(p=>{const b=finalValue(p)-p.buyIn;l.push("• "+p.name+" — "+money(p.buyIn)+" | מאזן "+signedMoney(b))});document.querySelectorAll("#transfers .transfer").forEach(c=>l.push("• "+(c.querySelector(".transfer-sub").textContent+" — "+c.querySelector(".transfer-amount").textContent)));return l.join("\n")}
+async function shareSummary(){const text=buildSummaryText();try{if(navigator.share){await navigator.share({title:"Winner winner chicken dinner",text});return}}catch(e){if(e&&e.name==="AbortError")return}await copyOrShow(text,"סיכום המשחק הועתק")}
+async function copyOrShow(text,message){
+ try{await navigator.clipboard.writeText(text);showToast(message);return}catch{}
+ $("shareText").value=text;$("shareModal").classList.add("show");$("shareText").focus();$("shareText").select()
+}
+async function shareApp(){const url=location.origin+location.pathname;try{if(navigator.share){await navigator.share({title:"Winner winner chicken dinner",text:"בוא לשחק איתי",url});return}}catch(e){if(e?.name==="AbortError")return}await copyOrShow(url,"קישור האפליקציה הועתק")}
+function openPokerCalc(){$("pokerCalcModal").classList.add("show");$("pokerCalcModal").setAttribute("aria-hidden","false");setTimeout(()=>$('pokerOuts').focus(),80)}
+function closePokerCalc(){$("pokerCalcModal").classList.remove("show");$("pokerCalcModal").setAttribute("aria-hidden","true")}
+function optionalNonnegative(v){const raw=String(v).trim();if(!raw)return null;const n=Number(raw.replace(",","."));return Number.isFinite(n)&&n>=0?n:NaN}
+function pokerPercent(n){return (n*100).toLocaleString("he-IL",{maximumFractionDigits:1})+"%"}
+function calculatePokerOdds(){
+  const raw=String($("pokerOuts").value).trim(),outs=Number(raw),cards=Number($("pokerCardsLeft").value),maxOuts=cards===2?47:46;
+  if(!/^\d+$/.test(raw)||!Number.isInteger(outs)||outs<0||outs>maxOuts){$("pokerCalcAdvice").textContent="הזן מספר אאוטים שלם בין 0 ל־"+maxOuts+".";$("pokerNextChance").textContent="—";$("pokerRiverChance").textContent="—";$("pokerPotOdds").textContent="—";return}
+  const chanceNext=outs/(cards===2?47:46),chanceRiver=cards===2?1-((47-outs)/47)*((46-outs)/46):chanceNext;
+  $("pokerNextChance").textContent=pokerPercent(chanceNext);$("pokerRiverChance").textContent=pokerPercent(chanceRiver);
+  const pot=optionalNonnegative($("pokerPotSize").value),call=optionalNonnegative($("pokerCallAmount").value);
+  if(Number.isNaN(pot)||Number.isNaN(call)){$("pokerPotOdds").textContent="—";$("pokerCalcAdvice").textContent="הקופה וסכום ההשוואה צריכים להיות מספרים חיוביים או אפס.";return}
+  if(pot===null||call===null||pot+call===0){$("pokerPotOdds").textContent="—";$("pokerCalcAdvice").textContent="הסיכוי לפגוע עד הריבר הוא "+pokerPercent(chanceRiver)+". הזן קופה וסכום להשוואה לחישוב אחוז הקופה הנדרש.";return}
+  const required=call/(pot+call);$("pokerPotOdds").textContent=pokerPercent(required);
+  const diff=chanceRiver-required;
+  $("pokerCalcAdvice").textContent=Math.abs(diff)<.005?"הסיכוי המשוער דומה לאחוז הקופה הנדרש.":diff>0?"לפי האאוטים, הסיכוי לפגוע גבוה מאחוז הקופה הנדרש.":"לפי האאוטים, הסיכוי לפגוע נמוך מאחוז הקופה הנדרש.";
+}
+function resetPokerCalc(){$("pokerOuts").value="";$("pokerCardsLeft").value="2";$("pokerPotSize").value="";$("pokerCallAmount").value="";$("pokerNextChance").textContent="—";$("pokerRiverChance").textContent="—";$("pokerPotOdds").textContent="—";$("pokerCalcAdvice").textContent="הזן את מספר האאוטים ולחץ על „חשב סיכויים”."}
+function scrollToControl(id){const e=$(id);if(!e)return;e.scrollIntoView({behavior:"smooth",block:"center"});if(e.tagName==="INPUT")setTimeout(()=>e.focus(),350)}
+
+$("applyRatioBtn").addEventListener("click",applyRatio);$("addPlayerBtn").addEventListener("click",addPlayer);$("newGameBtn").addEventListener("click",newGame);$("resetBtn").addEventListener("click",newGame);$("settleBtn").addEventListener("click",settle);$("shareSummaryBtn").addEventListener("click",shareSummary);$("shareAppBtn").addEventListener("click",shareApp);$("pokerCalcBtn").addEventListener("click",openPokerCalc);
+$("pokerCalcClose").addEventListener("click",closePokerCalc);$("pokerCalcModal").addEventListener("click",e=>{if(e.target===$("pokerCalcModal"))closePokerCalc()});$("pokerCalcRun").addEventListener("click",calculatePokerOdds);$("pokerCalcReset").addEventListener("click",resetPokerCalc);["pokerOuts","pokerPotSize","pokerCallAmount"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")calculatePokerOdds()}));
+$("focusPlayersBtn").addEventListener("click",()=>{if(!state.players.length){scrollToControl("playerName");showToast("הוסף שחקנים כדי להתחיל")}else{scrollToControl("players");showToast("המשחק מוכן — בהצלחה")}});$("finishGameBtn").addEventListener("click",()=>{if(!state.players.length){scrollToControl("playerName");return showToast("הוסף שחקנים כדי להתחיל")}const input=document.querySelector(".final-chips");input.scrollIntoView({behavior:"smooth",block:"center"});input.focus();input.select();showToast("הכנס לכל שחקן את הג׳טונים שנשארו")});
+$("playerName").addEventListener("keydown",e=>{if(e.key==="Enter")addPlayer()});$("buyIn").addEventListener("keydown",e=>{if(e.key==="Enter")addPlayer()});$("ratioMoney").addEventListener("keydown",e=>{if(e.key==="Enter")applyRatio()});$("ratioChips").addEventListener("keydown",e=>{if(e.key==="Enter")applyRatio()});
+document.querySelectorAll("[data-quick-buyin]").forEach(b=>b.addEventListener("click",()=>{$("buyIn").value=b.dataset.quickBuyin;$("playerName").focus()}));document.querySelectorAll("[data-scroll]").forEach(b=>b.addEventListener("click",()=>scrollToControl(b.dataset.scroll)));
+$("players").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.classList.contains("player-remove"))return removePlayer(b.dataset.id);if(b.classList.contains("player-buy"))return openRebuy(b.dataset.id,"קנייה");if(b.classList.contains("player-rebuy"))return openRebuy(b.dataset.id,"Rebuy");if(b.classList.contains("player-history"))return openBuyHistory(b.dataset.id);if(b.classList.contains("player-undo-buy"))return cancelLastBuy(b.dataset.id)});$("players").addEventListener("change",e=>{if(e.target.matches(".final-chips"))updateFinalChips(e.target.dataset.id,e.target.value)});$("players").addEventListener("input",e=>{if(e.target.matches(".final-chips"))updateFinalChips(e.target.dataset.id,e.target.value)});
+$("confirmCancel").addEventListener("click",closeConfirm);$("confirmOk").addEventListener("click",()=>{const f=pendingConfirm;closeConfirm();if(typeof f==="function")f()});$("confirmModal").addEventListener("click",e=>{if(e.target===$("confirmModal"))closeConfirm()});
+$("rebuyCancel").addEventListener("click",closeRebuy);$("rebuyConfirm").addEventListener("click",confirmRebuy);$("rebuyAmount").addEventListener("keydown",e=>{if(e.key==="Enter")confirmRebuy()});$("rebuyModal").addEventListener("click",e=>{if(e.target===$("rebuyModal"))closeRebuy()});document.querySelectorAll("[data-rebuy]").forEach(b=>b.addEventListener("click",()=>{$("rebuyAmount").value=b.dataset.rebuy;confirmRebuy()}));
+$("buyHistoryClose").addEventListener("click",closeBuyHistory);$("buyHistoryModal").addEventListener("click",e=>{if(e.target===$("buyHistoryModal"))closeBuyHistory()});$("buyHistoryList").addEventListener("click",e=>{const b=e.target.closest(".delete-buy");if(b)deleteBuy(b.dataset.buyId)});
+$("saveBtn").addEventListener("click",async()=>{state=sanitizeState(state);state.savedAt=Date.now();if(!localSave())return;let cloud=false;try{cloud=await window.wwcdCloud?.saveNow()}catch{}showToast(cloud?"המשחק נשמר במכשיר ובחשבון":"המשחק נשמר במכשיר");playActionSound()});
+window.addEventListener("pagehide",()=>{try{localStorage.setItem("wwcd_state",JSON.stringify(state))}catch{}});
+$("shareClose").addEventListener("click",()=>$("shareModal").classList.remove("show"));
+document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if($("confirmModal").classList.contains("show"))return closeConfirm();closeRebuy();closeBuyHistory();closePokerCalc();$("shareModal").classList.remove("show")});
+render();
+</script>
+<script type="module" src="/rooms.js"></script>
+
+</body>
+</html>
