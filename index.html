@@ -805,6 +805,12 @@ body.room-authenticated:not(.room-view-active) .room-account .room-actions{flex-
 .room-list button.is-active{border-color:var(--gold2);color:var(--gold2)}
 .room-roster-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}.room-roster-head h4{margin:0}
 .room-transfers .transfer{padding:11px 12px}
+.profile-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px}
+.profile-stat{display:flex;flex-direction:column;gap:2px;padding:10px 13px;border:1px solid rgba(212,175,55,.2);border-radius:13px;background:rgba(212,175,55,.06)}
+.profile-stat span{color:var(--muted);font-size:.8rem}.profile-stat strong{color:var(--gold2);font-size:1.15rem}
+.profile-stat-main{grid-column:1/-1}.profile-stat-main strong{font-size:1.6rem}.profile-stat-main small{color:var(--muted);font-size:.72rem}
+.profile-stat strong.neg{color:var(--red2,#ff8a8a)}
+.profile-guest-note{margin:-4px 0 12px;color:var(--muted);font-size:.78rem}
 .profile-wins{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;padding:10px 13px;border:1px solid rgba(212,175,55,.2);border-radius:13px;background:rgba(212,175,55,.06)}
 .profile-wins span{color:var(--muted);font-size:.84rem}.profile-wins strong{color:var(--gold2);font-size:1.15rem}
 .app-version{margin-top:6px;opacity:.6;font-size:11px}
@@ -1030,7 +1036,12 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
         <section class="sheet profile-sheet" role="dialog" aria-modal="true" aria-labelledby="profileTitle" dir="rtl">
           <header class="profile-head"><div><h3 id="profileTitle">הפרופיל שלי</h3><p id="profileEmail"></p></div><button id="profileCloseBtn" class="btn" type="button" aria-label="סגור פרופיל">סגור</button></header>
           <div class="profile-avatar-wrap"><div id="profileAvatar" class="profile-avatar" aria-label="תמונת פרופיל">י</div><div class="profile-actions"><button id="profileUploadBtn" class="btn" type="button">העלה תמונה</button><button id="profileRemoveAvatarBtn" class="btn" type="button">הסר תמונה</button><input id="profileFileInput" class="profile-file-input" type="file" accept="image/jpeg,image/png,image/webp" aria-label="בחר תמונת פרופיל"></div></div>
-          <div class="profile-wins"><span>ניצחונות בחדרים</span><strong id="profileWins">—</strong></div>
+          <div class="profile-stats" aria-label="הסטטיסטיקה שלך">
+            <div class="profile-stat profile-stat-main"><span>נקודות מצטברות</span><strong id="profilePoints" dir="ltr">—</strong><small>נקודה לכל ₪1 רווח בחדרים (הפסד מוריד)</small></div>
+            <div class="profile-stat"><span>משחקים</span><strong id="profileGames">—</strong></div>
+            <div class="profile-stat"><span>ניצחונות</span><strong id="profileWins">—</strong></div>
+          </div>
+          <p id="profileGuestNote" class="profile-guest-note" hidden>נקודות נצברות רק למשתמשים שנכנסו עם Google.</p>
           <div class="profile-fields"><label class="profile-field">השם שיופיע לשחקנים<input id="profileName" class="input" type="text" maxlength="40" autocomplete="name" placeholder="השם שלך"></label></div>
           <p id="profileMessage" class="profile-message" role="status" aria-live="polite"></p>
           <div class="sheet-actions"><button id="profileCancelBtn" class="btn" type="button">ביטול</button><button id="profileSaveBtn" class="btn primary" type="button">שמור פרופיל</button></div>

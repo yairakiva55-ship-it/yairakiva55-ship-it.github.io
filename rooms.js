@@ -25,7 +25,7 @@ let client = null;
 let user = null, room = null, members = [], entries = [], channel = null, shownUser = null, rooms = [];
 let roomActionMode = "create", roomActionOpener = null, pendingProfileAvatar;
 let signOutRequested = false, verifyTimer = null, verifyAttempts = 0;
-let profileRow = null, profilesTable = true, gamesTable = true, wins = null;
+let profileRow = null, profilesTable = true, gamesTable = true, wins = null, points = null, gamesPlayed = null;
 let cloudSaveTimer = null, cloudReady = false;
 // Login gate: the app opens only after the visitor taps Google or Guest on the login screen.
 // A remembered account is kept so the tap re-enters it instantly instead of creating a new one.
@@ -107,6 +107,15 @@ function renderProfileIdentity() {
   $("profileUploadBtn").textContent = src ? "החלף תמונה" : "העלה תמונה";
   const winsEl = $("profileWins");
   if (winsEl) winsEl.textContent = wins === null ? "—" : Number(wins).toLocaleString("he-IL");
+  const guest = isGuest();
+  const pointsEl = $("profilePoints"), gamesEl = $("profileGames");
+  if (pointsEl) {
+    const value = points === null || guest ? null : Math.round(Number(points) / 100);
+    pointsEl.textContent = value === null ? "—" : (value > 0 ? "+" : value < 0 ? "−" : "") + Math.abs(value).toLocaleString("he-IL");
+    pointsEl.className = value < 0 ? "neg" : "";
+  }
+  if (gamesEl) gamesEl.textContent = gamesPlayed === null || guest ? "—" : Number(gamesPlayed).toLocaleString("he-IL");
+  if ($("profileGuestNote")) $("profileGuestNote").hidden = !guest;
 }
 function profileMessage(text = "", type = "") {
   $("profileMessage").textContent = text;
@@ -165,8 +174,14 @@ async function loadProfileRow() {
 }
 async function loadWins() {
   if (!user) return;
-  const { data, error } = await client.from("wwcd_user_stats").select("wins").eq("user_id", user.id).maybeSingle();
-  if (!error) { wins = Number(data?.wins || 0); renderProfileIdentity(); }
+  let { data, error } = await client.from("wwcd_user_stats").select("wins,points_agorot,games").eq("user_id", user.id).maybeSingle();
+  if (error) ({ data, error } = await client.from("wwcd_user_stats").select("wins").eq("user_id", user.id).maybeSingle());
+  if (!error) {
+    wins = Number(data?.wins || 0);
+    points = Number(data?.points_agorot || 0);
+    gamesPlayed = Number(data?.games || 0);
+    renderProfileIdentity();
+  }
 }
 async function saveProfile() {
   if (!user) return;
@@ -380,7 +395,7 @@ async function signOut() {
   try { await client.auth.signOut({ scope: "local" }); } catch {}
   safeRemove(AUTH_STORAGE_KEY);
   loginGateOpen = false; rememberedUser = null;
-  user = null; shownUser = null; room = null; rooms = []; members = []; entries = []; profileRow = null; wins = null; cloudReady = false;
+  user = null; shownUser = null; room = null; rooms = []; members = []; entries = []; profileRow = null; wins = null; points = null; gamesPlayed = null; cloudReady = false;
   updateRoomsBadge();
   showSignedOut("התנתקת. אפשר להתחבר שוב בכל רגע.");
   signOutRequested = false;
