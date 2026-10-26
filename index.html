@@ -819,6 +819,7 @@ body.room-authenticated:not(.room-view-active) .room-account .room-actions{flex-
 /* Summary goes below the players section on every screen size */
 .layout>.summary-card{order:1!important}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media(max-width:760px){html,body{overflow-x:hidden}}
 @media(max-width:760px){
   /* iOS zooms into any field under 16px — keep every field at 16px+ on phones */
   input,select,textarea,.input{font-size:16px!important}
@@ -836,8 +837,12 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .topbar .brand-title{font-size:13px;direction:ltr;text-align:right}
   /* Account bar: one row, name shortens instead of pushing buttons down */
   body.room-authenticated:not(.room-view-active) .room-account{gap:6px}
-  body.room-authenticated:not(.room-view-active) #roomUserLabel{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
-  body.room-authenticated:not(.room-view-active) .room-account .room-actions{flex:0 1 auto;flex-wrap:nowrap;gap:4px}
+  body.room-authenticated:not(.room-view-active) #roomUserLabel{flex:1 1 0;min-width:76px;unicode-bidi:plaintext;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+  body.room-authenticated:not(.room-view-active) .room-account{flex-wrap:wrap}
+  body.room-authenticated:not(.room-view-active) .room-account .room-actions{flex:1 1 auto;flex-wrap:wrap;justify-content:flex-end;gap:4px;min-width:0}
+  .rooms-badge{padding:1px 5px;letter-spacing:.02em;font-size:.64rem}
+  .profile-open .profile-open-text{display:none}
+  body.room-authenticated:not(.room-view-active) .room-account .room-actions .profile-open{padding:4px 6px}
   body.room-authenticated:not(.room-view-active) .room-account .room-actions .btn{min-height:36px;padding:7px 9px;font-size:12px;white-space:nowrap}
   .topbar .brand-sub{display:none}
   .topbar .top-pot{grid-column:2;grid-row:1;justify-self:end;min-width:0;padding:6px 10px;gap:8px}
@@ -1019,7 +1024,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     </div>
     <div class="login-footer"><span class="login-lock">✓</span> הכניסה מאובטחת. פרטי החשבון שלך לא מוצגים לשחקנים אחרים.</div>
     <div id="roomDashboard" hidden>
-      <div class="room-account"><span id="roomUserLabel"></span><div class="room-actions"><button id="roomViewBackBtn" class="btn room-view-back" type="button">חזרה למשחק</button><button id="profileOpenBtn" class="btn profile-open" type="button" aria-haspopup="dialog" aria-controls="profileModal"><span id="profileMiniAvatar" class="profile-mini-avatar" aria-hidden="true">י</span><span>הפרופיל שלי</span></button><button id="openRoomsPanelBtn" class="btn" type="button" aria-haspopup="dialog" aria-controls="roomPanelOverlay">חדרים<span id="roomsBtnBadge" class="rooms-badge" hidden></span></button><button id="adminOpenBtn" class="btn" type="button" hidden>ADMIN</button><button id="googleSignOutBtn" class="btn danger" type="button">התנתק</button></div></div>
+      <div class="room-account"><span id="roomUserLabel"></span><div class="room-actions"><button id="roomViewBackBtn" class="btn room-view-back" type="button">חזרה למשחק</button><button id="profileOpenBtn" class="btn profile-open" type="button" aria-haspopup="dialog" aria-controls="profileModal" aria-label="הפרופיל שלי"><span id="profileMiniAvatar" class="profile-mini-avatar" aria-hidden="true">י</span><span class="profile-open-text">הפרופיל שלי</span></button><button id="openRoomsPanelBtn" class="btn" type="button" aria-haspopup="dialog" aria-controls="roomPanelOverlay">חדרים<span id="roomsBtnBadge" class="rooms-badge" hidden></span></button><button id="adminOpenBtn" class="btn" type="button" hidden>ADMIN</button><button id="googleSignOutBtn" class="btn danger" type="button">התנתק</button></div></div>
       <div id="appNotice" class="app-notice" role="status" aria-live="polite" hidden></div>
       <div id="profileModal" class="modal profile-overlay" aria-hidden="true">
         <section class="sheet profile-sheet" role="dialog" aria-modal="true" aria-labelledby="profileTitle" dir="rtl">
@@ -1207,7 +1212,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     </aside>
   </section>
 
-  <div class="footer">המשחק נשמר במכשיר ובחשבון שלך. חדרים ורישומי כסף משותפים נשמרים בענן.<div class="app-version">גרסה 2026.10.26</div></div>
+  <div class="footer">המשחק נשמר במכשיר ובחשבון שלך. חדרים ורישומי כסף משותפים נשמרים בענן.<div class="app-version">גרסה 2026.10.27</div></div>
 </div>
 <script>
 const $=id=>document.getElementById(id);
@@ -1352,7 +1357,7 @@ function settle(){
   const box=$("transfers");box.innerHTML="";if(!a.length)box.innerHTML='<div class="empty">אין חובות — כולם מאוזנים</div>';else a.forEach(t=>{const e=document.createElement("div");e.className="transfer";e.innerHTML='<div class="transfer-top"><span>'+esc(t.from)+' ← '+esc(t.to)+'</span><span class="transfer-amount">'+money(t.amount)+'</span></div><div class="transfer-sub">'+esc(t.from)+' צריך להעביר ל־'+esc(t.to)+'</div>';box.appendChild(e)});chipBurst($("settleBtn"))
 }
 
-function buildSummaryText(){const t=state.players.reduce((s,p)=>s+p.buyIn,0),l=["♠ Winner winner chicken dinner","","סה״כ בקופה: "+money(t),"יחס: "+state.ratioMoney+" ₪ = "+Number(state.ratioChips).toLocaleString("he-IL")+" ג׳טונים","","שחקנים:"];state.players.forEach(p=>{const b=finalValue(p)-p.buyIn;l.push("• "+p.name+" — "+money(p.buyIn)+" | מאזן "+signedMoney(b))});document.querySelectorAll("#transfers .transfer").forEach(c=>l.push("• "+(c.querySelector(".transfer-sub").textContent+" — "+c.querySelector(".transfer-amount").textContent)));return l.join("\n")}
+function buildSummaryText(){const t=state.players.reduce((s,p)=>s+p.buyIn,0),l=["♠ Winner winner chicken dinner","","סה״כ בקופה: "+money(t),"יחס: "+state.ratioMoney+" ₪ = "+Number(state.ratioChips).toLocaleString("he-IL")+" ג׳טונים","","שחקנים:"];state.players.forEach(p=>{const b=finalValue(p)-p.buyIn;l.push("• "+p.name+" — "+money(p.buyIn)+" | מאזן "+signedMoney(b))});const tr=document.querySelectorAll("#transfers .transfer");if(tr.length)l.push("","העברות:");tr.forEach(c=>l.push("• "+(c.querySelector(".transfer-sub").textContent+" — "+c.querySelector(".transfer-amount").textContent)));return l.join("\n")}
 async function shareSummary(){const text=buildSummaryText();try{if(navigator.share){await navigator.share({title:"Winner winner chicken dinner",text});return}}catch(e){if(e&&e.name==="AbortError")return}await copyOrShow(text,"סיכום המשחק הועתק")}
 async function copyOrShow(text,message){
  try{await navigator.clipboard.writeText(text);showToast(message);return}catch{}
