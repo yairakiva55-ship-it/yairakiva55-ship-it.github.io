@@ -729,8 +729,9 @@ async function loadSdk() {
   const oauthError = readOAuthError();
   if (safeSessionGet(LOGIN_TAP_KEY)) { safeSessionRemove(LOGIN_TAP_KEY); if (!oauthError) loginGateOpen = true; }
   const cached = storedSession();
-  // Show the table immediately for a returning user; the server check follows.
-  if (cached && !oauthError) await enterUser(cached.user, { provisional: true });
+  // Remember me: a returning user who already signed in on this device goes straight in.
+  // The login screen only appears when there is no saved account (first visit or after sign-out).
+  if (cached && !oauthError) { loginGateOpen = true; await enterUser(cached.user, { provisional: true }); }
   let createClient;
   try { createClient = await loadSdk(); }
   catch {
