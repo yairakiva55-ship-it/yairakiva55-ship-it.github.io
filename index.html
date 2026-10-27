@@ -1357,19 +1357,24 @@ function recalcPlayer(p){p.buyIn=(p.buyHistory||[]).reduce((s,b)=>s+Number(b.amo
 function playActionSound(){
   if(!soundEnabled)return;
   try{
-    // Soft "tok-tok": two chips set down on felt
-    const C=window.AudioContext||window.webkitAudioContext,ctx=new C(),t0=ctx.currentTime+.01;
-    const out=ctx.createBiquadFilter();out.type="lowpass";out.frequency.value=5200;out.connect(ctx.destination);
-    const buf=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.02),ctx.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);
-    const tok=(t,vol,f)=>{
-      const o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*.62,t+.05);
-      g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.003);g.gain.exponentialRampToValueAtTime(.0001,t+.09);o.connect(g).connect(out);o.start(t);o.stop(t+.1);
-      const b=ctx.createOscillator(),bg=ctx.createGain();b.type="sine";b.frequency.setValueAtTime(240,t);b.frequency.exponentialRampToValueAtTime(130,t+.06);
-      bg.gain.setValueAtTime(.0001,t);bg.gain.exponentialRampToValueAtTime(vol*.7,t+.004);bg.gain.exponentialRampToValueAtTime(.0001,t+.07);b.connect(bg).connect(out);b.start(t);b.stop(t+.08);
-      const n=ctx.createBufferSource(),hp=ctx.createBiquadFilter(),ng=ctx.createGain();n.buffer=buf;hp.type="highpass";hp.frequency.value=2500;ng.gain.value=vol*.35;n.connect(hp).connect(ng).connect(out);n.start(t);
-    };
-    tok(t0,.16,1450);tok(t0+.075,.11,1650);
-    setTimeout(()=>ctx.close(),400)
+    // Clay poker chips dropping onto a stack: each impact is a short click plus
+    // a few fast-decaying inharmonic ring modes, like real chips knocking together
+    const C=window.AudioContext||window.webkitAudioContext,ctx=new C(),sr=ctx.sampleRate;
+    const buf=ctx.createBuffer(1,Math.floor(sr*.32),sr),d=buf.getChannelData(0);
+    const hits=[[0,1],[.034,.72],[.058,.55],[.091,.42],[.112,.3],[.15,.18]];
+    const modes=[[1,1,.016],[1.52,.6,.012],[2.13,.38,.009],[2.71,.22,.007],[.31,.35,.022]];
+    hits.forEach(([at,amp])=>{
+      const s0=Math.floor((at+Math.random()*.008)*sr),base=2700+Math.random()*700,ph=modes.map(()=>Math.random()*6.283);
+      for(let i=0;i<sr*.06&&s0+i<d.length;i++){
+        const t=i/sr;let v=0;
+        modes.forEach(([m,a,dec],k)=>{v+=a*Math.exp(-t/dec)*Math.sin(6.283*base*m*t+ph[k])});
+        if(i<sr*.0015)v+=(Math.random()*2-1)*.9*(1-i/(sr*.0015));
+        d[s0+i]+=v*amp*(1-Math.exp(-i/6));
+      }
+    });
+    let peak=0;for(let i=0;i<d.length;i++)peak=Math.max(peak,Math.abs(d[i]));for(let i=0;i<d.length;i++)d[i]*=.45/peak;
+    const src=ctx.createBufferSource();src.buffer=buf;src.connect(ctx.destination);src.start();
+    setTimeout(()=>ctx.close(),600)
   }catch{}
 }
 function motionAllowed(){return !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches}
