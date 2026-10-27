@@ -615,6 +615,24 @@ input:focus-visible,textarea:focus-visible{outline:2px solid var(--gold2);outlin
 .poker-calc-advice{margin:11px 0 0!important;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);font-size:13px}
 .poker-calc-note{margin:11px 0 0!important;font-size:11px!important;line-height:1.55!important}
 .pc-slots{display:grid;grid-template-columns:auto 1fr;gap:14px;margin-bottom:12px}
+.pc-slots.vs{grid-template-columns:1fr}
+.poker-calc-sheet [hidden]{display:none!important}
+.pc-mode{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:14px;background:rgba(0,0,0,.22);margin-bottom:14px}
+.pc-mode-btn{all:unset;box-sizing:border-box;cursor:pointer;text-align:center;padding:9px 6px;border-radius:10px;font-weight:700;font-size:14px;color:var(--muted)}
+.pc-mode-btn.active{background:rgba(212,175,55,.17);color:var(--gold2)}
+.pc-mode-btn:focus-visible{outline:2px solid var(--gold2)}
+.pc-hands{display:flex;flex-wrap:wrap;gap:12px 18px}
+.pc-hand-box{display:grid;gap:6px;align-content:start}
+.pc-hand-head{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:20px}
+.pc-remove{all:unset;cursor:pointer;font-size:13px;line-height:1;color:var(--muted);padding:3px 6px;border-radius:6px}
+.pc-remove:hover,.pc-remove:focus-visible{color:var(--text);background:rgba(255,255,255,.08)}
+.pc-res{font-size:12px;color:var(--muted);min-height:32px;line-height:1.35;max-width:120px}
+.pc-res strong{color:var(--text);font-size:15px}
+.pc-hand-box.lead .pc-res strong{color:var(--gold2)}
+.pc-hand-box.lead .pc-slot.filled{box-shadow:0 0 0 2px var(--gold2),0 3px 8px #0004}
+.pc-bar{height:4px;margin-top:3px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden}
+.pc-bar i{display:block;height:100%;background:var(--gold2);border-radius:2px}
+.pc-add{margin:-2px 0 12px;font-size:13px;padding:8px 14px}
 .pc-group{display:grid;gap:6px}
 .pc-label{color:var(--muted);font-size:13px;font-weight:600}.pc-label small{font-weight:400;opacity:.75}
 .pc-row{display:flex;gap:6px;direction:ltr;justify-content:flex-end}
@@ -998,23 +1016,28 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <div class="poker-calc-head">
       <div>
         <h3 id="pokerCalcTitle">מחשבון פוקר</h3>
-        <p>בחר את הקלפים שלך ואת הקלפים על השולחן, והמחשבון יחשב את הסיכוי שלך לנצח.</p>
+        <p id="pcIntro">בחר את הקלפים שלך ואת הקלפים על השולחן, והמחשבון יחשב את הסיכוי שלך לנצח.</p>
       </div>
       <button id="pokerCalcClose" class="btn" type="button" aria-label="סגור מחשבון">✕</button>
     </div>
-    <div class="pc-slots">
-      <div class="pc-group"><span class="pc-label">היד שלך</span><div class="pc-row" id="pcHole"></div></div>
+    <div class="pc-mode" role="group" aria-label="סוג חישוב">
+      <button id="pcModeRandom" class="pc-mode-btn active" type="button" aria-pressed="true">מול יריבים אקראיים</button>
+      <button id="pcModeVs" class="pc-mode-btn" type="button" aria-pressed="false">יד נגד יד</button>
+    </div>
+    <div class="pc-slots" id="pcSlotsWrap">
+      <div class="pc-hands" id="pcHands"></div>
       <div class="pc-group"><span class="pc-label">השולחן <small>פלופ · טרן · ריבר</small></span><div class="pc-row" id="pcBoard"></div></div>
     </div>
+    <button id="pcAddHand" class="btn pc-add" type="button" hidden>+ הוסף יד</button>
     <div class="pc-picker" id="pcPicker" aria-label="בחירת קלף"></div>
     <div class="pc-hand" id="pcHandName">לחץ על קלף כדי לבחור את היד שלך</div>
     <div class="poker-calc-grid">
-      <label class="poker-calc-field">כמה יריבים ביד?
+      <label class="poker-calc-field" id="pcOppField">כמה יריבים ביד?
         <select id="pokerOpponents" class="input">
           <option value="1">1 יריב</option><option value="2">2 יריבים</option><option value="3">3 יריבים</option><option value="4">4 יריבים</option><option value="5">5 יריבים</option><option value="6">6 יריבים</option><option value="7">7 יריבים</option><option value="8">8 יריבים</option>
         </select>
       </label>
-      <span class="pc-spacer" aria-hidden="true"></span>
+      <span class="pc-spacer" id="pcSpacer" aria-hidden="true"></span>
       <label class="poker-calc-field">גודל הקופה לפני ההשוואה (₪)
         <input id="pokerPotSize" class="input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="לדוגמה: 100">
       </label>
@@ -1027,13 +1050,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
       <button id="pokerCalcReset" class="btn" type="button">נקה</button>
     </div>
     <div id="pokerCalcResults" class="poker-calc-results" role="status" aria-live="polite">
-      <div class="poker-calc-stats">
+      <div class="poker-calc-stats" id="pcStats">
         <div class="poker-calc-stat"><span>סיכוי לנצח</span><strong id="pokerWinChance">—</strong></div>
         <div class="poker-calc-stat"><span>סיכוי לתיקו</span><strong id="pokerTieChance">—</strong></div>
         <div class="poker-calc-stat"><span>אחוז נדרש להשוואה</span><strong id="pokerPotOdds">—</strong></div>
       </div>
       <p id="pokerCalcAdvice" class="poker-calc-advice">בחר את שני הקלפים שלך ולחץ על „חשב סיכויים”.</p>
-      <p class="poker-calc-note">החישוב מריץ אלפי ידיים אקראיות מול יריבים שהקלפים שלהם לא ידועים, ולכן התוצאה משוערת (בדיוק של בערך אחוז). היא לא יודעת איך היריבים משחקים.</p>
+      <p class="poker-calc-note" id="pcNote">החישוב מריץ אלפי ידיים אקראיות מול יריבים שהקלפים שלהם לא ידועים, ולכן התוצאה משוערת (בדיוק של בערך אחוז). היא לא יודעת איך היריבים משחקים.</p>
     </div>
   </div>
 </div>
@@ -1491,11 +1514,13 @@ async function copyOrShow(text,message){
  $("shareText").value=text;$("shareModal").classList.add("show");$("shareText").focus();$("shareText").select()
 }
 async function shareApp(){const url=location.origin+location.pathname;try{if(navigator.share){await navigator.share({title:"Winner winner chicken dinner",text:"בוא לשחק איתי",url});return}}catch(e){if(e?.name==="AbortError")return}await copyOrShow(url,"קישור האפליקציה הועתק")}
-// ---- Poker calculator: pick cards, Monte Carlo equity vs random hands ----
+// ---- Poker calculator: pick cards; odds vs random opponents, or hand vs hand (2-5 hands) ----
 // Card = 0..51, rank = c%13 (0 = 2 … 12 = A), suit = c/13|0 (♠ ♥ ♦ ♣)
+// Slots: hand h card i -> h*2+i (hands 0..4), board -> 10..14
 const PC_RANKS=["2","3","4","5","6","7","8","9","10","J","Q","K","A"],PC_SUITS=["♠","♥","♦","♣"];
 const PC_HANDS=["קלף גבוה","זוג","שני זוגות","שלישייה","רצף (סטרייט)","צבע (פלאש)","פול האוס","רביעייה","סטרייט פלאש"];
-let pcSlots=[null,null,null,null,null,null,null],pcActive=0,pcRunId=0;
+const PC_MAXH=5,PC_B=10;
+let pcMode="random",pcNumHands=1,pcSlots=new Array(15).fill(null),pcActive=0,pcRunId=0,pcResults=null;
 function pcIsRed(c){const s=c/13|0;return s===1||s===2}
 function pcLabel(c){return PC_RANKS[c%13]+PC_SUITS[c/13|0]}
 function pcStraightHigh(mask){// mask of ranks (bit 0 = 2 … bit 12 = A); returns top rank or -1
@@ -1518,66 +1543,124 @@ function pcEval(cards){// higher score = better hand; category = floor(score / 1
   if(pairs.length)return pack(1,[pairs[0],...singles.slice(0,3)]);
   return pack(0,singles.slice(0,5))
 }
-function pcHandName(cards){const cat=Math.floor(pcEval(cards)/371293);if(cat===8&&pcEval(cards)%371293===12)return "רויאל פלאש";return PC_HANDS[cat]}
+function pcHandName(cards){const v=pcEval(cards),cat=Math.floor(v/371293);return cat===8&&v%371293===12?"רויאל פלאש":PC_HANDS[cat]}
+function pcHand(h){return [pcSlots[h*2],pcSlots[h*2+1]]}
+function pcBoardCards(){return pcSlots.slice(PC_B).filter(c=>c!==null)}
+function pcOrder(){const o=[];for(let h=0;h<pcNumHands;h++)o.push(h*2,h*2+1);for(let i=0;i<5;i++)o.push(PC_B+i);return o}
+function pcHandTitle(h){return pcMode==="random"?"היד שלך":"יד "+(h+1)+(h===0?" (שלך)":"")}
 function pcRender(){
-  const used=new Set(pcSlots.filter(c=>c!==null));
+  const used=new Set(pcSlots.filter(c=>c!==null)),vs=pcMode==="vs";
   const slot=i=>{const c=pcSlots[i],b=document.createElement("button");b.type="button";b.className="pc-slot"+(c!==null?" filled"+(pcIsRed(c)?" red":""):"")+(i===pcActive?" active":"");
-    b.textContent=c!==null?pcLabel(c):"+";b.setAttribute("aria-label",(i<2?"קלף ביד ":"קלף שולחן ")+(i<2?i+1:i-1)+(c!==null?": "+pcLabel(c)+" (לחץ להסרה)":""));
-    b.addEventListener("click",()=>{if(pcSlots[i]!==null){pcSlots[i]=null;pcActive=i}else pcActive=i;pcChanged()});return b};
-  const hole=$("pcHole"),board=$("pcBoard");hole.innerHTML="";board.innerHTML="";
-  for(let i=0;i<2;i++)hole.appendChild(slot(i));for(let i=2;i<7;i++)board.appendChild(slot(i));
+    b.textContent=c!==null?pcLabel(c):"+";b.setAttribute("aria-label",(i<PC_B?pcHandTitle(i>>1)+", קלף "+(i%2+1):"קלף שולחן "+(i-PC_B+1))+(c!==null?": "+pcLabel(c)+" (לחץ להסרה)":""));
+    b.addEventListener("click",()=>{pcSlots[i]=null;pcActive=i;pcChanged()});return b};
+  $("pcModeRandom").classList.toggle("active",!vs);$("pcModeVs").classList.toggle("active",vs);
+  $("pcModeRandom").setAttribute("aria-pressed",String(!vs));$("pcModeVs").setAttribute("aria-pressed",String(vs));
+  $("pcSlotsWrap").classList.toggle("vs",vs);
+  $("pcIntro").textContent=vs?"בחר עד 5 ידיים ואת הקלפים על השולחן, והמחשבון יראה לכל יד את הסיכוי שלה לנצח.":"בחר את הקלפים שלך ואת הקלפים על השולחן, והמחשבון יחשב את הסיכוי שלך לנצח.";
+  $("pcOppField").hidden=vs;$("pcSpacer").hidden=vs;$("pcStats").hidden=vs;
+  $("pcAddHand").hidden=!vs||pcNumHands>=PC_MAXH;
+  $("pcNote").textContent=vs?"כשנשארים 1–2 קלפים לפתוח החישוב מדויק לגמרי; לפני הפלופ הוא מריץ עשרות אלפי חלוקות ולכן משוער בדיוק של בערך חצי אחוז.":"החישוב מריץ אלפי ידיים אקראיות מול יריבים שהקלפים שלהם לא ידועים, ולכן התוצאה משוערת (בדיוק של בערך אחוז). היא לא יודעת איך היריבים משחקים.";
+  const hands=$("pcHands");hands.innerHTML="";
+  const lead=vs&&pcResults?pcResults.reduce((bi,r,i,a)=>r.equity>a[bi].equity?i:bi,0):-1;
+  for(let h=0;h<pcNumHands;h++){
+    const box=document.createElement("div");box.className="pc-hand-box"+(h===lead?" lead":"");
+    const head=document.createElement("div");head.className="pc-hand-head";const lab=document.createElement("span");lab.className="pc-label";lab.textContent=pcHandTitle(h);head.appendChild(lab);
+    if(vs&&pcNumHands>2){const x=document.createElement("button");x.type="button";x.className="pc-remove";x.textContent="✕";x.setAttribute("aria-label","הסר את "+pcHandTitle(h));x.addEventListener("click",()=>pcRemoveHand(h));head.appendChild(x)}
+    box.appendChild(head);
+    const row=document.createElement("div");row.className="pc-row";row.appendChild(slot(h*2));row.appendChild(slot(h*2+1));box.appendChild(row);
+    if(vs){const res=document.createElement("div");res.className="pc-res";const r=pcResults&&pcResults[h],cards=[...pcHand(h),...pcBoardCards()];
+      if(r){res.innerHTML='<strong>'+pokerPercent(r.equity)+'</strong> לזכות'+(r.tie>=.0005?' · תיקו '+pokerPercent(r.tie):'')+(cards.length>=5?'<br>'+esc(pcHandName(cards)):'')+'<div class="pc-bar"><i style="width:'+Math.round(r.equity*100)+'%"></i></div>'}
+      else res.textContent=pcHand(h).includes(null)?"":"—";
+      box.appendChild(res)}
+    hands.appendChild(box)
+  }
+  const board=$("pcBoard");board.innerHTML="";for(let i=PC_B;i<PC_B+5;i++)board.appendChild(slot(i));
   const pk=$("pcPicker");pk.innerHTML="";
   for(let s=0;s<4;s++)for(let r=12;r>=0;r--){const c=s*13+r,b=document.createElement("button");b.type="button";b.className="pc-card"+(pcIsRed(c)?" red":"");b.textContent=pcLabel(c);b.disabled=used.has(c)||pcActive<0;b.setAttribute("aria-label",pcLabel(c));
     b.addEventListener("click",()=>pcPick(c));pk.appendChild(b)}
-  const hole2=pcSlots.slice(0,2).filter(c=>c!==null),brd=pcSlots.slice(2).filter(c=>c!==null),all=[...hole2,...brd];
-  $("pcHandName").textContent=hole2.length<2?(hole2.length?"בחר עוד קלף אחד ליד שלך":"לחץ על קלף כדי לבחור את היד שלך"):all.length>=5?"היד שלך כרגע: "+pcHandName(all):hole2[0]%13===hole2[1]%13?"היד שלך כרגע: זוג "+PC_RANKS[hole2[0]%13]:"היד שלך: "+pcLabel(hole2[0])+" "+pcLabel(hole2[1])+((hole2[0]/13|0)===(hole2[1]/13|0)?" (אותו צבע)":"");
+  const name=$("pcHandName");
+  if(vs){const missing=[];for(let h=0;h<pcNumHands;h++)if(pcHand(h).includes(null))missing.push(h+1);
+    name.textContent=missing.length?"בחר קלפים ל"+(missing.length===1?"יד "+missing[0]:"ידיים "+missing.join(", ")):pcActive<0?"כל הקלפים נבחרו":"אפשר להוסיף קלפים לשולחן"}
+  else{const hole=pcHand(0).filter(c=>c!==null),all=[...hole,...pcBoardCards()];
+    name.textContent=hole.length<2?(hole.length?"בחר עוד קלף אחד ליד שלך":"לחץ על קלף כדי לבחור את היד שלך"):all.length>=5?"היד שלך כרגע: "+pcHandName(all):hole[0]%13===hole[1]%13?"היד שלך כרגע: זוג "+PC_RANKS[hole[0]%13]:"היד שלך: "+pcLabel(hole[0])+" "+pcLabel(hole[1])+((hole[0]/13|0)===(hole[1]/13|0)?" (אותו צבע)":"")}
 }
+function pcNextEmpty(){return pcOrder().find(i=>pcSlots[i]===null)??-1}
 function pcPick(c){
   if(pcActive<0)return;
-  if(pcActive>=2){const firstEmpty=pcSlots.indexOf(null,2);if(firstEmpty>=0&&firstEmpty<pcActive)pcActive=firstEmpty}
-  pcSlots[pcActive]=c;
-  const order=[0,1,2,3,4,5,6];pcActive=order.find(i=>pcSlots[i]===null)??-1;pcChanged()
+  if(pcActive>=PC_B){const firstEmpty=pcSlots.indexOf(null,PC_B);if(firstEmpty>=0&&firstEmpty<pcActive)pcActive=firstEmpty}
+  pcSlots[pcActive]=c;pcActive=pcNextEmpty();pcChanged()
 }
-function pcChanged(){pcRender();const hole=pcSlots.slice(0,2).filter(c=>c!==null);if(hole.length===2)calculatePokerOdds();else pcClearResults("בחר את שני הקלפים שלך ולחץ על „חשב סיכויים”.")}
-function pcClearResults(msg){pcRunId++;$("pokerWinChance").textContent="—";$("pokerTieChance").textContent="—";$("pokerPotOdds").textContent="—";$("pokerCalcAdvice").textContent=msg}
+function pcReady(){for(let h=0;h<pcNumHands;h++)if(pcHand(h).includes(null))return false;return true}
+function pcChanged(){pcResults=null;pcRunId++;pcRender();if(pcReady())calculatePokerOdds();else pcClearResults(pcMode==="vs"?"בחר שני קלפים לכל יד כדי לחשב.":"בחר את שני הקלפים שלך ולחץ על „חשב סיכויים”.")}
+function pcClearResults(msg){pcRunId++;if(pcResults){pcResults=null;pcRender()}$("pokerWinChance").textContent="—";$("pokerTieChance").textContent="—";$("pokerPotOdds").textContent="—";$("pokerCalcAdvice").textContent=msg}
+function pcSetMode(m){if(m===pcMode)return;pcMode=m;
+  if(m==="vs")pcNumHands=2;else{pcNumHands=1;for(let i=2;i<PC_B;i++)pcSlots[i]=null}
+  pcActive=pcNextEmpty();pcChanged()}
+function pcAddHand(){if(pcNumHands>=PC_MAXH)return;pcNumHands++;pcActive=pcNumHands*2-2;pcChanged()}
+function pcRemoveHand(h){if(pcNumHands<=2)return;for(let i=h*2;i<PC_B-2;i++)pcSlots[i]=pcSlots[i+2];pcSlots[PC_B-2]=pcSlots[PC_B-1]=null;pcNumHands--;pcActive=pcNextEmpty();pcChanged()}
 function openPokerCalc(){$("pokerCalcModal").classList.add("show");$("pokerCalcModal").setAttribute("aria-hidden","false");pcRender()}
 function closePokerCalc(){$("pokerCalcModal").classList.remove("show");$("pokerCalcModal").setAttribute("aria-hidden","true")}
 function optionalNonnegative(v){const raw=String(v).trim();if(!raw)return null;const n=Number(raw.replace(",","."));return Number.isFinite(n)&&n>=0?n:NaN}
 function pokerPercent(n){return (n*100).toLocaleString("he-IL",{maximumFractionDigits:1})+"%"}
-function pcSimulate(hole,board,opps,iters){
+function pcSimulate(hole,board,opps,iters){// hero vs random hands; tie = chance of a split pot, equity = expected share of the pot
   const used=new Set([...hole,...board]),deck=[];for(let c=0;c<52;c++)if(!used.has(c))deck.push(c);
-  const need=5-board.length+opps*2;let win=0,tie=0;const D=deck.length;
+  const need=5-board.length+opps*2;let win=0,tie=0,share=0;const D=deck.length;
   for(let it=0;it<iters;it++){
     for(let i=0;i<need;i++){const j=i+Math.floor(Math.random()*(D-i)),t=deck[i];deck[i]=deck[j];deck[j]=t}
     const full=board.concat(deck.slice(0,5-board.length)),me=pcEval(hole.concat(full));let best=0,ties=0,k=5-board.length;
     for(let o=0;o<opps;o++){const v=pcEval([deck[k],deck[k+1]].concat(full));k+=2;if(v>best){best=v;ties=0}if(v===best)ties++}
-    if(me>best)win++;else if(me===best)tie+=1/(ties+1)
+    if(me>best)win++;else if(me===best){tie++;share+=1/(ties+1)}
   }
-  return {win:win/iters,tie:tie/iters}
+  return {win:win/iters,tie:tie/iters,equity:(win+share)/iters}
+}
+function pcSimulateVs(hands,board){// known hands against each other; exact when 0-2 board cards are left, otherwise sampled
+  const used=new Set([...hands.flat(),...board]),deck=[];for(let c=0;c<52;c++)if(!used.has(c))deck.push(c);
+  const n=hands.length,need=5-board.length,win=new Array(n).fill(0),tie=new Array(n).fill(0),share=new Array(n).fill(0),sc=new Array(n);let total=0;
+  const score=full=>{let best=-1,cnt=0;for(let h=0;h<n;h++){sc[h]=pcEval(hands[h].concat(full));if(sc[h]>best){best=sc[h];cnt=1}else if(sc[h]===best)cnt++}
+    for(let h=0;h<n;h++)if(sc[h]===best){if(cnt===1)win[h]++;else{tie[h]++;share[h]+=1/cnt}}total++};
+  if(need===0)score(board);
+  else if(need===1)for(const a of deck)score(board.concat([a]));
+  else if(need===2){for(let i=0;i<deck.length;i++)for(let j=i+1;j<deck.length;j++)score(board.concat([deck[i],deck[j]]))}
+  else{const D=deck.length,iters=Math.round(60000/Math.sqrt(n));
+    for(let it=0;it<iters;it++){for(let i=0;i<need;i++){const j=i+Math.floor(Math.random()*(D-i)),t=deck[i];deck[i]=deck[j];deck[j]=t}score(board.concat(deck.slice(0,need)))}}
+  return hands.map((_,h)=>({win:win[h]/total,tie:tie[h]/total,equity:(win[h]+share[h])/total}))
+}
+function pcPotAdvice(equity,prefix){
+  const pot=optionalNonnegative($("pokerPotSize").value),call=optionalNonnegative($("pokerCallAmount").value);
+  if(pot===null||call===null||pot+call===0){$("pokerPotOdds").textContent="—";return ""}
+  const required=call/(pot+call),diff=equity-required;$("pokerPotOdds").textContent=pokerPercent(required);
+  return prefix+(Math.abs(diff)<.01?"הסיכוי ("+pokerPercent(equity)+") דומה למה שנדרש ("+pokerPercent(required)+") — השוואה גבולית.":diff>0?"✓ הסיכוי ("+pokerPercent(equity)+") גבוה מהנדרש ("+pokerPercent(required)+") — משתלם להשוות.":"✗ הסיכוי ("+pokerPercent(equity)+") נמוך מהנדרש ("+pokerPercent(required)+") — עדיף לוותר.")
 }
 function calculatePokerOdds(){
-  const hole=pcSlots.slice(0,2).filter(c=>c!==null),board=pcSlots.slice(2).filter(c=>c!==null),opps=Number($("pokerOpponents").value)||1;
-  if(hole.length<2)return pcClearResults("בחר את שני הקלפים שלך כדי לחשב.");
+  const board=pcBoardCards(),vs=pcMode==="vs",opps=Number($("pokerOpponents").value)||1;
+  if(!pcReady())return pcClearResults(vs?"בחר שני קלפים לכל יד כדי לחשב.":"בחר את שני הקלפים שלך כדי לחשב.");
   if(board.length===1||board.length===2)return pcClearResults("על השולחן צריכים להיות 0, 3, 4 או 5 קלפים (פלופ = 3).");
   const pot=optionalNonnegative($("pokerPotSize").value),call=optionalNonnegative($("pokerCallAmount").value);
-  if(Number.isNaN(pot)||Number.isNaN(call)){pcClearResults("הקופה וסכום ההשוואה צריכים להיות מספרים חיוביים או אפס.");return}
+  if(Number.isNaN(pot)||Number.isNaN(call))return pcClearResults("הקופה וסכום ההשוואה צריכים להיות מספרים חיוביים או אפס.");
   const run=++pcRunId;$("pokerCalcAdvice").textContent="מחשב…";
   setTimeout(()=>{
     if(run!==pcRunId)return;
-    let r;try{r=pcSimulate(hole,board,opps,Math.round(24000/Math.sqrt(opps)))}catch{return pcClearResults("משהו השתבש בחישוב, נסה שוב.")}
-    const equity=r.win+r.tie;
+    if(vs){
+      const hands=[];for(let h=0;h<pcNumHands;h++)hands.push(pcHand(h));
+      let res;try{res=pcSimulateVs(hands,board)}catch{return pcClearResults("משהו השתבש בחישוב, נסה שוב.")}
+      if(run!==pcRunId)return;
+      pcResults=res;pcRender();
+      const best=Math.max(...res.map(r=>r.equity)),leaders=res.map((r,i)=>r.equity===best?i+1:0).filter(Boolean);
+      const lead=leaders.length>1?"הידיים "+leaders.join(" ו־")+" שוות — "+pokerPercent(best)+" לכל אחת.":"יד "+leaders[0]+" מובילה עם "+pokerPercent(best)+" לזכות בקופה.";
+      $("pokerCalcAdvice").textContent=lead+pcPotAdvice(res[0].equity," ליד 1 (שלך): ");
+      return
+    }
+    let r;try{r=pcSimulate(pcHand(0),board,opps,Math.round(24000/Math.sqrt(opps)))}catch{return pcClearResults("משהו השתבש בחישוב, נסה שוב.")}
     $("pokerWinChance").textContent=pokerPercent(r.win);$("pokerTieChance").textContent=pokerPercent(r.tie);
-    const vs=opps===1?"מול יריב אחד":"מול "+opps+" יריבים";
-    if(pot===null||call===null||pot+call===0){$("pokerPotOdds").textContent="—";$("pokerCalcAdvice").textContent="יש לך "+pokerPercent(equity)+" מהקופה בממוצע "+vs+". הזן קופה וסכום להשוואה כדי לדעת אם כדאי להשוות.";return}
-    const required=call/(pot+call),diff=equity-required;$("pokerPotOdds").textContent=pokerPercent(required);
-    $("pokerCalcAdvice").textContent=Math.abs(diff)<.01?"הסיכוי שלך ("+pokerPercent(equity)+") דומה למה שנדרש — השוואה גבולית.":diff>0?"✓ הסיכוי שלך ("+pokerPercent(equity)+") גבוה מהנדרש ("+pokerPercent(required)+") — משתלם להשוות.":"✗ הסיכוי שלך ("+pokerPercent(equity)+") נמוך מהנדרש ("+pokerPercent(required)+") — עדיף לוותר.";
+    const adv=pcPotAdvice(r.equity,"");
+    $("pokerCalcAdvice").textContent=adv||"יש לך "+pokerPercent(r.equity)+" מהקופה בממוצע "+(opps===1?"מול יריב אחד":"מול "+opps+" יריבים")+". הזן קופה וסכום להשוואה כדי לדעת אם כדאי להשוות.";
   },30)
 }
-function resetPokerCalc(){pcSlots=[null,null,null,null,null,null,null];pcActive=0;$("pokerOpponents").value="1";$("pokerPotSize").value="";$("pokerCallAmount").value="";pcRender();pcClearResults("בחר את שני הקלפים שלך ולחץ על „חשב סיכויים”.")}
+function resetPokerCalc(){pcSlots.fill(null);pcNumHands=pcMode==="vs"?2:1;pcActive=0;pcResults=null;$("pokerOpponents").value="1";$("pokerPotSize").value="";$("pokerCallAmount").value="";pcRender();pcClearResults(pcMode==="vs"?"בחר שני קלפים לכל יד כדי לחשב.":"בחר את שני הקלפים שלך ולחץ על „חשב סיכויים”.")}
 function scrollToControl(id){const e=$(id);if(!e)return;e.scrollIntoView({behavior:"smooth",block:"center"});if(e.tagName==="INPUT")setTimeout(()=>e.focus(),350)}
 
 $("applyRatioBtn").addEventListener("click",applyRatio);$("addPlayerBtn").addEventListener("click",addPlayer);$("newGameBtn").addEventListener("click",newGame);$("resetBtn").addEventListener("click",newGame);$("settleBtn").addEventListener("click",settle);$("shareSummaryBtn").addEventListener("click",shareSummary);$("shareAppBtn").addEventListener("click",shareApp);$("pokerCalcBtn").addEventListener("click",openPokerCalc);
-$("pokerCalcClose").addEventListener("click",closePokerCalc);$("pokerCalcModal").addEventListener("click",e=>{if(e.target===$("pokerCalcModal"))closePokerCalc()});$("pokerCalcRun").addEventListener("click",calculatePokerOdds);$("pokerCalcReset").addEventListener("click",resetPokerCalc);["pokerPotSize","pokerCallAmount"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")calculatePokerOdds()}));$("pokerOpponents").addEventListener("change",()=>{if(pcSlots[0]!==null&&pcSlots[1]!==null)calculatePokerOdds()});
+$("pokerCalcClose").addEventListener("click",closePokerCalc);$("pokerCalcModal").addEventListener("click",e=>{if(e.target===$("pokerCalcModal"))closePokerCalc()});$("pokerCalcRun").addEventListener("click",calculatePokerOdds);$("pokerCalcReset").addEventListener("click",resetPokerCalc);["pokerPotSize","pokerCallAmount"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")calculatePokerOdds()}));$("pokerOpponents").addEventListener("change",()=>{if(pcReady())calculatePokerOdds()});$("pcModeRandom").addEventListener("click",()=>pcSetMode("random"));$("pcModeVs").addEventListener("click",()=>pcSetMode("vs"));$("pcAddHand").addEventListener("click",pcAddHand);
 $("finishGameBtn").addEventListener("click",()=>{if(!state.players.length){scrollToControl("playerName");return showToast("הוסף שחקנים כדי להתחיל")}const input=document.querySelector(".final-chips");input.scrollIntoView({behavior:"smooth",block:"center"});input.focus();input.select();showToast("הכנס לכל שחקן את הג׳טונים שנשארו")});
 $("playerName").addEventListener("keydown",e=>{if(e.key==="Enter")addPlayer()});$("buyIn").addEventListener("keydown",e=>{if(e.key==="Enter")addPlayer()});$("ratioMoney").addEventListener("keydown",e=>{if(e.key==="Enter")applyRatio()});$("ratioChips").addEventListener("keydown",e=>{if(e.key==="Enter")applyRatio()});
 document.querySelectorAll("[data-quick-buyin]").forEach(b=>b.addEventListener("click",()=>{$("buyIn").value=b.dataset.quickBuyin;$("playerName").focus()}));document.querySelectorAll("[data-scroll]").forEach(b=>b.addEventListener("click",()=>scrollToControl(b.dataset.scroll)));
