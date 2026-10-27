@@ -1357,16 +1357,19 @@ function recalcPlayer(p){p.buyIn=(p.buyHistory||[]).reduce((s,b)=>s+Number(b.amo
 function playActionSound(){
   if(!soundEnabled)return;
   try{
-    // Clay poker chips clattering onto a stack
+    // Soft "tok-tok": two chips set down on felt
     const C=window.AudioContext||window.webkitAudioContext,ctx=new C(),t0=ctx.currentTime+.01;
-    const buf=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.08),ctx.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
-    const clack=(t,vol,pitch)=>{
-      const n=ctx.createBufferSource(),bp=ctx.createBiquadFilter(),g=ctx.createGain();n.buffer=buf;bp.type="bandpass";bp.frequency.value=pitch*1.6;bp.Q.value=1.4;
-      g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+.035);n.connect(bp).connect(g).connect(ctx.destination);n.start(t);n.stop(t+.05);
-      [1,2.3].forEach((m,i)=>{const o=ctx.createOscillator(),og=ctx.createGain();o.type="triangle";o.frequency.setValueAtTime(pitch*m,t);og.gain.setValueAtTime(vol*(i?.18:.35),t);og.gain.exponentialRampToValueAtTime(.0001,t+(i?.03:.06));o.connect(og).connect(ctx.destination);o.start(t);o.stop(t+.08)});
+    const out=ctx.createBiquadFilter();out.type="lowpass";out.frequency.value=5200;out.connect(ctx.destination);
+    const buf=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.02),ctx.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);
+    const tok=(t,vol,f)=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*.62,t+.05);
+      g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.003);g.gain.exponentialRampToValueAtTime(.0001,t+.09);o.connect(g).connect(out);o.start(t);o.stop(t+.1);
+      const b=ctx.createOscillator(),bg=ctx.createGain();b.type="sine";b.frequency.setValueAtTime(240,t);b.frequency.exponentialRampToValueAtTime(130,t+.06);
+      bg.gain.setValueAtTime(.0001,t);bg.gain.exponentialRampToValueAtTime(vol*.7,t+.004);bg.gain.exponentialRampToValueAtTime(.0001,t+.07);b.connect(bg).connect(out);b.start(t);b.stop(t+.08);
+      const n=ctx.createBufferSource(),hp=ctx.createBiquadFilter(),ng=ctx.createGain();n.buffer=buf;hp.type="highpass";hp.frequency.value=2500;ng.gain.value=vol*.35;n.connect(hp).connect(ng).connect(out);n.start(t);
     };
-    [0,.045,.08,.125,.15,.2].forEach((dt,i)=>clack(t0+dt+Math.random()*.012,.32-i*.035,2600+Math.random()*900));
-    setTimeout(()=>ctx.close(),700)
+    tok(t0,.16,1450);tok(t0+.075,.11,1650);
+    setTimeout(()=>ctx.close(),400)
   }catch{}
 }
 function motionAllowed(){return !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches}
