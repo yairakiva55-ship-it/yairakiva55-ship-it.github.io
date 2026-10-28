@@ -581,8 +581,9 @@
     if (!shell || !hub) return;
     hub.after(root);
     document.body.classList.add('sk-on');
-    addGuestButton();
-    if (lsGet(GUEST_KEY) === '1') document.body.classList.add('wn-guest');
+    // לאפליקציה יש כבר כניסת אורח משלה (googleSignInBtn/guestSignInBtn) — לא מוסיפים כפתור שני
+    if ($('guestSignInBtn')) { lsDel(GUEST_KEY); document.body.classList.remove('wn-guest'); }
+    else { addGuestButton(); if (lsGet(GUEST_KEY) === '1') document.body.classList.add('wn-guest'); }
     // כשמתחברים עם Google — יוצאים ממצב אורח
     var ta = $('tableActive');
     if (ta) new MutationObserver(function () { setTimeout(render, 0); }).observe(ta, { attributes: true, attributeFilter: ['hidden'] });
