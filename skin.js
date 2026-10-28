@@ -11,6 +11,44 @@
   function signed(n) { n = Math.round(Number(n || 0) * 100) / 100; return n > 0.009 ? '+' + money(n) : n < -0.009 ? '−' + money(-n) : money(0); }
   function toast(m) { if (typeof window.showToast === 'function') window.showToast(m); }
   function uid(p) { return p + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9); }
+
+  /* ---------- אנימציות ג׳טונים וקלפים ---------- */
+  function motionOK() { return !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  function sound() { try { if (typeof window.playActionSound === 'function') window.playActionSound(); } catch (e) {} }
+  function burst(target) {
+    if (!motionOK() || !target) return;
+    try { if (typeof window.chipBurst === 'function') return window.chipBurst(target); } catch (e) {}
+  }
+  function pulsePot() {
+    var e = document.querySelector('#sk-root .sk-pot');
+    if (!e || !motionOK()) return;
+    e.classList.remove('pot-pulse'); void e.offsetWidth; e.classList.add('pot-pulse');
+  }
+  function dealCards(target, n) {
+    var layer = document.getElementById('fxLayer');
+    if (!motionOK() || !layer || !target) return;
+    var r = target.getBoundingClientRect(), suits = ['♠', '♥', '♦', '♣'];
+    for (var i = 0; i < (n || 5); i++) {
+      var c = document.createElement('div');
+      c.className = 'fx-card';
+      var su = suits[i % 4];
+      c.textContent = su;
+      if (su === '♥' || su === '♦') c.style.color = '#d32f2f';
+      c.style.left = Math.min(window.innerWidth - 40, Math.max(10, r.left + r.width / 2 - 25)) + 'px';
+      c.style.top = Math.min(window.innerHeight - 90, Math.max(60, r.top + Math.min(r.height / 2, 60) - 34)) + 'px';
+      c.style.setProperty('--fan', ((i - 2) * 46) + 'px');
+      c.style.setProperty('--angle', ((i - 2) * 9) + 'deg');
+      c.style.animationDelay = (i * 70) + 'ms';
+      layer.appendChild(c);
+      (function (el) { setTimeout(function () { el.remove(); }, 1500); })(c);
+    }
+  }
+  function fx(target, opts) {
+    opts = opts || {};
+    sound();
+    if (opts.cards) dealCards(target, opts.cards); else burst(target);
+    if (opts.pot) setTimeout(pulsePot, 60);
+  }
   function initials(name) { return String(name).trim().split(/\s+/).slice(0, 2).map(function (x) { return x[0] || ''; }).join('') || '?'; }
 
   function getState() { return G.get(); }
@@ -60,6 +98,15 @@
     '.sk-kicker{color:var(--sk-gold);font-weight:800;font-size:12px;letter-spacing:.14em}',
     '.sk-chips{display:flex;justify-content:center;gap:8px;margin:12px 0 6px}',
     '.sk-chip{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:20px;border:5px dashed rgba(255,255,255,.85);box-shadow:0 6px 14px rgba(0,0,0,.35),inset 0 0 0 3px rgba(0,0,0,.15)}',
+    '.sk-chip{animation:skFloat 4.5s ease-in-out infinite}.sk-chip:nth-child(2){animation-delay:-1.5s}.sk-chip:nth-child(3){animation-delay:-3s}',
+    '@keyframes skFloat{0%,100%{transform:translateY(0) rotate(-10deg)}50%{transform:translateY(-7px) rotate(14deg)}}',
+    '.sk-chips:hover .sk-chip,.sk-chip:active{animation-duration:1.2s}',
+    '.sk-logo{animation:skLogo 6s ease-in-out infinite}@keyframes skLogo{0%,90%,100%{transform:rotate(0)}94%{transform:rotate(-8deg)}97%{transform:rotate(6deg)}}',
+    '.sk-pot.pot-pulse{animation:potPulse .65s ease}',
+    '.sk-player.sk-pop{animation:skPop .5s cubic-bezier(.2,.8,.2,1)}@keyframes skPop{0%{transform:scale(.96);background:rgba(47,212,124,.18)}100%{transform:none}}',
+    '.sk-player.sk-drop{animation:skDrop .45s ease}@keyframes skDrop{0%{background:rgba(229,72,77,.18)}100%{background:rgba(255,255,255,.035)}}',
+    '.sk-amt.sk-bump{animation:skBump .5s ease}@keyframes skBump{40%{transform:scale(1.25);color:#fff}}',
+    '@media(prefers-reduced-motion:reduce){.sk-chip,.sk-logo{animation:none!important}}',
     '.sk-chip.r{background:#d93a3f}.sk-chip.g{background:#1f9d62}.sk-chip.y{background:#d9a21f}',
     '.sk-room{color:var(--sk-muted);font-size:13px;font-weight:700;direction:rtl}.sk-room b{color:var(--sk-text);letter-spacing:.08em;direction:ltr;display:inline-block}',
     '.sk-ratio-row{display:grid;grid-template-columns:1fr auto 1.2fr auto;gap:8px;align-items:center}',
@@ -182,10 +229,12 @@
       if (!(amt > 0)) return toast('סכום הכניסה צריך להיות גדול מ-0');
       var s2 = getState();
       if (s2.players.some(function (p) { return p.name === name; })) return toast('כבר יש שחקן בשם הזה');
-      s2.players.push({ id: uid('p'), name: name, buyHistory: [{ id: uid('buy'), amount: amt, kind: 'כניסה', at: Date.now() }], buyIn: amt, finalChips: 0 });
+      var newId = uid('p');
+      s2.players.push({ id: newId, name: name, buyHistory: [{ id: uid('buy'), amount: amt, kind: 'כניסה', at: Date.now() }], buyIn: amt, finalChips: 0 });
       save(s2);
       closeOverlay(addO);
       render();
+      rowFx(newId, 'sk-pop', true);
       toast(name + ' הצטרף/ה לשולחן');
     }
     $('sk-add-go').onclick = go;
@@ -220,7 +269,7 @@
     $('sk-ratio-save').onclick = function () {
       var m = Number($('sk-rm').value), c = Number($('sk-rc').value);
       if (!(m > 0) || !(c > 0)) return toast('שני המספרים צריכים להיות גדולים מ-0');
-      var s2 = getState(); s2.ratioMoney = m; s2.ratioChips = c; save(s2); render(); closeOverlay(menuO); toast('היחס עודכן');
+      var s2 = getState(); s2.ratioMoney = m; s2.ratioChips = c; save(s2); render(); closeOverlay(menuO); fx($('sk-r-save'), { pot: true }); toast('היחס עודכן');
     };
     sheet.querySelectorAll('[data-act]').forEach(function (b) {
       b.onclick = function () {
@@ -296,7 +345,7 @@
       if (!(m > 0) || !(c > 0)) return toast('שני המספרים צריכים להיות גדולים מ-0');
       var s2 = getState(); s2.ratioMoney = m; s2.ratioChips = c; save(s2);
       document.activeElement && document.activeElement.blur && document.activeElement.blur();
-      render(); toast('היחס עודכן');
+      render(); fx($('sk-r-save'), { pot: true }); toast('היחס עודכן');
     }
     $('sk-r-save').onclick = saveRatio;
     ['sk-r-money', 'sk-r-chips'].forEach(function (id) { $(id).onkeydown = function (e) { if (e.key === 'Enter') saveRatio(); }; });
@@ -306,7 +355,7 @@
     $('sk-invite').onclick = invite;
     $('sk-finish').onclick = function () {
       if (getState().players.length < 2) return toast('צריך לפחות שני שחקנים');
-      view = 'settle'; render(); window.scrollTo({ top: 0 });
+      view = 'settle'; render(); window.scrollTo({ top: 0 }); fx($('sk-root'), { cards: 5 });
     };
     root.querySelectorAll('.sk-player').forEach(function (row) {
       var id = row.getAttribute('data-id');
@@ -315,13 +364,13 @@
         if (!p) return;
         var amt = (p.buyHistory[0] && p.buyHistory[0].amount) || 100;
         p.buyHistory.push({ id: uid('buy'), amount: amt, kind: 'Rebuy', at: Date.now() });
-        save(s2); render(); toast('קנייה נוספת: ' + p.name + ' ' + money(amt));
+        save(s2); render(); rowFx(id, 'sk-pop', true); toast('קנייה נוספת: ' + p.name + ' ' + money(amt));
       };
       row.querySelector('[data-minus]').onclick = function () {
         var s2 = getState(), p = s2.players.find(function (x) { return x.id === id; });
         if (!p) return;
         if (p.buyHistory.length > 1) {
-          var last = p.buyHistory.pop(); save(s2); render(); toast('בוטלה קנייה של ' + money(last.amount));
+          var last = p.buyHistory.pop(); save(s2); render(); rowFx(id, 'sk-drop', false); toast('בוטלה קנייה של ' + money(last.amount));
         } else if (typeof window.openConfirm === 'function') {
           window.openConfirm('להסיר את ' + p.name + '?', 'השחקן וכל הקניות שלו יימחקו מהמשחק.', 'הסר', function () {
             var s3 = getState(); s3.players = s3.players.filter(function (x) { return x.id !== id; }); save(s3); render();
@@ -335,6 +384,14 @@
     var per = Number(s.ratioMoney) / Number(s.ratioChips);
     var v = per >= 1 ? money(per) : per >= 0.01 ? '₪' + per.toLocaleString('he-IL', { maximumFractionDigits: 2 }) : (per * 100).toLocaleString('he-IL', { maximumFractionDigits: 2 }) + ' אגורות';
     return 'ג׳טון אחד = ' + v;
+  }
+
+  function rowFx(id, cls, chips) { setTimeout(function () { rowFx2(id, cls, chips); }, 20); }
+  function rowFx2(id, cls, chips) {
+    var row = root.querySelector('.sk-player[data-id="' + id + '"]');
+    if (!row) return;
+    if (motionOK()) { row.classList.add(cls); var a = row.querySelector('.sk-amt'); if (a && chips) a.classList.add('sk-bump'); }
+    if (chips) fx(row, { pot: true }); else { sound(); pulsePot(); }
   }
 
   function computeTransfers(s) {
@@ -358,6 +415,7 @@
     return out;
   }
 
+  var lastDiff = null;
   var DOTS = ['#d93a3f', '#1f9d62', '#d9a21f', '#3b6fd9', '#8e44ad', '#e67e22', '#16a085', '#7f8c8d'];
   function renderSettle() {
     var s = getState(), ps = perShekel(s);
@@ -377,6 +435,9 @@
       return '<div class="sk-bal"><span>' + esc(p.name) + '</span><span class="v ' + cls + '">' + signed(b) + '</span></div>';
     }).join('');
     var tr = diff === 0 ? computeTransfers(s) : [];
+    var justBalanced = diff === 0 && lastDiff !== null && lastDiff !== 0;
+    lastDiff = diff;
+    if (justBalanced) setTimeout(function () { var ok = root.querySelector('.sk-ok'); if (ok) fx(ok); }, 30);
     var pays = tr.length ? tr.map(function (t) {
       return '<div class="sk-pay"><span>' + esc(t.from) + ' משלם/ת ל' + esc(t.to) + '</span><span class="v">' + money(t.amount) + '</span></div>';
     }).join('') : (diff === 0 ? '<div class="sk-zero" style="padding:8px 0">אין חובות — כולם מאוזנים</div>' : '');
@@ -395,6 +456,8 @@
     $('sk-back').onclick = function () { view = 'game'; render(); };
     $('sk-save').onclick = function () {
       if (typeof window.persist === 'function') window.persist();
+      fx($('sk-save'));
+      if (diff === 0) setTimeout(function () { dealCards($('sk-save'), 5); }, 250);
       toast(diff === 0 ? 'התוצאה נשמרה' : 'נשמר. שים לב: הג׳טונים עדיין לא מאוזנים');
     };
     root.querySelectorAll('.sk-chiprow').forEach(function (row) {
@@ -406,7 +469,7 @@
         save(s2); render();
       }
       row.querySelectorAll('[data-d]').forEach(function (b) {
-        b.onclick = function () { setVal(Number(input.value || 0) + Number(b.getAttribute('data-d')) * step); };
+        b.onclick = function () { sound(); setVal(Number(input.value || 0) + Number(b.getAttribute('data-d')) * step); };
       });
       input.onchange = function () { setVal(input.value); };
       input.onkeydown = function (e) { if (e.key === 'Enter') input.blur(); };
@@ -648,6 +711,7 @@
         var c = +b.getAttribute('data-c'), a2 = calc.active || nextEmpty();
         if (!a2) return toast('כל המשבצות מלאות — לחץ על קלף כדי להחליף');
         if (a2.t === 'b') calc.board[a2.i] = c; else calc.hands[a2.i].cards[a2.j] = c;
+        sound();
         calc.active = nextEmpty(); renderCalc();
       };
     });
