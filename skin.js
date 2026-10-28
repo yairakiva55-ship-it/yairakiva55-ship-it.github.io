@@ -89,6 +89,7 @@
     '.sk-logo{flex:none;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:26px;color:#fff;background:linear-gradient(145deg,#f04848,#a91e25);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}',
     '.sk-title{font-weight:800;font-size:16px;line-height:1.2}.sk-sub{color:var(--sk-muted);font-size:12px}',
     '.sk-iconbtn{flex:none;width:42px;height:42px;border-radius:14px;border:1px solid var(--sk-line);background:rgba(255,255,255,.05);color:var(--sk-text);display:grid;place-items:center;padding:0;cursor:pointer}',
+    '.sk-btn.sk-reset{width:100%;min-height:50px;color:#ff8a8e;border-color:rgba(229,72,77,.35);background:rgba(229,72,77,.08)}',
     '.sk-headbtns{display:flex;gap:8px;flex:none}',
     '.sk-iconbtn.sk-out{width:auto;padding:0 12px;gap:6px;display:inline-flex;align-items:center;color:#ff8a8e;border-color:rgba(229,72,77,.3);background:rgba(229,72,77,.08);font:inherit;font-weight:800;font-size:13px}',
     '.sk-profile-logout{width:100%;margin-top:10px;min-height:46px;border-radius:14px;border:1px solid rgba(229,72,77,.35);background:rgba(229,72,77,.1);color:#ff8a8e;font:inherit;font-weight:800;cursor:pointer}',
@@ -458,9 +459,24 @@
       status +
       '<section class="sk-card"><div class="sk-sec-title" style="color:var(--sk-green)">יתרות</div>' + bal + '</section>' +
       '<section class="sk-card"><div class="sk-sec-title" style="color:var(--sk-green)">תשלומים</div>' + (pays || '<div class="sk-zero" style="padding:6px 0">יופיעו כשהג׳טונים יתאזנו</div>') + '</section>' +
-      '<button class="sk-btn green" type="button" id="sk-save" style="width:100%;min-height:54px;font-size:17px">שמור תוצאה</button>';
+      '<button class="sk-btn green" type="button" id="sk-save" style="width:100%;min-height:54px;font-size:17px">שמור תוצאה</button>' +
+      '<button class="sk-btn sk-reset" type="button" id="sk-reset">' + ICON.reset + 'איפוס שולחן</button>';
 
     $('sk-back').onclick = function () { view = 'game'; render(); };
+    $('sk-reset').onclick = function () {
+      function doReset() {
+        var s2 = getState();
+        s2.players = [];
+        save(s2);
+        if (typeof window.clearTransfers === 'function') { try { window.clearTransfers(); } catch (e) {} }
+        lastDiff = null;
+        view = 'game'; render(); window.scrollTo({ top: 0 });
+        fx($('sk-root'), { cards: 5 });
+        toast('השולחן אופס — אפשר להתחיל משחק חדש');
+      }
+      if (typeof window.openConfirm === 'function') window.openConfirm('לאפס את השולחן?', 'כל השחקנים, הקניות והג׳טונים של המשחק הזה יימחקו. היחס יישאר כמו שהוא. כדאי ללחוץ קודם "שמור תוצאה" או לשתף סיכום.', 'אפס שולחן', doReset);
+      else doReset();
+    };
     $('sk-save').onclick = function () {
       if (typeof window.persist === 'function') window.persist();
       fx($('sk-save'));
