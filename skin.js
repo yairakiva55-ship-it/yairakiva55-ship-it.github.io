@@ -89,6 +89,49 @@
     '.sk-logo{flex:none;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:26px;color:#fff;background:linear-gradient(145deg,#f04848,#a91e25);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}',
     '.sk-title{font-weight:800;font-size:16px;line-height:1.2}.sk-sub{color:var(--sk-muted);font-size:12px}',
     '.sk-iconbtn{flex:none;width:42px;height:42px;border-radius:14px;border:1px solid var(--sk-line);background:rgba(255,255,255,.05);color:var(--sk-text);display:grid;place-items:center;padding:0;cursor:pointer}',
+    /* מיקרו-אנימציות */
+    '.sk-btn,.sk-iconbtn,.sk-pm,.wn-item,.sk-quick button,.sk-addhand,.sk-profile-logout{position:relative;overflow:hidden;transition:transform .16s cubic-bezier(.2,.8,.2,1),box-shadow .2s,background-color .2s,filter .2s,border-color .2s}',
+    '.sk-ripple{position:absolute;border-radius:50%;background:currentColor;opacity:.18;transform:scale(0);pointer-events:none;animation:skRipple .55s ease-out forwards}',
+    '@keyframes skRipple{to{transform:scale(1);opacity:0}}',
+    '.sk-btn:focus-visible,.sk-iconbtn:focus-visible,.sk-pm:focus-visible,.sk-slot:focus-visible,.sk-dc:focus-visible{outline:2px solid var(--sk-gold);outline-offset:3px}',
+    '.sk-player{transition:background-color .2s,border-color .2s,transform .2s}',
+    '.sk-chip{cursor:pointer}.sk-chip.sk-spin{animation:skSpin .7s cubic-bezier(.2,.8,.2,1)!important}@keyframes skSpin{0%{transform:rotate(0) scale(1)}50%{transform:rotate(200deg) scale(1.15)}100%{transform:rotate(360deg) scale(1)}}',
+    '.sk-slot,.sk-dc{transition:transform .15s,box-shadow .15s,opacity .2s}',
+    '.sk-slot.filled .sk-pc{animation:skCardIn .28s cubic-bezier(.2,.8,.2,1)}@keyframes skCardIn{from{transform:translateY(-10px) rotate(-6deg) scale(.9);opacity:.3}to{transform:none;opacity:1}}',
+    '.sk-cell b{transition:color .2s}',
+    '.sk-ok,.sk-warn{animation:skFade .3s ease}',
+    '.sk-overlay.show{animation:skFade .2s ease}@keyframes skFade{from{opacity:0}to{opacity:1}}',
+    '@keyframes skIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}',
+    '.sk-enter .sk-col>*,.sk-enter>.sk-topnav,.sk-enter>.sk-guest-banner{animation:skIn .45s cubic-bezier(.2,.8,.2,1) both}',
+    '.sk-enter .sk-col>*:nth-child(2){animation-delay:.06s}.sk-enter .sk-col>*:nth-child(3){animation-delay:.12s}.sk-enter .sk-col>*:nth-child(4){animation-delay:.18s}.sk-enter .sk-col>*:nth-child(5){animation-delay:.24s}',
+    '.sk-enter .sk-col-b>*{animation-delay:.1s}.sk-enter .sk-col-b>*:nth-child(2){animation-delay:.16s}.sk-enter .sk-col-b>*:nth-child(3){animation-delay:.22s}.sk-enter .sk-col-b>*:nth-child(4){animation-delay:.28s}',
+    '.sk-enter .sk-player{animation:skIn .4s cubic-bezier(.2,.8,.2,1) both}.sk-enter .sk-player:nth-child(2){animation-delay:.05s}.sk-enter .sk-player:nth-child(3){animation-delay:.1s}.sk-enter .sk-player:nth-child(4){animation-delay:.15s}.sk-enter .sk-player:nth-child(n+5){animation-delay:.2s}',
+    '@media(hover:hover){.sk-btn:hover{transform:translateY(-1px);filter:brightness(1.07)}.sk-btn.green:hover{box-shadow:0 10px 24px rgba(47,212,124,.3)}.sk-iconbtn:hover{background:rgba(255,255,255,.1)}.sk-pm:hover{transform:scale(1.1)}.sk-player:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}.sk-dc:not(.used):hover{transform:translateY(-3px);box-shadow:0 6px 12px rgba(0,0,0,.35)}.sk-slot:hover{transform:translateY(-2px)}.sk-chip:hover{animation-duration:1.4s}}',
+    '.sk-btn:active,.sk-iconbtn:active{transform:scale(.96)}.sk-pm:active{transform:scale(.88)}',
+    '@media(prefers-reduced-motion:reduce){.sk-ripple,.sk-enter *{animation:none!important}.sk-btn,.sk-pm,.sk-player{transition:none!important}}',
+    /* פריסה: טלפון — עמודה אחת; מחשב — שתי עמודות */
+    '.sk-col{display:contents}',
+    '.sk-pot span{white-space:nowrap}',
+    '@media(max-width:420px){.sk-title{font-size:14px}.sk-iconbtn.sk-out span{display:none}.sk-iconbtn.sk-out{width:42px;padding:0;justify-content:center}.sk-name .sk-tag{display:table;margin:2px 0 0}.sk-pot{padding:10px 12px}.sk-pot span{font-size:12px}}',
+    '@media(max-width:380px){#sk-root{gap:12px}.sk-card{padding:13px;border-radius:20px}.sk-player{gap:7px;padding:9px 10px}.sk-amt{min-width:52px;font-size:15px}.sk-pm{width:32px;height:32px}.sk-av{width:34px;height:34px}.sk-pot strong{font-size:21px}.sk-ratio-row{grid-template-columns:1fr auto 1.2fr;}.sk-ratio-row .sk-btn{grid-column:1/-1}.sk-stepper input{width:80px}}',
+    '@media(min-width:900px){',
+    '  body.sk-on:not(.room-view-active) #tableCard{max-width:1080px}',
+    '  #sk-root{max-width:1080px;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:22px;align-items:start;padding-top:10px}',
+    '  .sk-col{display:grid;gap:18px;align-content:start}',
+    '  .sk-col-a{position:sticky;top:16px}',
+    '  #sk-root>.sk-guest-banner,#sk-root>.sk-topnav{grid-column:1/-1}',
+    '  .sk-card{padding:20px;border-radius:26px}',
+    '  .sk-actions .sk-btn{flex-direction:row;min-height:56px;font-size:15px;gap:8px}',
+    '  .sk-player{padding:12px 16px}.sk-amt{font-size:18px;min-width:80px}',
+    '  .sk-pm{width:38px;height:38px}',
+    '  .sk-overlay{align-items:center;padding:24px}',
+    '  .sk-sheet{border-radius:26px;max-height:88vh;padding:16px 24px 22px;box-shadow:0 30px 90px rgba(0,0,0,.55)}',
+    '  #sk-calc .sk-sheet{width:min(780px,100%)}',
+    '  #sk-calc .sk-dc{font-size:13px;aspect-ratio:auto;height:48px}#sk-calc .sk-dc span{font-size:15px}',
+    '  #sk-calc .sk-board{max-width:420px}',
+    '  .sk-board{max-width:520px;margin:0 auto}',
+    '  .sk-grab{display:none}',
+    '}',
     '.sk-btn.sk-reset{width:100%;min-height:50px;color:#ff8a8e;border-color:rgba(229,72,77,.35);background:rgba(229,72,77,.08)}',
     '.sk-headbtns{display:flex;gap:8px;flex:none}',
     '.sk-iconbtn.sk-out{width:auto;padding:0 12px;gap:6px;display:inline-flex;align-items:center;color:#ff8a8e;border-color:rgba(229,72,77,.3);background:rgba(229,72,77,.08);font:inherit;font-weight:800;font-size:13px}',
@@ -323,6 +366,7 @@
     }).join('');
     root.innerHTML =
       '<div class="sk-guest-banner"><span>אתה משחק כאורח — המשחק נשמר רק במכשיר הזה</span><button type="button" id="sk-guest-login">התחבר</button></div>' +
+      '<div class="sk-col sk-col-a">' +
       '<section class="sk-card">' +
       '<div class="sk-head"><div class="sk-brand"><div class="sk-logo">♠</div><div><div class="sk-title">Winner winner chicken dinner</div><div class="sk-sub">Poker Night</div></div></div>' +
       '<div class="sk-headbtns">' + (isGuestMode() ? '' : '<button class="sk-iconbtn sk-out" type="button" id="sk-logout-btn" aria-label="התנתק" title="התנתק">' + ICON.logout + '<span>יציאה</span></button>') +
@@ -338,13 +382,18 @@
       '<b class="sk-eq">=</b>' +
       '<label class="sk-rbox"><input id="sk-r-chips" type="number" inputmode="numeric" min="1" value="' + s.ratioChips + '" aria-label="ג׳טונים"><span>ג׳טונים</span></label>' +
       '<button class="sk-btn green" type="button" id="sk-r-save">עדכן</button></div></section>' +
+      '</div><div class="sk-col sk-col-b">' +
       '<section class="sk-card"><div class="sk-sec-title">שחקנים (' + s.players.length + ')<small>+ קנייה נוספת · − ביטול קנייה</small></div>' +
       '<div class="sk-list">' + (rows || '<div class="sk-empty">עוד אין שחקנים. לחץ על "הוסף שחקן" כדי להתחיל.</div>') + '</div></section>' +
       '<div class="sk-actions">' +
       '<button class="sk-btn" type="button" id="sk-finish">' + ICON.flag + 'סיים משחק</button>' +
       '<button class="sk-btn" type="button" id="sk-invite">' + ICON.link + 'הזמן</button>' +
       '<button class="sk-btn green" type="button" id="sk-add-btn">' + ICON.addUser + 'הוסף שחקן</button>' +
-      '</div>';
+      '</div></div>';
+    countPot(pot);
+    root.querySelectorAll('.sk-chip').forEach(function (c) {
+      c.onclick = function () { if (!motionOK()) return; c.classList.remove('sk-spin'); void c.offsetWidth; c.classList.add('sk-spin'); sound(); };
+    });
 
     $('sk-menu-btn').onclick = openMenu;
     if ($('sk-logout-btn')) $('sk-logout-btn').onclick = confirmLogout;
@@ -455,12 +504,14 @@
 
     root.innerHTML =
       '<div class="sk-topnav"><h2>סגירת חשבון</h2><button class="sk-backlink" type="button" id="sk-back">' + ICON.back + 'ערב פוקר</button></div>' +
+      '<div class="sk-col sk-col-a">' +
       '<section class="sk-card"><div class="sk-sec-title" style="color:var(--sk-green)">ג׳טונים שנשארו<small>' + num(step) + ' בכל לחיצה</small></div>' + chipRows + '</section>' +
       status +
+      '</div><div class="sk-col sk-col-b">' +
       '<section class="sk-card"><div class="sk-sec-title" style="color:var(--sk-green)">יתרות</div>' + bal + '</section>' +
       '<section class="sk-card"><div class="sk-sec-title" style="color:var(--sk-green)">תשלומים</div>' + (pays || '<div class="sk-zero" style="padding:6px 0">יופיעו כשהג׳טונים יתאזנו</div>') + '</section>' +
       '<button class="sk-btn green" type="button" id="sk-save" style="width:100%;min-height:54px;font-size:17px">שמור תוצאה</button>' +
-      '<button class="sk-btn sk-reset" type="button" id="sk-reset">' + ICON.reset + 'איפוס שולחן</button>';
+      '<button class="sk-btn sk-reset" type="button" id="sk-reset">' + ICON.reset + 'איפוס שולחן</button></div>';
 
     $('sk-back').onclick = function () { view = 'game'; render(); };
     $('sk-reset').onclick = function () {
@@ -499,12 +550,45 @@
     });
   }
 
+  var renderedView = null, enterTimer = null, lastPot = null;
   function render() {
     if (!root.isConnected) return;
     var focused = document.activeElement && root.contains(document.activeElement);
     if (focused && document.activeElement.tagName === 'INPUT') return; // לא לשבור הקלדה
+    var entering = renderedView !== view;
+    renderedView = view;
     if (view === 'settle') renderSettle(); else renderGame();
+    if (entering && motionOK()) {
+      root.classList.remove('sk-enter'); void root.offsetWidth; root.classList.add('sk-enter');
+      clearTimeout(enterTimer); enterTimer = setTimeout(function () { root.classList.remove('sk-enter'); }, 1100);
+    }
   }
+  // הקופה "סופרת" עד הסכום החדש
+  function countPot(pot) {
+    var el = root.querySelector('.sk-pot strong');
+    var from = lastPot; lastPot = pot;
+    if (!el || from === null || from === pot || !motionOK()) return;
+    el.textContent = money(from);
+    var t0 = performance.now(), dur = 550;
+    (function step(t) {
+      var k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = money(Math.round(from + (pot - from) * e));
+      if (k < 1 && el.isConnected) requestAnimationFrame(step); else el.textContent = money(pot);
+    })(t0);
+  }
+  // גל לחיצה עדין על כפתורים
+  document.addEventListener('pointerdown', function (e) {
+    if (!motionOK()) return;
+    var b = e.target.closest && e.target.closest('.sk-btn,.sk-iconbtn,.sk-pm,.wn-item,.sk-quick button,.sk-addhand,.sk-guest-btn,.sk-profile-logout');
+    if (!b || b.disabled) return;
+    var r = b.getBoundingClientRect(), d = Math.max(r.width, r.height) * 1.6, sp = document.createElement('span');
+    sp.className = 'sk-ripple';
+    sp.style.width = sp.style.height = d + 'px';
+    sp.style.left = (e.clientX - r.left - d / 2) + 'px';
+    sp.style.top = (e.clientY - r.top - d / 2) + 'px';
+    b.appendChild(sp);
+    setTimeout(function () { sp.remove(); }, 600);
+  }, { passive: true });
 
   /* ---------- guest mode (כניסה כאורח) ---------- */
   var GUEST_KEY = 'wwcd_guest';
