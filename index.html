@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07140f">
 <link rel="apple-touch-icon" sizes="180x180" href="/spade-home-icon-v2.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Winner Poker">
 <link rel="icon" type="image/png" sizes="180x180" href="/spade-home-icon-v2.png?v=13">
 <title>Winner winner chicken dinner</title>
 <style>
@@ -1684,6 +1689,7 @@ render();
 <script src="/skin.js?v=12" defer></script>
 <script src="/bottom-nav.js?v=4" defer></script>
 <script src="/terms-gate.js?v=6" defer></script>
+<script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})})}</script>
 
 </body>
 </html>
