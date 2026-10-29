@@ -104,26 +104,27 @@
   function injectStyles() {
     var css =
       '#wwcd-terms{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;' +
-      'padding:16px;background:rgba(8,10,14,.82);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);' +
+      'padding:16px;background:radial-gradient(ellipse at 50% 0%,rgba(212,175,55,.14),transparent 55%),rgba(3,12,8,.86);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);' +
       'font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;direction:rtl}' +
       '#wwcd-terms .wt-card{width:100%;max-width:480px;max-height:calc(100vh - 32px);overflow-y:auto;' +
-      'background:#15181f;color:#eef0f4;border:1px solid #2a2f3a;border-radius:16px;padding:24px 20px;' +
-      'box-shadow:0 20px 60px rgba(0,0,0,.5)}' +
-      '#wwcd-terms h2{margin:0 0 6px;font-size:22px;font-weight:700}' +
-      '#wwcd-terms .wt-sub{margin:0 0 18px;color:#a3a9b6;font-size:14px;line-height:1.5}' +
+      'background:radial-gradient(ellipse at 50% -20%,rgba(242,201,76,.16),transparent 50%),linear-gradient(160deg,#12301f,#06150e);color:#f3efe2;border:1px solid rgba(242,201,76,.28);border-radius:26px;padding:26px 22px;animation:wtIn .45s cubic-bezier(.2,.9,.3,1.2);' +
+      'box-shadow:0 30px 90px rgba(0,0,0,.55)}@keyframes wtIn{from{opacity:0;transform:translateY(18px) scale(.97)}}' +
+      '#wwcd-terms .wt-card:before{content:"♠ ♥ ♣ ♦";display:block;text-align:center;letter-spacing:8px;color:#f2c94c;font-size:18px;margin:0 0 10px;opacity:.9}' +
+      '#wwcd-terms h2{margin:0 0 6px;font-size:23px;font-weight:900;text-align:center;color:#fff}' +
+      '#wwcd-terms .wt-sub{margin:0 0 18px;color:#b9c7bd;font-size:14px;text-align:center;line-height:1.5}' +
       '#wwcd-terms label{display:flex;gap:12px;align-items:flex-start;padding:12px;margin:0 0 8px;' +
-      'border:1px solid #2a2f3a;border-radius:10px;cursor:pointer;font-size:15px;line-height:1.5;' +
+      'border:1px solid rgba(255,255,255,.12);border-radius:14px;cursor:pointer;font-size:15px;line-height:1.5;' +
       'transition:border-color .15s,background .15s}' +
-      '#wwcd-terms label:hover{border-color:#3d4452}' +
+      '#wwcd-terms label:hover{border-color:rgba(242,201,76,.4)}' +
       '#wwcd-terms label.wt-on{border-color:#2fbf71;background:rgba(47,191,113,.08)}' +
       '#wwcd-terms input[type=checkbox]{flex:none;width:22px;height:22px;margin:1px 0 0;accent-color:#2fbf71;cursor:pointer}' +
-      '#wwcd-terms .wt-intro{margin:0 0 10px;font-size:15px;font-weight:700;line-height:1.55;color:#eef0f4}' +
-      '#wwcd-terms .wt-list{margin:0 0 16px;padding:12px 26px 12px 12px;display:grid;gap:10px;font-size:14px;line-height:1.6;color:#d6dae2;max-height:42vh;overflow-y:auto;border:1px solid #2a2f3a;border-radius:12px;background:rgba(255,255,255,.02)}' +
+      '#wwcd-terms .wt-intro{margin:0 0 10px;font-size:15px;font-weight:700;line-height:1.55;color:#fff}' +
+      '#wwcd-terms .wt-list{margin:0 0 16px;padding:12px 26px 12px 12px;display:grid;gap:10px;font-size:14px;line-height:1.6;color:#d9e3dc;max-height:42vh;overflow-y:auto;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(0,0,0,.18)}' +
       '#wwcd-terms label{margin-bottom:14px;font-weight:600}' +
-      '#wwcd-terms .wt-go{width:100%;padding:14px;border:0;border-radius:10px;font-size:17px;font-weight:700;' +
-      'background:#2fbf71;color:#06130b;cursor:pointer;transition:opacity .15s}' +
-      '#wwcd-terms .wt-go:disabled{opacity:.35;cursor:not-allowed}' +
-      '#wwcd-terms .wt-note{margin:12px 0 0;text-align:center;color:#7d8391;font-size:12px}' +
+      '#wwcd-terms .wt-go{width:100%;padding:15px;border:0;border-radius:16px;font-size:17px;font-weight:900;font-family:inherit;' +
+      'background:linear-gradient(180deg,#36dd85,#1fb565);color:#062012;cursor:pointer;box-shadow:0 8px 22px rgba(47,212,124,.28);transition:opacity .15s,transform .15s}#wwcd-terms .wt-go:not(:disabled):active{transform:scale(.97)}' +
+      '#wwcd-terms .wt-go:disabled{opacity:.35;box-shadow:none;cursor:not-allowed}' +
+      '#wwcd-terms .wt-note{margin:12px 0 0;text-align:center;color:#8fa596;font-size:12px}' +
       'html.wt-lock,html.wt-lock body{overflow:hidden!important}';
     var s = el('style');
     s.textContent = css;

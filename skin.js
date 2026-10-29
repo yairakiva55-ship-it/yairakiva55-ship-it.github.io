@@ -154,6 +154,53 @@
     'body.room-authenticated #sk-legal{display:none}',
     '.sk-delete-link{display:block;margin:12px auto 0;border:0;background:none;color:#c98b8e;font:inherit;font-size:.8rem;text-decoration:underline;cursor:pointer}',
     '.sk-field{min-width:0}.sk-field input{min-width:0;width:100%;box-sizing:border-box}',
+    /* מצב ריק מזמין */
+    '.sk-empty-rich{display:grid;justify-items:center;gap:6px;padding:22px 16px;border-style:dashed}',
+    '.sk-empty-rich b{font-size:17px;color:var(--sk-text)}.sk-empty-rich>span{font-size:13px}',
+    '.sk-empty-rich .sk-btn{margin-top:8px}',
+    '.sk-empty-cards{position:relative;width:86px;height:64px;margin-bottom:4px}',
+    '.sk-empty-cards span{position:absolute;top:0;width:44px;height:60px;border-radius:8px;background:#fbfaf6;color:#151515;font:900 15px/1 Georgia,serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;box-shadow:0 6px 14px rgba(0,0,0,.35);animation:skDeal 3.6s ease-in-out infinite}',
+    '.sk-empty-cards span i{font-style:normal;font-size:20px}.sk-empty-cards span:first-child{left:6px;transform:rotate(-12deg)}.sk-empty-cards span.red{right:6px;color:#d32f2f;transform:rotate(12deg);animation-delay:-1.8s}',
+    '@keyframes skDeal{0%,100%{translate:0 0}50%{translate:0 -5px}}',
+    /* שולחן משותף בעיצוב החדש */
+    '#sk-table-slot:empty{display:none}',
+    '#sk-root .table-card{margin:0;border:1px solid rgba(242,201,76,.22);border-radius:24px;padding:14px 16px;background:linear-gradient(150deg,rgba(242,201,76,.10),rgba(13,35,24,.9));box-shadow:0 10px 30px rgba(0,0,0,.22)}',
+    '#sk-root .table-empty-text strong{display:flex;align-items:center;gap:8px;font-size:16px}',
+    '#sk-root .table-empty-text strong::before{content:"♣";display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:rgba(242,201,76,.16);color:#f2c94c;font-size:15px}',
+    '#sk-root .table-empty-actions .btn,#sk-root .table-active-actions .btn{min-height:44px;border-radius:14px;font-weight:800}',
+    '#sk-root #openCreateRoomBtn{background:linear-gradient(180deg,#36dd85,#1fb565);color:#062012;border:0;box-shadow:0 6px 16px rgba(47,212,124,.22)}',
+    '#sk-root .table-link{color:#f2c94c}',
+    '@media(max-width:520px){#sk-root .table-empty{grid-template-columns:1fr}#sk-root .table-empty-actions{display:grid;grid-template-columns:1fr 1fr}}',
+    /* עמוד פתיחה */
+    '#sk-landing{display:none}',
+    'body.sk-on:not(.room-authenticated):not(.wn-guest) .shell{display:flex!important;flex-direction:column}',
+    'body.sk-on:not(.room-authenticated):not(.wn-guest) .shell>#sk-landing{order:2}',
+    'body.sk-on:not(.room-authenticated):not(.wn-guest) .shell>#sk-landing{display:grid!important;gap:14px;margin-top:18px;animation:sklIn .6s ease both}',
+    '@keyframes sklIn{from{opacity:0;transform:translateY(14px)}}',
+    '.skl-hero{position:relative;overflow:hidden;padding:22px 20px;border-radius:26px;border:1px solid rgba(242,201,76,.22);background:radial-gradient(ellipse at 80% 0%,rgba(242,201,76,.16),transparent 55%),linear-gradient(160deg,#103222,#071710);text-align:center}',
+    '.skl-kicker{display:inline-block;padding:5px 12px;border-radius:99px;background:rgba(47,212,124,.12);color:#5fe39b;font-size:12px;font-weight:800}',
+    '.skl-hero h1{margin:12px 0 8px;font:900 30px/1.12 Georgia,"Times New Roman",serif;color:#fff;direction:ltr}',
+    '.skl-hero h1 em{color:#f2c94c;font-style:italic}',
+    '.skl-hero p{margin:0 auto;max-width:420px;color:#b9c7bd;font-size:14.5px;line-height:1.65}',
+    '.skl-chips i{position:absolute;width:34px;height:34px;border-radius:50%;opacity:.55;border:4px dashed rgba(255,255,255,.75);animation:sklFloat 6s ease-in-out infinite}',
+    '.skl-chips .c1{background:#d63c3c;top:14px;left:14px}.skl-chips .c2{background:#2a6fd6;bottom:16px;right:16px;animation-delay:-2s}.skl-chips .c3{background:#1f9e5a;top:46%;left:-8px;animation-delay:-4s;width:26px;height:26px}.skl-chips .c4{background:#222;top:12px;right:22%;animation-delay:-3s;width:22px;height:22px;border-width:3px}',
+    '@keyframes sklFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-8px) rotate(25deg)}}',
+    '.skl-feats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}',
+    '.skl-f{display:grid;gap:4px;justify-items:center;text-align:center;padding:14px 8px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);transition:transform .2s,border-color .2s}',
+    '.skl-f:hover{transform:translateY(-3px);border-color:rgba(242,201,76,.35)}',
+    '.skl-f span{font-size:24px}.skl-f b{color:#fff;font-size:14px}.skl-f small{color:#9fb3a6;font-size:11.5px;line-height:1.45}',
+    '.skl-steps{list-style:none;margin:0;padding:12px;display:grid;gap:8px;border-radius:20px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.06)}',
+    '.skl-steps li{display:flex;align-items:center;gap:10px;color:#d9e3dc;font-size:14px}',
+    '.skl-steps b{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#f2c94c;color:#1b1503;font-size:13px}',
+    '.skl-foot{text-align:center;color:#7f978a;font-size:12px}.skl-foot a{color:#f2c94c}',
+    '@media(max-width:420px){.skl-feats{grid-template-columns:1fr}.skl-f{grid-template-columns:auto 1fr;justify-items:start;text-align:start;column-gap:12px;padding:12px 14px}.skl-f span{grid-row:span 2;font-size:26px}.skl-hero h1{font-size:27px}}',
+    '@media(min-width:900px){',
+    '  body.sk-on:not(.room-authenticated):not(.wn-guest) .shell{width:min(1080px,100%)!important;display:grid!important;grid-template-columns:minmax(0,1.1fr) minmax(0,520px);gap:28px;align-items:center}',
+    '  body.sk-on:not(.room-authenticated):not(.wn-guest) .shell>#sk-landing{margin:0;order:0}',
+    '  body.sk-on:not(.room-authenticated):not(.wn-guest) .shell>.room-hub{order:1}',
+    '  .skl-hero{padding:34px 30px}.skl-hero h1{font-size:42px}',
+    '}',
+    '@media(prefers-reduced-motion:reduce){.skl-chips i,#sk-landing,.sk-empty-cards span{animation:none!important}}',
     '.sk-seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:14px;background:rgba(0,0,0,.25);border:1px solid var(--sk-line)}',
     '.sk-seg button{height:40px;border:0;border-radius:10px;background:transparent;color:var(--sk-muted);font:inherit;font-weight:800;cursor:pointer;transition:background .2s,color .2s}',
     '.sk-seg button[aria-checked="true"]{background:var(--sk-green);color:#062012}',
@@ -432,6 +479,7 @@
       '<div class="sk-hero"><div class="sk-kicker">Winner winner chicken dinner</div>' +
       '<div class="sk-chips"><div class="sk-chip r">♦</div><div class="sk-chip g">♣</div><div class="sk-chip y">♠</div></div>' +
       (code ? '<div class="sk-room">חדר <b>' + esc(code) + '</b></div>' : '') + '</div>' +
+      '<div id="sk-table-slot"></div>' +
       '<section class="sk-card sk-ratio"><div class="sk-sec-title">' + (isPoints() ? 'יחס ג׳טונים לנקודות' : 'יחס ג׳טונים לשקל') + '<small>' + esc(chipLine(s)) + '</small></div>' +
       '<div class="sk-ratio-row"><label class="sk-rbox"><input id="sk-r-money" type="number" inputmode="decimal" min="0.01" value="' + s.ratioMoney + '" aria-label="' + (isPoints() ? 'נקודות' : 'שקלים') + '"><span>' + CUR() + '</span></label>' +
       '<b class="sk-eq">=</b>' +
@@ -439,7 +487,7 @@
       '<button class="sk-btn green" type="button" id="sk-r-save">עדכן</button></div></section>' +
       '</div><div class="sk-col sk-col-b">' +
       '<section class="sk-card"><div class="sk-sec-title">שחקנים (' + s.players.length + ')<small>+ קנייה נוספת · − ביטול קנייה</small></div>' +
-      '<div class="sk-list">' + (rows || '<div class="sk-empty">עוד אין שחקנים. לחץ על "הוסף שחקן" כדי להתחיל.</div>') + '</div></section>' +
+      '<div class="sk-list">' + (rows || '<div class="sk-empty sk-empty-rich"><div class="sk-empty-cards" aria-hidden="true"><span>A<i>♠</i></span><span class="red">K<i>♥</i></span></div><b>השולחן עוד ריק</b><span>מוסיפים שחקנים, והאפליקציה סופרת הכל לבד.</span><button class="sk-btn green" type="button" id="sk-add-first">' + ICON.addUser + 'הוסף את השחקן הראשון</button></div>') + '</div></section>' +
       '<div class="sk-actions">' +
       '<button class="sk-btn" type="button" id="sk-finish">' + ICON.flag + 'סיים משחק</button>' +
       '<button class="sk-btn" type="button" id="sk-invite">' + ICON.link + 'הזמן</button>' +
@@ -465,6 +513,7 @@
     $('sk-guest-login').onclick = exitGuest;
     $('sk-share').onclick = function () { var b = $('shareAppBtn'); if (b) b.click(); };
     $('sk-add-btn').onclick = openAdd;
+    if ($('sk-add-first')) $('sk-add-first').onclick = openAdd;
     $('sk-invite').onclick = invite;
     $('sk-finish').onclick = function () {
       if (getState().players.length < 2) return toast('צריך לפחות שני שחקנים');
@@ -633,11 +682,22 @@
     lastRenderAt = performance.now();
     var entering = renderedView !== view;
     renderedView = view;
+    parkTableCard();
     if (view === 'settle') renderSettle(); else renderGame();
+    placeTableCard();
     if (entering && motionOK()) {
       root.classList.remove('sk-enter'); void root.offsetWidth; root.classList.add('sk-enter');
       clearTimeout(enterTimer); enterTimer = setTimeout(function () { root.classList.remove('sk-enter'); }, 1100);
     }
+  }
+  // כרטיס "שולחן משותף" של האפליקציה עובר למקום שלו בעיצוב (מתחת לכותרת), ובכל רינדור חוזר לבית שלו כדי לא להימחק
+  function parkTableCard() {
+    var tc = $('tableCard'), hub = document.querySelector('#roomDashboard');
+    if (tc && hub && root.contains(tc)) { var notice = $('appNotice'); if (notice) notice.after(tc); else hub.appendChild(tc); }
+  }
+  function placeTableCard() {
+    var tc = $('tableCard'), slot = $('sk-table-slot');
+    if (tc && slot) slot.appendChild(tc);
   }
   // הקופה "סופרת" עד הסכום החדש
   function countPot(pot) {
@@ -858,6 +918,28 @@
     };
   }
 
+  // עמוד פתיחה מזמין לפני ההתחברות
+  function addLanding(shell, hub) {
+    if ($('sk-landing')) return;
+    var L = document.createElement('section');
+    L.id = 'sk-landing';
+    L.innerHTML =
+      '<div class="skl-hero">' +
+        '<div class="skl-chips" aria-hidden="true"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i></div>' +
+        '<span class="skl-kicker">ערב פוקר עם החבר׳ה</span>' +
+        '<h1>Winner winner<br><em>chicken dinner</em></h1>' +
+        '<p>בלי דפים, בלי מחשבון ובלי ויכוחים בסוף הערב. האפליקציה סופרת קניות, מחשבת מי חייב למי ושומרת את ההיסטוריה.</p>' +
+      '</div>' +
+      '<div class="skl-feats">' +
+        '<div class="skl-f"><span>🪙</span><b>קניות וג׳טונים</b><small>לחיצה אחת לכל קנייה, הקופה מתעדכנת מיד</small></div>' +
+        '<div class="skl-f"><span>🤝</span><b>סגירת חשבון</b><small>מינימום העברות, מחושב אוטומטית</small></div>' +
+        '<div class="skl-f"><span>🎯</span><b>מחשבון סיכויים</b><small>כמה אחוזים יש לך מול היד שלו</small></div>' +
+      '</div>' +
+      '<ol class="skl-steps"><li><b>1</b>נכנסים עם Google או כאורח</li><li><b>2</b>מוסיפים שחקנים וקניות</li><li><b>3</b>בסוף לוחצים "סיים משחק"</li></ol>' +
+      '<div class="skl-foot">חינם · בלי הימורים בכסף אמיתי · <a href="privacy.html">פרטיות</a></div>';
+    shell.insertBefore(L, hub);
+  }
+
   function mount() {
     loadBlocks();
     addProfileLogout();
@@ -865,6 +947,7 @@
     var shell = document.querySelector('.shell'), hub = document.querySelector('.room-hub');
     if (!shell || !hub) return;
     hub.after(root);
+    addLanding(shell, hub);
     document.body.classList.add('sk-on');
     // לאפליקציה יש כבר כניסת אורח משלה (googleSignInBtn/guestSignInBtn) — לא מוסיפים כפתור שני
     if ($('guestSignInBtn')) { lsDel(GUEST_KEY); document.body.classList.remove('wn-guest'); }
