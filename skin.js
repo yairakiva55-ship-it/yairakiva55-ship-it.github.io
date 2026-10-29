@@ -139,6 +139,7 @@
     '.admin-terms.ok{background:rgba(47,212,124,.18);color:#2fd47c;box-shadow:0 0 0 1px rgba(47,212,124,.4)}',
     '.admin-terms.no{background:rgba(255,255,255,.06);color:#9fb3a6}',
     'body.room-authenticated #sk-legal{display:none}',
+    '.sk-delete-link{display:block;margin:12px auto 0;border:0;background:none;color:#c98b8e;font:inherit;font-size:.8rem;text-decoration:underline;cursor:pointer}',
     '.sk-headbtns{display:flex;gap:8px;flex:none}',
     '.sk-iconbtn.sk-out{width:auto;padding:0 12px;gap:6px;display:inline-flex;align-items:center;color:#ff8a8e;border-color:rgba(229,72,77,.3);background:rgba(229,72,77,.08);font:inherit;font-weight:800;font-size:13px}',
     '.sk-profile-logout{width:100%;margin-top:10px;min-height:46px;border-radius:14px;border:1px solid rgba(229,72,77,.35);background:rgba(229,72,77,.1);color:#ff8a8e;font:inherit;font-weight:800;cursor:pointer}',
@@ -157,6 +158,26 @@
     '.sk-chips:hover .sk-chip,.sk-chip:active{animation-duration:1.2s}',
     '.sk-logo{animation:skLogo 6s ease-in-out infinite}@keyframes skLogo{0%,90%,100%{transform:rotate(0)}94%{transform:rotate(-8deg)}97%{transform:rotate(6deg)}}',
     '.sk-pot.pot-pulse{animation:potPulse .65s ease}',
+    '.sk-pot{position:relative;overflow:hidden}',
+    '.sk-pot::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,236,160,.22) 50%,transparent 65%);transform:translateX(-120%);animation:skShine 7s ease-in-out 2s infinite;pointer-events:none}',
+    '.sk-pot.sk-shine::after{animation:skShineFast .9s ease-out}',
+    '@keyframes skShine{0%,80%{transform:translateX(-120%)}100%{transform:translateX(120%)}}@keyframes skShineFast{from{transform:translateX(-120%)}to{transform:translateX(120%)}}',
+    '.sk-pot-lbl{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}',
+    '.sk-pot strong{white-space:nowrap;font-size:clamp(19px,5.6vw,24px)}',
+    '.sk-pot{flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;min-width:0}',
+    '.sk-pot strong{line-height:1.1;align-self:flex-end}',
+    '@media(max-width:420px){.sk-row2{grid-template-columns:1.5fr 1fr}.sk-pot{padding:8px 12px}.sk-pot-lbl{gap:6px;font-size:12px}.sk-row2 .sk-btn{padding:10px 8px}}',
+    '.sk-stack{position:relative;display:inline-block;width:18px;height:18px;flex:none}',
+    '.sk-stack b{position:absolute;left:0;width:18px;height:6px;border-radius:50%;border:1.5px dashed rgba(255,255,255,.7);box-sizing:border-box}',
+    '.sk-stack b:nth-child(1){bottom:0;background:#d93a3f}.sk-stack b:nth-child(2){bottom:5px;background:#1f9d62}.sk-stack b:nth-child(3){bottom:10px;background:#d9a21f;animation:skTop 3.2s ease-in-out infinite}',
+    '@keyframes skTop{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}',
+    '.sk-stack.bump{animation:skStack .55s cubic-bezier(.2,.8,.2,1)}@keyframes skStack{30%{transform:translateY(-5px) scale(1.15)}60%{transform:translateY(1px) scale(.95)}}',
+    '.sk-delta{position:absolute;left:14px;top:6px;font-weight:900;font-size:15px;pointer-events:none;animation:skDelta 1.2s ease-out forwards;direction:ltr}',
+    '.sk-delta.up{color:#7dffb5}.sk-delta.down{color:#ff8a8e}',
+    '@keyframes skDelta{0%{opacity:0;transform:translateY(10px) scale(.8)}20%{opacity:1;transform:translateY(0) scale(1.1)}100%{opacity:0;transform:translateY(-22px) scale(1)}}',
+    '.sk-fly{position:fixed;width:26px;height:26px;border-radius:50%;border:4px dashed rgba(255,255,255,.85);box-shadow:0 6px 14px rgba(0,0,0,.4);z-index:300;pointer-events:none;animation:skFly .8s cubic-bezier(.5,0,.2,1) both}',
+    '@keyframes skFly{0%{opacity:0;transform:translate(0,0) scale(.6)}15%{opacity:1}70%{opacity:1;transform:translate(calc(var(--tx)*.7),calc(var(--ty)*.7 - 40px)) scale(1) rotate(200deg)}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(.5) rotate(360deg)}}',
+    '@media(prefers-reduced-motion:reduce){.sk-pot::after,.sk-stack b,.sk-stack,.sk-fly,.sk-delta{animation:none!important}}',
     '.sk-player.sk-pop{animation:skPop .5s cubic-bezier(.2,.8,.2,1)}@keyframes skPop{0%{transform:scale(.96);background:rgba(47,212,124,.18)}100%{transform:none}}',
     '.sk-player.sk-drop{animation:skDrop .45s ease}@keyframes skDrop{0%{background:rgba(229,72,77,.18)}100%{background:rgba(255,255,255,.035)}}',
     '.sk-amt.sk-bump{animation:skBump .5s ease}@keyframes skBump{40%{transform:scale(1.25);color:#fff}}',
@@ -379,7 +400,7 @@
       '<div class="sk-head"><div class="sk-brand"><div class="sk-logo">♠</div><div><div class="sk-title">Winner winner chicken dinner</div><div class="sk-sub">Poker Night</div></div></div>' +
       '<div class="sk-headbtns">' + (isAdmin() ? '<button class="sk-iconbtn sk-adm" type="button" id="sk-admin-btn" aria-label="ניהול" title="ניהול">' + ICON.shield + '<span>ADMIN</span></button>' : '') + (isGuestMode() ? '' : '<button class="sk-iconbtn sk-out" type="button" id="sk-logout-btn" aria-label="התנתק" title="התנתק">' + ICON.logout + '<span>יציאה</span></button>') +
       '<button class="sk-iconbtn" type="button" id="sk-menu-btn" aria-label="הגדרות">' + ICON.gear + '</button></div></div>' +
-      '<div class="sk-row2"><div class="sk-pot"><span>סה״כ בקופה</span><strong>' + money(pot) + '</strong></div>' +
+      '<div class="sk-row2"><div class="sk-pot"><span class="sk-pot-lbl"><i class="sk-stack" aria-hidden="true"><b></b><b></b><b></b></i>סה״כ בקופה</span><strong>' + money(pot) + '</strong></div>' +
       '<button class="sk-btn green" type="button" id="sk-share">' + ICON.share + 'שתף</button></div>' +
       '</section>' +
       '<div class="sk-hero"><div class="sk-kicker">POKER NIGHT MANAGER</div>' +
@@ -457,7 +478,26 @@
     var row = root.querySelector('.sk-player[data-id="' + id + '"]');
     if (!row) return;
     if (motionOK()) { row.classList.add(cls); var a = row.querySelector('.sk-amt'); if (a && chips) a.classList.add('sk-bump'); }
-    if (chips) fx(row, { pot: true }); else { sound(); pulsePot(); }
+    if (chips) { fx(row, { pot: true }); flyToPot(row); } else { sound(); pulsePot(); }
+  }
+
+  function flyToPot(from) {
+    var pot = root.querySelector('.sk-pot'), layer = document.getElementById('fxLayer');
+    if (!pot || !from || !layer || !motionOK()) return;
+    var a = from.getBoundingClientRect(), b = pot.getBoundingClientRect();
+    var colors = ['#d93a3f', '#1f9d62', '#d9a21f'];
+    for (var i = 0; i < 4; i++) {
+      var c = document.createElement('span');
+      c.className = 'sk-fly';
+      c.style.background = colors[i % 3];
+      c.style.left = (a.left + a.width / 2 - 13 + (i - 1.5) * 10) + 'px';
+      c.style.top = (a.top + a.height / 2 - 13) + 'px';
+      c.style.setProperty('--tx', (b.left + b.width / 2 - (a.left + a.width / 2) - (i - 1.5) * 10) + 'px');
+      c.style.setProperty('--ty', (b.top + b.height / 2 - (a.top + a.height / 2)) + 'px');
+      c.style.animationDelay = (i * 70) + 'ms';
+      layer.appendChild(c);
+      (function (el) { setTimeout(function () { el.remove(); }, 1200); })(c);
+    }
   }
 
   function computeTransfers(s) {
@@ -559,11 +599,12 @@
     });
   }
 
-  var renderedView = null, enterTimer = null, lastPot = null;
+  var renderedView = null, enterTimer = null, lastPot = null, lastRenderAt = 0;
   function render() {
     if (!root.isConnected) return;
     var focused = document.activeElement && root.contains(document.activeElement);
     if (focused && document.activeElement.tagName === 'INPUT') return; // לא לשבור הקלדה
+    lastRenderAt = performance.now();
     var entering = renderedView !== view;
     renderedView = view;
     if (view === 'settle') renderSettle(); else renderGame();
@@ -577,6 +618,17 @@
     var el = root.querySelector('.sk-pot strong');
     var from = lastPot; lastPot = pot;
     if (!el || from === null || from === pot || !motionOK()) return;
+    var box = el.closest('.sk-pot');
+    if (box) {
+      var d = document.createElement('span');
+      d.className = 'sk-delta ' + (pot > from ? 'up' : 'down');
+      d.textContent = (pot > from ? '+' : '−') + money(Math.abs(pot - from));
+      box.appendChild(d);
+      setTimeout(function () { d.remove(); }, 1300);
+      var st = box.querySelector('.sk-stack');
+      if (st) { st.classList.remove('bump'); void st.offsetWidth; st.classList.add('bump'); }
+      box.classList.remove('sk-shine'); void box.offsetWidth; box.classList.add('sk-shine');
+    }
     el.textContent = money(from);
     var t0 = performance.now(), dur = 550;
     (function step(t) {
@@ -675,6 +727,43 @@
     b.textContent = 'התנתק מהחשבון';
     b.onclick = function () { var c = $('profileCloseBtn'); if (c) c.click(); confirmLogout(); };
     sheet.appendChild(b);
+    var d = document.createElement('button');
+    d.type = 'button'; d.id = 'sk-delete-account'; d.className = 'sk-delete-link';
+    d.textContent = 'מחיקת החשבון שלי';
+    d.onclick = function () { var c = $('profileCloseBtn'); if (c) c.click(); askDelete(); };
+    sheet.appendChild(d);
+  }
+  function session() {
+    try { var x = JSON.parse(localStorage.getItem('sb-ctrnlkfopahdtoiaakru-auth-token') || 'null'); if (x && x.currentSession) x = x.currentSession; return x && x.access_token ? x : null; } catch (e) { return null; }
+  }
+  function askDelete() {
+    var se = session();
+    if (!se) return toast('צריך להיות מחובר כדי למחוק את החשבון');
+    if ((se.user && se.user.email || '').toLowerCase() === 'yairakiva55@gmail.com') return toast('אי אפשר למחוק את חשבון המנהל מתוך האפליקציה');
+    if (typeof window.openConfirm !== 'function') return;
+    window.openConfirm('למחוק את החשבון לצמיתות?', 'החשבון, הפרופיל, המשחקים השמורים, הנקודות והשולחנות שפתחת יימחקו ולא יהיה אפשר לשחזר אותם.', 'המשך למחיקה', function () {
+      setTimeout(function () {
+        window.openConfirm('בטוח לגמרי?', 'זה השלב האחרון. אחרי הלחיצה החשבון נמחק מיד.', 'מחק את החשבון', doDelete);
+      }, 250);
+    });
+  }
+  function doDelete() {
+    var se = session();
+    if (!se) return;
+    toast('מוחק את החשבון...');
+    fetch('https://ctrnlkfopahdtoiaakru.supabase.co/functions/v1/wwcd-delete-account', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + se.access_token, 'apikey': 'sb_publishable_zpiuN3ZFGPTHr5ySfL-rOw_Ngfzl7hc', 'Content-Type': 'application/json' },
+      body: '{}'
+    }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok && j.ok, j: j }; }); })
+      .then(function (res) {
+        if (!res.ok) return toast((res.j && res.j.error) || 'מחיקת החשבון נכשלה. נסה שוב.');
+        try { Object.keys(localStorage).forEach(function (k) { if (/^sb-|^wwcd_/.test(k)) localStorage.removeItem(k); }); } catch (e) {}
+        try { sessionStorage.clear(); } catch (e) {}
+        toast('החשבון נמחק');
+        setTimeout(function () { location.replace('/'); }, 900);
+      })
+      .catch(function () { toast('אין חיבור לשרת. נסה שוב.'); });
   }
 
   function mount() {
@@ -702,7 +791,8 @@
 
   // כשהמשחק נטען מהענן או משתנה מבחוץ — לרענן
   var origReplace = G.replace;
-  G.replace = function (next) { origReplace(next); setTimeout(render, 0); };
+  // שינוי מבחוץ (ענן/רענון) — לרנדר רק אם לא רונדר הרגע, כדי לא למחוק אנימציות שרצות
+  G.replace = function (next) { origReplace(next); setTimeout(function () { if (performance.now() - lastRenderAt > 150) render(); }, 0); };
 
   window.wnGame = {
     show: function () { view = 'game'; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); },
