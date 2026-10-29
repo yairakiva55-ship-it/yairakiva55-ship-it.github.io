@@ -13,23 +13,24 @@
 (function () {
   'use strict';
 
-  var TERMS_VERSION = 1;
+  var TERMS_VERSION = 2; // נוסח 2 — כולם מתבקשים לאשר מחדש
   var SUPABASE_URL = 'https://ctrnlkfopahdtoiaakru.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_zpiuN3ZFGPTHr5ySfL-rOw_Ngfzl7hc';
   var SESSION_KEY = 'sb-ctrnlkfopahdtoiaakru-auth-token';
   var LOCAL_KEY = 'wwcd_terms_accepted_v' + TERMS_VERSION;
   var SYNCED_KEY = 'wwcd_terms_synced_v' + TERMS_VERSION + '_';
 
+  var INTRO = 'בלחיצה על "אני מאשר/ת", אני מצהיר/ה כי מלאו לי 18 שנים וכי קראתי והבנתי את התנאים הבאים:';
   var POINTS = [
-    'אני בן/בת 18 ומעלה.',
-    'ידוע לי שהאפליקציה היא כלי לרישום ומעקב בלבד. היא לא מחזיקה, לא מעבירה ולא גובה כסף, ואינה צד לשום התחשבנות בין המשתמשים.',
-    'ידוע לי שהאפליקציה לא מארגנת, לא מפעילה ולא מעודדת הימורים בשום צורה, ושהאחריות לפעול לפי החוק החל עליי היא שלי בלבד.',
-    'ידוע לי שהשימוש באפליקציה חינמי, ושהנתונים המוצגים בה הם לצורכי מעקב בלבד. הם לא יוצרים חוב או התחייבות לתשלום כלפי אף אחד.',
-    'אני מאשר/ת שהשימוש באפליקציה הוא באחריותי הבלעדית, ושלמפעילי האפליקציה אין אחריות לכל נזק או הפסד כספי שנובע מהשימוש בה.'
+    'האפליקציה היא כלי לרישום, חישוב והצגת נתונים שהמשתמשים מזינים בלבד; היא אינה מחזיקה, מקבלת, מעבירה או גובה כספים, אינה מנהלת קופה ואינה צד למשחק, להסכמות או להתחשבנות בין משתמשים.',
+    'הסכומים, היתרות והחישובים מוצגים לנוחות ולמעקב בלבד ועלולים להיות שגויים או חלקיים, ולכן באחריותי לבדוק אותם בעצמי; הצגתם אינה קביעה משפטית שקיים חוב ואינה התחייבות של מפעילי האפליקציה לשלם או לגבות כסף.',
+    'כל משחק, הסכמה, תשלום או התחשבנות נעשים בין המשתמשים בלבד, ואני אחראי/ת לפעולותיי ולבדיקת התאמתן לדין; אין להשתמש באפליקציה לצורך פעילות האסורה לפי דין.',
+    'בכפוף לדין, מפעילי האפליקציה אינם אחראים להפסד או למחלוקת הנובעים ממידע שהוזן בידי משתמשים, מהסתמכות על החישובים או מהסכמות ופעולות בין משתמשים; אין בתנאים אלה כדי לגרוע מאחריות שלא ניתן להגביל או לשלול לפי דין.',
+    'השימוש באפליקציה כפוף גם למדיניות הפרטיות שלה.'
   ];
 
   // ---------- אחסון מקומי (מוגן מפני דפדפנים שחוסמים אותו) ----------
-  var GUEST_SESSION_KEY = 'wwcd_terms_guest_session_';
+  var GUEST_SESSION_KEY = 'wwcd_terms_guest_session_v' + TERMS_VERSION + '_';
   var guestMode = false;
   function ssGet(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
   function ssSet(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
@@ -116,7 +117,8 @@
       '#wwcd-terms label:hover{border-color:#3d4452}' +
       '#wwcd-terms label.wt-on{border-color:#2fbf71;background:rgba(47,191,113,.08)}' +
       '#wwcd-terms input[type=checkbox]{flex:none;width:22px;height:22px;margin:1px 0 0;accent-color:#2fbf71;cursor:pointer}' +
-      '#wwcd-terms .wt-list{margin:0 0 16px;padding:0 20px 0 0;display:grid;gap:8px;font-size:15px;line-height:1.55;color:#d6dae2}' +
+      '#wwcd-terms .wt-intro{margin:0 0 10px;font-size:15px;font-weight:700;line-height:1.55;color:#eef0f4}' +
+      '#wwcd-terms .wt-list{margin:0 0 16px;padding:12px 26px 12px 12px;display:grid;gap:10px;font-size:14px;line-height:1.6;color:#d6dae2;max-height:42vh;overflow-y:auto;border:1px solid #2a2f3a;border-radius:12px;background:rgba(255,255,255,.02)}' +
       '#wwcd-terms label{margin-bottom:14px;font-weight:600}' +
       '#wwcd-terms .wt-go{width:100%;padding:14px;border:0;border-radius:10px;font-size:17px;font-weight:700;' +
       'background:#2fbf71;color:#06130b;cursor:pointer;transition:opacity .15s}' +
@@ -139,16 +141,17 @@
     card.appendChild(el('p', { 'class': 'wt-sub' }, guestMode ? 'כאורח יש לקרוא ולאשר את התנאים בכל כניסה.' : 'יש לקרוא ולאשר פעם אחת בלבד.'));
 
     var list = el('ul', { 'class': 'wt-list' });
+    card.appendChild(el('p', { 'class': 'wt-intro' }, INTRO));
     POINTS.forEach(function (text) { list.appendChild(el('li', null, text)); });
     card.appendChild(list);
 
     var label = el('label', { 'for': 'wt-c0' });
     var cb = el('input', { type: 'checkbox', id: 'wt-c0' });
     label.appendChild(cb);
-    label.appendChild(el('span', null, 'קראתי, הבנתי ואני מאשר/ת את כל האמור למעלה.'));
+    label.appendChild(el('span', null, 'קראתי והבנתי את התנאים'));
     card.appendChild(label);
 
-    var go = el('button', { type: 'button', 'class': 'wt-go' }, 'המשך');
+    var go = el('button', { type: 'button', 'class': 'wt-go' }, 'אני מאשר/ת');
     go.disabled = true;
     card.appendChild(go);
     card.appendChild(el('p', { 'class': 'wt-note' }, 'האישור נשמר יחד עם התאריך והשעה.'));
