@@ -67,6 +67,7 @@
     link: '<svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>',
     flag: '<svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>',
     back: '<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
+    shield: '<svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>',
     logout: '<svg viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5M5 12h11"/></svg>',
     crown: '<svg viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg>',
     trash: '<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
@@ -112,7 +113,7 @@
     /* פריסה: טלפון — עמודה אחת; מחשב — שתי עמודות */
     '.sk-col{display:contents}',
     '.sk-pot span{white-space:nowrap}',
-    '@media(max-width:420px){.sk-title{font-size:14px}.sk-iconbtn.sk-out span{display:none}.sk-iconbtn.sk-out{width:42px;padding:0;justify-content:center}.sk-name .sk-tag{display:table;margin:2px 0 0}.sk-pot{padding:10px 12px}.sk-pot span{font-size:12px}}',
+    '@media(max-width:420px){.sk-title{font-size:14px}.sk-iconbtn.sk-out span,.sk-iconbtn.sk-adm span{display:none}.sk-iconbtn.sk-adm{width:42px;padding:0;justify-content:center}.sk-iconbtn.sk-out{width:42px;padding:0;justify-content:center}.sk-name .sk-tag{display:table;margin:2px 0 0}.sk-pot{padding:10px 12px}.sk-pot span{font-size:12px}}',
     '@media(max-width:380px){#sk-root{gap:12px}.sk-card{padding:13px;border-radius:20px}.sk-player{gap:7px;padding:9px 10px}.sk-amt{min-width:52px;font-size:15px}.sk-pm{width:32px;height:32px}.sk-av{width:34px;height:34px}.sk-pot strong{font-size:21px}.sk-ratio-row{grid-template-columns:1fr auto 1.2fr;}.sk-ratio-row .sk-btn{grid-column:1/-1}.sk-stepper input{width:80px}}',
     '@media(min-width:900px){',
     '  body.sk-on:not(.room-view-active) #tableCard{max-width:1080px}',
@@ -133,6 +134,10 @@
     '  .sk-grab{display:none}',
     '}',
     '.sk-btn.sk-reset{width:100%;min-height:50px;color:#ff8a8e;border-color:rgba(229,72,77,.35);background:rgba(229,72,77,.08)}',
+    '.sk-iconbtn.sk-adm{width:auto;padding:0 12px;gap:6px;display:inline-flex;align-items:center;color:var(--sk-gold);border-color:rgba(242,201,76,.35);background:rgba(242,201,76,.08);font:inherit;font-weight:900;font-size:12px;letter-spacing:.04em}',
+    '.admin-terms{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;margin-inline-end:8px;vertical-align:middle;font-size:13px;font-weight:900}',
+    '.admin-terms.ok{background:rgba(47,212,124,.18);color:#2fd47c;box-shadow:0 0 0 1px rgba(47,212,124,.4)}',
+    '.admin-terms.no{background:rgba(255,255,255,.06);color:#9fb3a6}',
     '.sk-headbtns{display:flex;gap:8px;flex:none}',
     '.sk-iconbtn.sk-out{width:auto;padding:0 12px;gap:6px;display:inline-flex;align-items:center;color:#ff8a8e;border-color:rgba(229,72,77,.3);background:rgba(229,72,77,.08);font:inherit;font-weight:800;font-size:13px}',
     '.sk-profile-logout{width:100%;margin-top:10px;min-height:46px;border-radius:14px;border:1px solid rgba(229,72,77,.35);background:rgba(229,72,77,.1);color:#ff8a8e;font:inherit;font-weight:800;cursor:pointer}',
@@ -338,6 +343,7 @@
   root.id = 'sk-root';
   var view = 'game';
 
+  function isAdmin() { var b = $('adminOpenBtn'); return !!(b && !b.hidden); }
   function roomCode() {
     var act = $('tableActive');
     if (act && act.hidden) return '';
@@ -369,7 +375,7 @@
       '<div class="sk-col sk-col-a">' +
       '<section class="sk-card">' +
       '<div class="sk-head"><div class="sk-brand"><div class="sk-logo">♠</div><div><div class="sk-title">Winner winner chicken dinner</div><div class="sk-sub">Poker Night</div></div></div>' +
-      '<div class="sk-headbtns">' + (isGuestMode() ? '' : '<button class="sk-iconbtn sk-out" type="button" id="sk-logout-btn" aria-label="התנתק" title="התנתק">' + ICON.logout + '<span>יציאה</span></button>') +
+      '<div class="sk-headbtns">' + (isAdmin() ? '<button class="sk-iconbtn sk-adm" type="button" id="sk-admin-btn" aria-label="ניהול" title="ניהול">' + ICON.shield + '<span>ADMIN</span></button>' : '') + (isGuestMode() ? '' : '<button class="sk-iconbtn sk-out" type="button" id="sk-logout-btn" aria-label="התנתק" title="התנתק">' + ICON.logout + '<span>יציאה</span></button>') +
       '<button class="sk-iconbtn" type="button" id="sk-menu-btn" aria-label="הגדרות">' + ICON.gear + '</button></div></div>' +
       '<div class="sk-row2"><div class="sk-pot"><span>סה״כ בקופה</span><strong>' + money(pot) + '</strong></div>' +
       '<button class="sk-btn green" type="button" id="sk-share">' + ICON.share + 'שתף</button></div>' +
@@ -397,6 +403,7 @@
 
     $('sk-menu-btn').onclick = openMenu;
     if ($('sk-logout-btn')) $('sk-logout-btn').onclick = confirmLogout;
+    if ($('sk-admin-btn')) $('sk-admin-btn').onclick = function () { var b = $('adminOpenBtn'); if (b) b.click(); };
     function saveRatio() {
       var m = Number($('sk-r-money').value), c = Number($('sk-r-chips').value);
       if (!(m > 0) || !(c > 0)) return toast('שני המספרים צריכים להיות גדולים מ-0');
@@ -669,6 +676,8 @@
     if ($('guestSignInBtn')) { lsDel(GUEST_KEY); document.body.classList.remove('wn-guest'); }
     else { addGuestButton(); if (lsGet(GUEST_KEY) === '1') document.body.classList.add('wn-guest'); }
     // כשמתחברים עם Google — יוצאים ממצב אורח
+    var ab = $('adminOpenBtn');
+    if (ab) new MutationObserver(function () { setTimeout(render, 0); }).observe(ab, { attributes: true, attributeFilter: ['hidden'] });
     var ta = $('tableActive');
     if (ta) new MutationObserver(function () { setTimeout(render, 0); }).observe(ta, { attributes: true, attributeFilter: ['hidden'] });
     new MutationObserver(function () {

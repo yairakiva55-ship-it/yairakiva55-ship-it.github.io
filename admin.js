@@ -155,14 +155,14 @@ function renderUsers(users, search = $("adminUserSearch")?.value || "") {
     const banned = Boolean(user.bannedUntil && new Date(user.bannedUntil) > new Date());
     const isSelf = user.id === currentUser?.id;
     return `<tr>
-      <td><strong>${escapeHtml(user.email || "ללא דוא״ל")}</strong><div class="admin-muted">הצטרף ${escapeHtml(prettyDate(user.createdAt))}</div></td>
+      <td><span class="admin-terms ${user.termsAcceptedAt ? "ok" : "no"}" title="${user.termsAcceptedAt ? "אישר את תנאי השימוש ב־" + escapeHtml(prettyDate(user.termsAcceptedAt)) : "עוד לא אישר את תנאי השימוש"}" aria-label="${user.termsAcceptedAt ? "אישר תנאי שימוש" : "לא אישר תנאי שימוש"}">${user.termsAcceptedAt ? "✓" : "–"}</span><strong>${escapeHtml(user.email || (user.isAnonymous ? "אורח" : "ללא דוא״ל"))}</strong><div class="admin-muted">הצטרף ${escapeHtml(prettyDate(user.createdAt))}${user.termsAcceptedAt ? " · אישר תנאים " + escapeHtml(prettyDate(user.termsAcceptedAt)) : " · לא אישר תנאים"}</div></td>
       <td>${escapeHtml(prettyDate(user.lastSignInAt))}</td><td>${Number(user.roomCount || 0)}</td><td>${Number(user.wins || 0)}</td>
       <td><span class="admin-badge ${banned ? "suspended" : ""}">${banned ? "מושעה" : "פעיל"}</span></td>
       <td>${isSelf ? '<span class="admin-muted">מנהל</span>' : banned ? `<button class="btn" type="button" data-admin-action="unban" data-user-id="${escapeHtml(user.id)}">הפעל</button>` : `<button class="btn danger" type="button" data-admin-action="ban" data-user-id="${escapeHtml(user.id)}">השעיה</button>`}</td>
     </tr>`;
   }).join("");
   $("adminContent").innerHTML = `
-    <div class="admin-toolbar"><div><h3>משתמשים</h3><div class="admin-muted">${filtered.length} מתוך ${users.length} חשבונות</div></div><button class="btn" type="button" data-admin-action="refresh">רענן</button></div>
+    <div class="admin-toolbar"><div><h3>משתמשים</h3><div class="admin-muted">${filtered.length} מתוך ${users.length} חשבונות · ${users.filter((u) => u.termsAcceptedAt).length} אישרו תנאי שימוש</div></div><button class="btn" type="button" data-admin-action="refresh">רענן</button></div>
     <label class="room-field" style="max-width:420px;margin-bottom:12px">חיפוש לפי דוא״ל או מזהה משתמש<input id="adminUserSearch" class="input" value="${escapeHtml(search)}" autocomplete="off"></label>
     ${rows ? `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>חשבון</th><th>כניסה אחרונה</th><th>חדרים</th><th>ניצחונות</th><th>מצב</th><th>פעולה</th></tr></thead><tbody>${rows}</tbody></table></div>` : '<div class="admin-empty">לא נמצאו משתמשים תואמים.</div>'}`;
 }
