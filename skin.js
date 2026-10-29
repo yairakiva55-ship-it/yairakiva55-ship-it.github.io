@@ -87,7 +87,7 @@
     '.sk-card{background:linear-gradient(160deg,#143222,#0d2318);border:1px solid var(--sk-line);border-radius:24px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}',
     '.sk-head{display:flex;align-items:center;justify-content:space-between;gap:12px}',
     '.sk-brand{display:flex;align-items:center;gap:12px;min-width:0}',
-    '.sk-logo{flex:none;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:26px;color:#fff;background:linear-gradient(145deg,#f04848,#a91e25);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}',
+    '.sk-logo{flex:none;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:26px;color:#fff;background:linear-gradient(145deg,#2a2a2a,#050505);border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 6px 14px rgba(0,0,0,.35)}',
     '.sk-title{font-weight:800;font-size:16px;line-height:1.2}.sk-sub{color:var(--sk-muted);font-size:12px}',
     '.sk-iconbtn{flex:none;width:42px;height:42px;border-radius:14px;border:1px solid var(--sk-line);background:rgba(255,255,255,.05);color:var(--sk-text);display:grid;place-items:center;padding:0;cursor:pointer}',
     /* מיקרו-אנימציות */
@@ -150,7 +150,7 @@
     '.sk-btn.green{background:linear-gradient(180deg,#36dd85,#1fb565);color:#062012;border-color:transparent;box-shadow:0 6px 18px rgba(47,212,124,.22)}',
     '.sk-btn:active,.sk-iconbtn:active,.sk-pm:active{transform:scale(.96)}',
     '.sk-hero{text-align:center;padding:4px 0 0}',
-    '.sk-kicker{color:var(--sk-gold);font-weight:800;font-size:12px;letter-spacing:.14em}',
+    '.sk-kicker{color:var(--sk-gold);font-weight:900;font-size:clamp(15px,4.4vw,18px);letter-spacing:.03em;direction:ltr}',
     '.sk-chips{display:flex;justify-content:center;gap:8px;margin:12px 0 6px}',
     '.sk-chip{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:20px;border:5px dashed rgba(255,255,255,.85);box-shadow:0 6px 14px rgba(0,0,0,.35),inset 0 0 0 3px rgba(0,0,0,.15)}',
     '.sk-chip{animation:skFloat 4.5s ease-in-out infinite}.sk-chip:nth-child(2){animation-delay:-1.5s}.sk-chip:nth-child(3){animation-delay:-3s}',
@@ -403,7 +403,7 @@
       '<div class="sk-row2"><div class="sk-pot"><span class="sk-pot-lbl"><i class="sk-stack" aria-hidden="true"><b></b><b></b><b></b></i>סה״כ בקופה</span><strong>' + money(pot) + '</strong></div>' +
       '<button class="sk-btn green" type="button" id="sk-share">' + ICON.share + 'שתף</button></div>' +
       '</section>' +
-      '<div class="sk-hero"><div class="sk-kicker">POKER NIGHT MANAGER</div>' +
+      '<div class="sk-hero"><div class="sk-kicker">Winner winner chicken dinner</div>' +
       '<div class="sk-chips"><div class="sk-chip r">♦</div><div class="sk-chip g">♣</div><div class="sk-chip y">♠</div></div>' +
       (code ? '<div class="sk-room">חדר <b>' + esc(code) + '</b></div>' : '') + '</div>' +
       '<section class="sk-card sk-ratio"><div class="sk-sec-title">יחס ג׳טונים לשקל<small>' + esc(chipLine(s)) + '</small></div>' +
