@@ -304,6 +304,7 @@ function showSignedOut(text = "") {
   $("roomConnectionStatus").textContent = "מוכן להתחברות";
   $("googleSignInBtn").disabled = !client;
   $("guestSignInBtn").disabled = !client;
+  if ($("facebookSignInBtn")) $("facebookSignInBtn").disabled = !client;
   if (text) $("authMessage").textContent = text;
   initAdminArea(null, client);
 }
@@ -384,6 +385,29 @@ async function verifySession() {
       showSignedOut("שירות ההתחברות לא זמין כרגע. נסה שוב בעוד רגע.");
     }
     verifyTimer = setTimeout(verifySession, Math.min(30000, 1500 * 2 ** Math.min(verifyAttempts - 1, 4)));
+  }
+}
+/* Facebook: the button appears only once the Facebook provider is enabled in Supabase. */
+async function refreshFacebookButton() {
+  const btn = $("facebookSignInBtn");
+  if (!btn) return;
+  try {
+    const res = await fetch(SUPABASE_URL + "/auth/v1/settings", { headers: { apikey: SUPABASE_KEY } });
+    const settings = res.ok ? await res.json() : null;
+    btn.hidden = !settings?.external?.facebook;
+  } catch { btn.hidden = true; }
+}
+async function signInFacebook() {
+  if (!client) return;
+  loginGateOpen = true;
+  safeSessionSet(LOGIN_TAP_KEY, "1");
+  $("authMessage").textContent = "פותח התחברות Facebook...";
+  $("facebookSignInBtn").disabled = true;
+  const { error } = await client.auth.signInWithOAuth({ provider: "facebook", options: { redirectTo: SITE_AUTH_REDIRECT_URL, scopes: "email" } });
+  if (error) {
+    loginGateOpen = false; safeSessionRemove(LOGIN_TAP_KEY);
+    $("facebookSignInBtn").disabled = false;
+    $("authMessage").textContent = "ההתחברות עם Facebook לא נפתחה: " + error.message;
   }
 }
 async function signIn() {
@@ -704,6 +728,8 @@ window.wwcdCloud = {
 
 /* ---------- wire up ---------- */
 $("googleSignInBtn").addEventListener("click", () => void signIn());
+if ($("facebookSignInBtn")) $("facebookSignInBtn").addEventListener("click", () => void signInFacebook());
+void refreshFacebookButton();
 $("guestSignInBtn").addEventListener("click", () => void signInGuest());
 // Coming back to the site (tab switch, phone unlock, reopening the app): refresh the session quietly.
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && client && user) void verifySession(); });

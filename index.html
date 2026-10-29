@@ -828,6 +828,9 @@ body.room-authenticated:not(.room-view-active) .room-account .room-actions{flex-
 @media(max-width:420px){.flow-btn{font-size:10px}.flow-btn b{font-size:11px}.hero h1{font-size:25px}.player-grid{gap:6px}.metric{padding:8px}.metric label{font-size:11px}.metric strong{font-size:15px}}
 
 /* v2026.10.26 — compact rooms, notices, profile wins, buy buttons */
+.room-facebook-btn{width:100%;min-height:54px;display:inline-flex;justify-content:center;align-items:center;gap:9px;border:0;border-radius:14px;background:#1877f2;color:#fff;font-weight:750;box-shadow:0 8px 20px rgba(24,119,242,.25)}
+.room-facebook-btn[hidden]{display:none!important}
+.room-fb-mark{width:23px;height:23px;border-radius:50%;background:#fff;color:#1877f2;display:inline-grid;place-items:center;font:900 17px/1 Arial,sans-serif;padding-top:2px}
 .room-guest-btn{width:100%;min-height:48px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(240,213,108,.28);color:var(--text);font-weight:700}
 .room-guest-note{margin:-6px 0 0!important;color:var(--muted);font-size:.76rem!important;line-height:1.5}
 .auth-message{min-height:1.2em;margin:0;color:#ffb3ad;font-size:.84rem;line-height:1.5}
@@ -1121,6 +1124,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <div id="roomAuthPanel" class="room-auth-panel">
       <div><strong>התחברות מאובטחת</strong><p>החשבון שלך יישמר איתך בכל מכשיר.</p></div>
       <button id="googleSignInBtn" class="btn primary room-google-btn" type="button"><span class="room-google-mark">G</span>המשך עם Google</button>
+      <button id="facebookSignInBtn" class="btn room-facebook-btn" type="button" hidden><span class="room-fb-mark" aria-hidden="true">f</span>המשך עם Facebook</button>
       <button id="guestSignInBtn" class="btn room-guest-btn" type="button">כניסה כאורח</button>
       <p class="room-guest-note">אורח יכול לשחק ולהצטרף לחדרים בלי חשבון Google. החיבור נשמר במכשיר הזה.</p>
       <p id="authMessage" class="auth-message" role="alert"></p>
@@ -1674,7 +1678,7 @@ $("shareClose").addEventListener("click",()=>$("shareModal").classList.remove("s
 document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if($("confirmModal").classList.contains("show"))return closeConfirm();closeRebuy();closeBuyHistory();closePokerCalc();$("shareModal").classList.remove("show")});
 render();
 </script>
-<script type="module" src="/rooms.js"></script>
+<script type="module" src="/rooms.js?v=2"></script>
 <script src="/skin.js?v=9" defer></script>
 <script src="/bottom-nav.js?v=4" defer></script>
 <script src="/terms-gate.js?v=5" defer></script>
