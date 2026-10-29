@@ -4,7 +4,6 @@
    עובד הכי טוב כשהג'טונים מפוזרים על השולחן (לא בערימות) ומצולמים מלמעלה. */
 (function () {
   'use strict';
-  var VAL_KEY = 'wwcd_chip_value';
   var MAXD = 640;
 
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
@@ -128,18 +127,18 @@
     var lab = new Int32Array(n), comps = [], minA = n * 0.0004;
     for (i = 0; i < n; i++) {
       if (!mask[i] || lab[i]) continue;
-      var id = comps.length + 1, q = [i], A = 0, sx = 0, sy = 0, x0 = w, x1 = 0, y0 = h, y1 = 0, touches = false;
+      var id = comps.length + 1, q = [i], pix = [], A = 0, sx = 0, sy = 0, x0 = w, x1 = 0, y0 = h, y1 = 0, touches = false;
       lab[i] = id;
       while (q.length) {
         var c = q.pop(), cx = c % w, cy = (c - cx) / w;
-        A++; sx += cx; sy += cy;
+        A++; sx += cx; sy += cy; pix.push(c);
         if (cx < x0) x0 = cx; if (cx > x1) x1 = cx; if (cy < y0) y0 = cy; if (cy > y1) y1 = cy;
         if (cx === 0 || cy === 0 || cx === w - 1 || cy === h - 1) touches = true;
         var nb = [cx > 0 ? c - 1 : -1, cx < w - 1 ? c + 1 : -1, c >= w ? c - w : -1, c < n - w ? c + w : -1];
         for (var k = 0; k < 4; k++) { var t = nb[k]; if (t >= 0 && mask[t] && !lab[t]) { lab[t] = id; q.push(t); } }
       }
       var bwid = x1 - x0 + 1, bhei = y1 - y0 + 1;
-      comps.push({ id: id, A: A, cx: sx / A, cy: sy / A, w: bwid, h: bhei, fill: A / (bwid * bhei), aspect: bwid / bhei, edge: touches });
+      comps.push({ id: id, pix: pix, A: A, cx: sx / A, cy: sy / A, w: bwid, h: bhei, fill: A / (bwid * bhei), aspect: bwid / bhei, edge: touches });
     }
     comps = comps.filter(function (c) { return c.A >= minA && c.A < n * 0.6; });
     // דברים שנחתכים בשולי התמונה ולא נראים כמו ג'טון (קצה שולחן, יד, חפץ) — לא נספרים
@@ -157,7 +156,85 @@
       total += c.count;
     });
     comps = comps.filter(function (c) { return c.count > 0; });
-    return { comps: comps, total: total, unit: unit, lab: lab, w: w, h: h };
+    // 6) כל ג'טון בנפרד: מפרידים כתמים של כמה ג'טונים צמודים, ומזהים את הצבע של כל אחד
+    var ur = Math.sqrt((unit || 400) / Math.PI), chips = [];
+    comps.forEach(function (c) {
+      var centers = c.count === 1 ? [[c.cx, c.cy]] : kmeans(c.pix, c.count, w);
+      centers.forEach(function (ct) { chips.push({ x: ct[0], y: ct[1], color: classify(d, lab, w, h, ct, centers, c.id, ur) }); });
+      c.pix = null;
+    });
+    return { comps: comps, chips: chips, total: chips.length, unit: unit, lab: lab, w: w, h: h };
+  }
+
+  // חלוקת כתם ל-k ג'טונים (k-means על המיקומים)
+  function kmeans(pix, k, w) {
+    var step = Math.max(1, Math.floor(pix.length / 3000)), P = [], i, j, it;
+    for (i = 0; i < pix.length; i += step) P.push([pix[i] % w, Math.floor(pix[i] / w)]);
+    var mx = 0, my = 0; P.forEach(function (p) { mx += p[0]; my += p[1]; }); mx /= P.length; my /= P.length;
+    var C = [], far = function (ref) { var best = null, bd = -1; P.forEach(function (p) { var m = Infinity; ref.forEach(function (r) { var dd = (p[0] - r[0]) * (p[0] - r[0]) + (p[1] - r[1]) * (p[1] - r[1]); if (dd < m) m = dd; }); if (m > bd) { bd = m; best = p; } }); return [best[0], best[1]]; };
+    C.push(far([[mx, my]]));
+    while (C.length < k) C.push(far(C));
+    for (it = 0; it < 15; it++) {
+      var S = C.map(function () { return [0, 0, 0]; });
+      P.forEach(function (p) {
+        var bi = 0, bd = Infinity;
+        for (j = 0; j < C.length; j++) { var dd = (p[0] - C[j][0]) * (p[0] - C[j][0]) + (p[1] - C[j][1]) * (p[1] - C[j][1]); if (dd < bd) { bd = dd; bi = j; } }
+        S[bi][0] += p[0]; S[bi][1] += p[1]; S[bi][2]++;
+      });
+      C = C.map(function (c, j2) { return S[j2][2] ? [S[j2][0] / S[j2][2], S[j2][1] / S[j2][2]] : c; });
+    }
+    return C;
+  }
+
+  // צבעי הג'טונים (הערכים ניתנים לשינוי ונשמרים)
+  var COLORS = [
+    { k: 'white', n: 'לבן', hex: '#f4f4ee', def: 1 },
+    { k: 'red', n: 'אדום', hex: '#d63c3c', def: 5 },
+    { k: 'blue', n: 'כחול', hex: '#2a6fd6', def: 10 },
+    { k: 'green', n: 'ירוק', hex: '#1f9e5a', def: 25 },
+    { k: 'pink', n: 'ורוד', hex: '#e86fa8', def: 50 },
+    { k: 'black', n: 'שחור', hex: '#1c1c1c', def: 100 },
+    { k: 'orange', n: 'כתום', hex: '#e67e22', def: 250 },
+    { k: 'purple', n: 'סגול', hex: '#7b3fb0', def: 500 },
+    { k: 'yellow', n: 'צהוב', hex: '#e8c22e', def: 1000 }
+  ];
+  function colorOf(r, g, b) {
+    var mx = Math.max(r, g, b), mn = Math.min(r, g, b), v = mx / 255, sat = mx ? (mx - mn) / mx : 0, hue = 0;
+    if (mx !== mn) {
+      if (mx === r) hue = 60 * (((g - b) / (mx - mn)) % 6); else if (mx === g) hue = 60 * ((b - r) / (mx - mn) + 2); else hue = 60 * ((r - g) / (mx - mn) + 4);
+      if (hue < 0) hue += 360;
+    }
+    if (v < 0.22 || (sat < 0.25 && v < 0.45)) return 'black';
+    if (sat < 0.22) return 'white';
+    if (hue < 12 || hue >= 345) return 'red';
+    if (hue < 38) return 'orange';
+    if (hue < 72) return 'yellow';
+    if (hue < 170) return 'green';
+    if (hue < 260) return 'blue';
+    if (hue < 300) return 'purple';
+    return 'pink';
+  }
+  // הצבע של ג'טון = הצבע השכיח בטבעת שלו (בלי המרכז ובלי הקצה)
+  function classify(d, lab, w, h, ct, centers, id, ur) {
+    var R = [], G = [], B = [];
+    for (var a = 0; a < 64; a++) for (var rf = 0.55; rf <= 0.86; rf += 0.1) {
+      var x = Math.round(ct[0] + Math.cos(a / 64 * 6.2832) * ur * rf), y = Math.round(ct[1] + Math.sin(a / 64 * 6.2832) * ur * rf);
+      if (x < 0 || y < 0 || x >= w || y >= h) continue;
+      var j = y * w + x; if (lab[j] !== id) continue;
+      if (centers.length > 1) {
+        var mine = (x - ct[0]) * (x - ct[0]) + (y - ct[1]) * (y - ct[1]), ok = true;
+        centers.forEach(function (o) { if (o !== ct && (x - o[0]) * (x - o[0]) + (y - o[1]) * (y - o[1]) < mine) ok = false; });
+        if (!ok) continue;
+      }
+      R.push(d[j * 4]); G.push(d[j * 4 + 1]); B.push(d[j * 4 + 2]);
+    }
+    if (!R.length) return 'white';
+    // הצבעה לפי פיקסלים (עמיד לפסים לבנים על הג'טון)
+    var votes = {};
+    for (var i = 0; i < R.length; i++) { var c = colorOf(R[i], G[i], B[i]); votes[c] = (votes[c] || 0) + 1; }
+    var best = null, bv = -1;
+    Object.keys(votes).forEach(function (c) { var v = votes[c] * (c === 'white' ? 0.8 : 1); if (v > bv) { bv = v; best = c; } });
+    return best;
   }
 
   function drawResult(canvas, img, res) {
@@ -173,14 +250,12 @@
       }
     }
     ctx.putImageData(over, 0, 0);
-    var rr = Math.max(10, Math.round(Math.sqrt(res.unit || 400) * 0.28));
-    ctx.font = '900 ' + Math.round(rr * 1.15) + 'px system-ui,sans-serif';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    res.comps.forEach(function (c) {
-      ctx.beginPath(); ctx.arc(c.cx, c.cy, rr, 0, Math.PI * 2);
-      ctx.fillStyle = c.count > 1 ? '#f2c94c' : '#36dd85'; ctx.fill();
+    var rr = Math.max(8, Math.round(Math.sqrt(res.unit || 400) * 0.24)), hex = {};
+    COLORS.forEach(function (c) { hex[c.k] = c.hex; });
+    (res.chips || []).forEach(function (c) {
+      ctx.beginPath(); ctx.arc(c.x, c.y, rr + 3, 0, Math.PI * 2); ctx.fillStyle = '#36dd85'; ctx.fill();
+      ctx.beginPath(); ctx.arc(c.x, c.y, rr, 0, Math.PI * 2); ctx.fillStyle = hex[c.color] || '#fff'; ctx.fill();
       ctx.lineWidth = 2; ctx.strokeStyle = '#062012'; ctx.stroke();
-      ctx.fillStyle = '#062012'; ctx.fillText(String(c.count), c.cx, c.cy + 1);
     });
   }
 
@@ -211,6 +286,16 @@
     '#cs-ov .cs-val input{width:90px;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;font:inherit;font-weight:800;text-align:center}',
     '#cs-ov .cs-total{text-align:center;margin:0 0 12px;color:#d9e3dc;font-size:14px}#cs-ov .cs-total b{color:#36dd85;font-size:18px}',
     '#cs-ov .cs-note{margin:0 0 12px;text-align:center;color:#8fa596;font-size:12px;line-height:1.5}',
+    '#cs-ov .cs-head{display:grid;grid-template-columns:1fr 122px 92px;gap:8px;padding:0 4px 6px;color:#8fa596;font-size:11.5px}',
+    '#cs-ov .cs-crow{display:grid;grid-template-columns:22px 1fr 110px 12px 72px;align-items:center;gap:8px;padding:8px 10px;margin:0 0 6px;border-radius:14px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.07)}',
+    '#cs-ov .cs-sw{width:22px;height:22px;border-radius:50%;border:3px dashed rgba(255,255,255,.7);box-shadow:0 0 0 1px rgba(0,0,0,.4)}',
+    '#cs-ov .cs-crow b{font-size:14px}',
+    '#cs-ov .cs-mini{display:flex;align-items:center;justify-content:space-between}',
+    '#cs-ov .cs-mini button{width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#fff;font-size:18px;font-weight:900;cursor:pointer}',
+    '#cs-ov .cs-c{min-width:28px;text-align:center;font-size:18px;font-weight:900;color:#f2c94c}',
+    '#cs-ov .cs-x{color:#8fa596;text-align:center}',
+    '#cs-ov .cs-crow input{width:100%;box-sizing:border-box;padding:7px 4px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;font:inherit;font-weight:800;text-align:center}',
+    '#cs-ov .cs-more{margin:0 0 12px}#cs-ov .cs-more summary{cursor:pointer;color:#f2c94c;font-size:13px;font-weight:800;padding:6px 4px;margin-bottom:6px}',
     '#cs-ov .cs-busy{padding:40px 0;text-align:center;color:#b9c7bd}',
     '#cs-ov .cs-spin{width:44px;height:44px;margin:0 auto 12px;border-radius:50%;border:5px dashed #f2c94c;animation:csSpin 1s linear infinite}',
     '@keyframes csSpin{to{transform:rotate(360deg)}}',
@@ -255,35 +340,55 @@
         cv.width = Math.max(1, Math.round(img.naturalWidth * s)); cv.height = Math.max(1, Math.round(img.naturalHeight * s));
         cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
         var res;
-        try { res = analyze(cv); } catch (e) { res = { total: 0, comps: [], unit: 0, w: cv.width, h: cv.height, lab: new Int32Array(cv.width * cv.height) }; }
+        try { res = analyze(cv); } catch (e) { res = { total: 0, chips: [], comps: [], unit: 0, w: cv.width, h: cv.height, lab: new Int32Array(cv.width * cv.height) }; }
         drawResult(cv, img, res);
         URL.revokeObjectURL(url);
-        result(cv, res.total);
+        result(cv, res.chips || []);
       }, 30);
     };
     img.onerror = function () { URL.revokeObjectURL(url); toast('לא הצלחתי לפתוח את התמונה'); intro(); };
     img.src = url;
   }
 
-  function result(cv, count) {
-    var val = Math.max(1, Number(lsGet(VAL_KEY)) || 1);
+  var VALS_KEY = 'wwcd_chip_values';
+  function loadVals() { var v = {}; try { v = JSON.parse(lsGet(VALS_KEY) || '{}') || {}; } catch (e) {} COLORS.forEach(function (c) { if (!(Number(v[c.k]) > 0)) v[c.k] = c.def; }); return v; }
+
+  function result(cv, chips) {
+    var vals = loadVals(), counts = {};
+    COLORS.forEach(function (c) { counts[c.k] = 0; });
+    chips.forEach(function (c) { counts[c.color]++; });
+    function row(c) {
+      return '<div class="cs-crow" data-k="' + c.k + '"><span class="cs-sw" style="background:' + c.hex + '"></span><b>' + c.n + '</b>' +
+        '<div class="cs-mini"><button type="button" data-d="-1" aria-label="פחות">−</button><span class="cs-c">' + counts[c.k] + '</span><button type="button" data-d="1" aria-label="יותר">+</button></div>' +
+        '<span class="cs-x">×</span><input type="number" inputmode="numeric" min="1" value="' + vals[c.k] + '" aria-label="שווי ' + c.n + '"></div>';
+    }
+    var found = COLORS.filter(function (c) { return counts[c.k] > 0; }), rest = COLORS.filter(function (c) { return !counts[c.k]; });
     body('<h3 id="cs-title">' + esc(state.name) + '</h3><div id="cs-img"></div>' +
-      '<div class="cs-res"><span class="lbl">ג׳טונים שזוהו<br><small>אפשר לתקן עם + / −</small></span>' +
-      '<div class="cs-step"><button type="button" data-d="-1" aria-label="פחות">−</button><span class="cs-count" id="cs-n">' + count + '</span><button type="button" data-d="1" aria-label="יותר">+</button></div></div>' +
-      '<label class="cs-val"><span>כמה שווה כל ג׳טון?</span><input id="cs-v" type="number" inputmode="numeric" min="1" value="' + val + '"></label>' +
+      (chips.length ? '<p class="cs-note">כל ג׳טון מסומן בצבע שזוהה. אם צבע לא נכון — מתקנים עם + / −.</p>' : '<p class="cs-note">לא זיהיתי ג׳טונים. נסו לפזר אותם על משטח בצבע אחיד ולצלם מלמעלה, או הוסיפו ידנית למטה.</p>') +
+      '<div class="cs-head"><span>צבע</span><span>כמות</span><span>שווי כל ג׳טון</span></div>' +
+      '<div class="cs-rows">' + found.map(row).join('') + '</div>' +
+      '<details class="cs-more"' + (found.length ? '' : ' open') + '><summary>צבעים נוספים</summary>' + rest.map(row).join('') + '</details>' +
       '<div class="cs-total" id="cs-t"></div>' +
-      (count === 0 ? '<p class="cs-note">לא זיהיתי ג׳טונים. נסו לפזר אותם על משטח בצבע אחיד ולצלם מלמעלה.</p>' : '<p class="cs-note">ירוק = ג׳טון אחד, צהוב = כמה ג׳טונים צמודים. שווה לבדוק במבט.</p>') +
       '<button class="cs-btn cs-go" type="button" id="cs-apply">עדכן ל' + esc(state.name) + '</button>' +
       '<button class="cs-btn cs-ghost" type="button" id="cs-again">צלם שוב</button>');
     ov.querySelector('#cs-img').appendChild(cv);
-    var n = count, nEl = ov.querySelector('#cs-n'), vEl = ov.querySelector('#cs-v'), tEl = ov.querySelector('#cs-t');
-    function upd() { var v = Math.max(1, Number(vEl.value) || 1); tEl.innerHTML = n + ' × ' + v + ' = <b>' + (n * v).toLocaleString('he-IL') + '</b> ג׳טונים'; nEl.textContent = n; }
-    ov.querySelectorAll('.cs-step [data-d]').forEach(function (b) { b.onclick = function () { n = Math.max(0, n + Number(b.getAttribute('data-d'))); upd(); }; });
-    vEl.oninput = upd; upd();
+    var tEl = ov.querySelector('#cs-t');
+    function sum() {
+      var n = 0, t = 0;
+      COLORS.forEach(function (c) { n += counts[c.k]; t += counts[c.k] * vals[c.k]; });
+      tEl.innerHTML = n + ' ג׳טונים · סה״כ <b>' + t.toLocaleString('he-IL') + '</b>';
+      return t;
+    }
+    ov.querySelectorAll('.cs-crow').forEach(function (r) {
+      var k = r.getAttribute('data-k'), cEl = r.querySelector('.cs-c'), inp = r.querySelector('input');
+      r.querySelectorAll('[data-d]').forEach(function (b) { b.onclick = function () { counts[k] = Math.max(0, counts[k] + Number(b.getAttribute('data-d'))); cEl.textContent = counts[k]; sum(); }; });
+      inp.oninput = function () { vals[k] = Math.max(1, Number(inp.value) || 1); sum(); };
+    });
+    sum();
     ov.querySelector('#cs-again').onclick = function () { file.click(); };
     ov.querySelector('#cs-apply').onclick = function () {
-      var v = Math.max(1, Number(vEl.value) || 1); lsSet(VAL_KEY, String(v));
-      close(); if (state.cb) state.cb(n * v);
+      lsSet(VALS_KEY, JSON.stringify(vals));
+      var t = sum(); close(); if (state.cb) state.cb(t);
     };
   }
 
