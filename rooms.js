@@ -1,6 +1,6 @@
 // Winner Winner Chicken Dinner — accounts, rooms, profile and cloud save.
 // v2026.10.26-claude
-import { initAdminArea } from "/admin.js?v=2";
+import { initAdminArea } from "/admin.js?v=3";
 
 const SUPABASE_URL = "https://ctrnlkfopahdtoiaakru.supabase.co";
 // Public publishable key (safe for browsers). Never put service-role or secret keys here.
@@ -225,7 +225,7 @@ async function saveProfile() {
     profileMessage("הפרופיל נשמר.", "success");
     setTimeout(() => { if ($("profileModal").classList.contains("show")) closeProfile(); }, 600);
   } catch (error) {
-    profileMessage("שמירת הפרופיל נכשלה: " + (error?.message || "בדוק את החיבור ונסה שוב."), "error");
+    profileMessage(/inappropriate_name/.test(String(error?.message)) ? "השם מכיל מילה לא ראויה. בחר שם אחר." : "שמירת הפרופיל נכשלה: " + (error?.message || "בדוק את החיבור ונסה שוב."), "error");
   } finally { $("profileSaveBtn").disabled = false; }
 }
 
@@ -269,8 +269,10 @@ function renderTable() {
   $("seatsSub").textContent = room.name;
   $("seatsList").innerHTML = members.map(member => {
     const me = member.user_id === user.id, isHost = member.user_id === room.host_id;
+    const name = shownName(member);
     const tags = `${isHost ? '<span class="seat-tag">מנהל</span>' : ""}${me ? '<span class="seat-tag me">אתה</span>' : ""}`;
-    return `<li class="seat${me ? " me" : ""}"><span class="seat-avatar" aria-hidden="true">${escapeHtml(profileInitialsSafe(member.display_name))}</span><span class="seat-name">${escapeHtml(member.display_name)}</span>${tags}</li>`;
+    const more = me ? "" : `<button type="button" class="member-more" data-member-id="${escapeHtml(member.user_id)}" data-member-name="${escapeHtml(member.display_name)}" aria-label="אפשרויות עבור ${escapeHtml(name)}">⋯</button>`;
+    return `<li class="seat${me ? " me" : ""}"><span class="seat-avatar" aria-hidden="true">${escapeHtml(profileInitialsSafe(name))}</span><span class="seat-name">${escapeHtml(name)}</span>${tags}${more}</li>`;
   }).join("");
 }
 function openSeats() { $("seatsPanel").classList.add("open"); $("seatsToggle").setAttribute("aria-expanded", "true"); }
@@ -606,10 +608,19 @@ function totals() {
   });
 }
 function label(kind) { return ({ buyin:"קנייה ראשונית", rebuy:"קנייה נוספת", cashout:"פדיון", adjustment:"תיקון" })[kind] || kind; }
+// Blocked users (App Store 1.2): their names are hidden from you. The list is managed in skin.js (window.wnBlocks).
+function shownName(member) {
+  return member && member.user_id !== user?.id && window.wnBlocks?.has(member.user_id) ? "משתמש חסום" : (member?.display_name || "שחקן");
+}
+window.addEventListener("wn-blocks-changed", () => { if (room) renderRoom(); });
+document.addEventListener("click", event => {
+  const b = event.target.closest?.(".member-more");
+  if (b && window.wnMemberActions) window.wnMemberActions(b.dataset.memberId, b.dataset.memberName, room?.id || null);
+});
 function renderRoom() {
   const players = totals();
   $("roomRoster").innerHTML = players.length ? players.map(item => `<div class="room-player">
-    <div><strong>${escapeHtml(item.display_name)}${item.user_id === room.host_id ? " ★" : ""}</strong><small>${item.user_id === user.id ? "אתה" : item.user_id === room.host_id ? "מנהל החדר" : "שחקן בחדר"}</small></div>
+    <div><strong>${escapeHtml(shownName(item))}${item.user_id === room.host_id ? " ★" : ""}${item.user_id !== user.id ? ` <button type="button" class="member-more" data-member-id="${escapeHtml(item.user_id)}" data-member-name="${escapeHtml(item.display_name)}" aria-label="אפשרויות">⋯</button>` : ""}</strong><small>${item.user_id === user.id ? "אתה" : item.user_id === room.host_id ? "מנהל החדר" : "שחקן בחדר"}</small></div>
     <div><small>קניות ותיקונים</small><strong>${nis(item.invested)}</strong></div>
     <div><small>פדיון ותיקונים</small><strong>${nis(item.cashed)}</strong></div>
     <div><small>${item.net > 0 ? "צריך להעביר" : item.net < 0 ? "מקבל" : "מאוזן"}</small><strong>${nis(Math.abs(item.net))}</strong></div>
@@ -619,13 +630,14 @@ function renderRoom() {
     const owner = members.find(member => member.user_id === item.user_id);
     const sign = item.kind === "adjustment" && Number(item.amount_agorot) < 0 ? "−" : "+";
     const own = item.user_id === user.id && room.status !== "finished";
-    return `<div class="room-entry"><span>${escapeHtml(owner?.display_name || "שחקן")} · ${label(item.kind)} · ${sign}${nis(Math.abs(Number(item.amount_agorot)))}</span>${own ? `<button class="btn danger" type="button" data-delete-money="${escapeHtml(item.id)}">מחק</button>` : ""}</div>`;
+    return `<div class="room-entry"><span>${escapeHtml(owner ? shownName(owner) : "שחקן")} · ${label(item.kind)} · ${sign}${nis(Math.abs(Number(item.amount_agorot)))}</span>${own ? `<button class="btn danger" type="button" data-delete-money="${escapeHtml(item.id)}">מחק</button>` : ""}</div>`;
   }).join("") : "<div class=\"room-note\">עוד לא נרשמו קניות או פדיונות.</div>";
   $("addMoneyEntryBtn").disabled = room.status === "finished";
   renderTable();
 }
 function friendlyRpcError(error) {
   const text = String(error?.message || "");
+  if (/inappropriate_name/.test(text)) return "השם מכיל מילה לא ראויה. בחר שם אחר.";
   if (/Invalid room code/i.test(text)) return "הקוד לא נמצא. בדוק אותו מול מנהל החדר.";
   if (/already started/i.test(text)) return "המשחק בחדר כבר התחיל, ולכן אי אפשר להצטרף.";
   if (/Room is full/i.test(text)) return "החדר מלא.";

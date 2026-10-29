@@ -6,7 +6,20 @@
   if (!G) return;
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[c]; }); }
-  function money(n) { return '₪' + Number(n || 0).toLocaleString('he-IL', { maximumFractionDigits: 2 }); }
+  /* מצב נקודות: האפליקציה סופרת נקודות במקום שקלים. ברירת מחדל: נקודות באפליקציה המותקנת, שקלים באתר. */
+  var UNIT_KEY = 'wwcd_unit';
+  function isPoints() {
+    var v = null; try { v = localStorage.getItem(UNIT_KEY); } catch (e) {}
+    if (v === 'points') return true;
+    if (v === 'nis') return false;
+    return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  }
+  function setUnit(u) { try { localStorage.setItem(UNIT_KEY, u); } catch (e) {} }
+  function CUR() { return isPoints() ? 'נק׳' : '₪'; }
+  function money(n) {
+    var v = Number(n || 0).toLocaleString('he-IL', { maximumFractionDigits: 2 });
+    return isPoints() ? v + ' נק׳' : '₪' + v;
+  }
   function num(n) { return Number(n || 0).toLocaleString('he-IL', { maximumFractionDigits: 0 }); }
   function signed(n) { n = Math.round(Number(n || 0) * 100) / 100; return n > 0.009 ? '+' + money(n) : n < -0.009 ? '−' + money(-n) : money(0); }
   function toast(m) { if (typeof window.showToast === 'function') window.showToast(m); }
@@ -140,6 +153,13 @@
     '.admin-terms.no{background:rgba(255,255,255,.06);color:#9fb3a6}',
     'body.room-authenticated #sk-legal{display:none}',
     '.sk-delete-link{display:block;margin:12px auto 0;border:0;background:none;color:#c98b8e;font:inherit;font-size:.8rem;text-decoration:underline;cursor:pointer}',
+    '.sk-field{min-width:0}.sk-field input{min-width:0;width:100%;box-sizing:border-box}',
+    '.sk-seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:14px;background:rgba(0,0,0,.25);border:1px solid var(--sk-line)}',
+    '.sk-seg button{height:40px;border:0;border-radius:10px;background:transparent;color:var(--sk-muted);font:inherit;font-weight:800;cursor:pointer;transition:background .2s,color .2s}',
+    '.sk-seg button[aria-checked="true"]{background:var(--sk-green);color:#062012}',
+    '.member-more{border:0;background:rgba(255,255,255,.08);color:var(--sk-text,#f3f6f2);border-radius:8px;padding:0 8px;margin-inline-start:6px;font:inherit;font-weight:900;cursor:pointer;line-height:1.6}',
+    '.sk-reasons{display:grid;gap:8px;margin-bottom:12px}.sk-reasons label{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);cursor:pointer}',
+    '.sk-reasons input{accent-color:#2fd47c;width:18px;height:18px}',
     '.sk-headbtns{display:flex;gap:8px;flex:none}',
     '.sk-iconbtn.sk-out{width:auto;padding:0 12px;gap:6px;display:inline-flex;align-items:center;color:#ff8a8e;border-color:rgba(229,72,77,.3);background:rgba(229,72,77,.08);font:inherit;font-weight:800;font-size:13px}',
     '.sk-profile-logout{width:100%;margin-top:10px;min-height:46px;border-radius:14px;border:1px solid rgba(229,72,77,.35);background:rgba(229,72,77,.1);color:#ff8a8e;font:inherit;font-weight:800;cursor:pointer}',
@@ -293,8 +313,8 @@
     sheet.innerHTML =
       '<div class="sk-grab"></div><h3>הוספת שחקן</h3><p class="sk-note">שם השחקן וסכום הכניסה</p>' +
       '<label class="sk-field">שם השחקן<input id="sk-add-name" maxlength="40" autocomplete="off" placeholder="לדוגמה: דנה"></label>' +
-      '<label class="sk-field">קנייה ראשונה (₪)<input id="sk-add-amt" type="number" inputmode="decimal" min="1" value="' + (last || 100) + '"></label>' +
-      '<div class="sk-quick">' + [50, 100, 200, 300].map(function (v) { return '<button type="button" data-v="' + v + '">₪' + v + '</button>'; }).join('') + '</div>' +
+      '<label class="sk-field">קנייה ראשונה (' + CUR() + ')<input id="sk-add-amt" type="number" inputmode="decimal" min="1" value="' + (last || 100) + '"></label>' +
+      '<div class="sk-quick">' + [50, 100, 200, 300].map(function (v) { return '<button type="button" data-v="' + v + '">' + money(v) + '</button>'; }).join('') + '</div>' +
       '<div class="sk-sheet-actions"><button class="sk-btn" type="button" data-close>ביטול</button><button class="sk-btn green" type="button" id="sk-add-go">הוסף</button></div>';
     sheet.querySelectorAll('[data-v]').forEach(function (b) { b.onclick = function () { $('sk-add-amt').value = b.getAttribute('data-v'); }; });
     sheet.querySelector('[data-close]').onclick = function () { closeOverlay(addO); };
@@ -326,9 +346,12 @@
     var admin = $('adminOpenBtn'), adminVisible = admin && !admin.hidden;
     var sheet = menuO.firstChild;
     sheet.innerHTML =
-      '<div class="sk-grab"></div><h3>הגדרות המשחק</h3><p class="sk-note">יחס כסף לג׳טונים ופעולות נוספות</p>' +
+      '<div class="sk-grab"></div><h3>הגדרות המשחק</h3><p class="sk-note">יחס לג׳טונים ופעולות נוספות</p>' +
+      '<div class="sk-field">סופרים ב־<div class="sk-seg" role="radiogroup" aria-label="יחידת ספירה">' +
+      '<button type="button" role="radio" data-unit="points" aria-checked="' + isPoints() + '">נקודות</button>' +
+      '<button type="button" role="radio" data-unit="nis" aria-checked="' + !isPoints() + '">שקלים ₪</button></div></div>' +
       '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end">' +
-      '<label class="sk-field">שקלים<input id="sk-rm" type="number" inputmode="decimal" min="0.01" value="' + s.ratioMoney + '"></label>' +
+      '<label class="sk-field">' + (isPoints() ? 'נקודות' : 'שקלים') + '<input id="sk-rm" type="number" inputmode="decimal" min="0.01" value="' + s.ratioMoney + '"></label>' +
       '<div style="padding-bottom:24px;color:#f2c94c;font-weight:900;font-size:20px">=</div>' +
       '<label class="sk-field">ג׳טונים<input id="sk-rc" type="number" inputmode="numeric" min="1" value="' + s.ratioChips + '"></label></div>' +
       '<button class="sk-btn green" type="button" id="sk-ratio-save" style="width:100%;margin-bottom:14px">עדכן יחס</button>' +
@@ -342,6 +365,9 @@
           '<button class="sk-btn" type="button" data-act="logout" style="color:#ff8a8e">' + ICON.back + 'התנתק</button>') +
       '</div>' +
       '<p style="text-align:center;margin:14px 0 0;font-size:13px"><a href="/privacy.html" target="_blank" rel="noopener" style="color:#f2c94c">מדיניות פרטיות</a> · <a href="/data-deletion.html" target="_blank" rel="noopener" style="color:#f2c94c">מחיקת חשבון</a></p>';
+    sheet.querySelectorAll('[data-unit]').forEach(function (b) {
+      b.onclick = function () { setUnit(b.getAttribute('data-unit')); lastPot = null; render(); openMenu(); toast(isPoints() ? 'מעכשיו סופרים בנקודות' : 'מעכשיו סופרים בשקלים'); };
+    });
     $('sk-ratio-save').onclick = function () {
       var m = Number($('sk-rm').value), c = Number($('sk-rc').value);
       if (!(m > 0) || !(c > 0)) return toast('שני המספרים צריכים להיות גדולים מ-0');
@@ -406,8 +432,8 @@
       '<div class="sk-hero"><div class="sk-kicker">Winner winner chicken dinner</div>' +
       '<div class="sk-chips"><div class="sk-chip r">♦</div><div class="sk-chip g">♣</div><div class="sk-chip y">♠</div></div>' +
       (code ? '<div class="sk-room">חדר <b>' + esc(code) + '</b></div>' : '') + '</div>' +
-      '<section class="sk-card sk-ratio"><div class="sk-sec-title">יחס ג׳טונים לשקל<small>' + esc(chipLine(s)) + '</small></div>' +
-      '<div class="sk-ratio-row"><label class="sk-rbox"><input id="sk-r-money" type="number" inputmode="decimal" min="0.01" value="' + s.ratioMoney + '" aria-label="שקלים"><span>₪</span></label>' +
+      '<section class="sk-card sk-ratio"><div class="sk-sec-title">' + (isPoints() ? 'יחס ג׳טונים לנקודות' : 'יחס ג׳טונים לשקל') + '<small>' + esc(chipLine(s)) + '</small></div>' +
+      '<div class="sk-ratio-row"><label class="sk-rbox"><input id="sk-r-money" type="number" inputmode="decimal" min="0.01" value="' + s.ratioMoney + '" aria-label="' + (isPoints() ? 'נקודות' : 'שקלים') + '"><span>' + CUR() + '</span></label>' +
       '<b class="sk-eq">=</b>' +
       '<label class="sk-rbox"><input id="sk-r-chips" type="number" inputmode="numeric" min="1" value="' + s.ratioChips + '" aria-label="ג׳טונים"><span>ג׳טונים</span></label>' +
       '<button class="sk-btn green" type="button" id="sk-r-save">עדכן</button></div></section>' +
@@ -469,7 +495,7 @@
 
   function chipLine(s) {
     var per = Number(s.ratioMoney) / Number(s.ratioChips);
-    var v = per >= 1 ? money(per) : per >= 0.01 ? '₪' + per.toLocaleString('he-IL', { maximumFractionDigits: 2 }) : (per * 100).toLocaleString('he-IL', { maximumFractionDigits: 2 }) + ' אגורות';
+    var v = isPoints() ? per.toLocaleString('he-IL', { maximumFractionDigits: 3 }) + ' נק׳' : per >= 1 ? money(per) : per >= 0.01 ? '₪' + per.toLocaleString('he-IL', { maximumFractionDigits: 2 }) : (per * 100).toLocaleString('he-IL', { maximumFractionDigits: 2 }) + ' אגורות';
     return 'ג׳טון אחד = ' + v;
   }
 
@@ -545,7 +571,7 @@
     lastDiff = diff;
     if (justBalanced) setTimeout(function () { var ok = root.querySelector('.sk-ok'); if (ok) fx(ok); }, 30);
     var pays = tr.length ? tr.map(function (t) {
-      return '<div class="sk-pay"><span>' + esc(t.from) + ' משלם/ת ל' + esc(t.to) + '</span><span class="v">' + money(t.amount) + '</span></div>';
+      return '<div class="sk-pay"><span>' + esc(t.from) + (isPoints() ? ' מעביר/ה ל' : ' משלם/ת ל') + esc(t.to) + '</span><span class="v">' + money(t.amount) + '</span></div>';
     }).join('') : (diff === 0 ? '<div class="sk-zero" style="padding:8px 0">אין חובות — כולם מאוזנים</div>' : '');
     var status = diff === 0
       ? '<div class="sk-ok">✓ הג׳טונים מאוזנים (' + num(chipsOut) + ' מתוך ' + num(chipsIn) + ')</div>'
@@ -766,7 +792,74 @@
       .catch(function () { toast('אין חיבור לשרת. נסה שוב.'); });
   }
 
+  /* ---------- דיווח וחסימה (הנחיות Apple 1.2) ---------- */
+  var REST = 'https://ctrnlkfopahdtoiaakru.supabase.co/rest/v1/';
+  var ANON = 'sb_publishable_zpiuN3ZFGPTHr5ySfL-rOw_Ngfzl7hc';
+  var blocks = new Set();
+  try { JSON.parse(localStorage.getItem('wwcd_blocks') || '[]').forEach(function (id) { blocks.add(id); }); } catch (e) {}
+  window.wnBlocks = blocks;
+  function api(path, opts) {
+    var se = session(); if (!se) return Promise.reject(new Error('signed-out'));
+    opts = opts || {};
+    var h = { apikey: ANON, Authorization: 'Bearer ' + se.access_token, 'Content-Type': 'application/json' };
+    if (opts.prefer) h.Prefer = opts.prefer;
+    return fetch(REST + path, { method: opts.method || 'GET', headers: h, body: opts.body ? JSON.stringify(opts.body) : undefined })
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.status === 204 || opts.method === 'DELETE' || opts.prefer ? null : r.json(); });
+  }
+  function saveBlocks() {
+    try { localStorage.setItem('wwcd_blocks', JSON.stringify(Array.from(blocks))); } catch (e) {}
+    window.dispatchEvent(new Event('wn-blocks-changed'));
+  }
+  function loadBlocks() {
+    if (!session()) return;
+    api('wwcd_blocks?select=blocked_id').then(function (rows) {
+      blocks.clear(); (rows || []).forEach(function (r) { blocks.add(r.blocked_id); }); saveBlocks();
+    }).catch(function () {});
+  }
+  var memberO = makeOverlay('sk-member');
+  window.wnMemberActions = function (userId, name, roomId) {
+    var blocked = blocks.has(userId), sheet = memberO.firstChild;
+    var shown = blocked ? 'משתמש חסום' : name;
+    sheet.innerHTML = '<div class="sk-grab"></div><h3>' + esc(shown) + '</h3><p class="sk-note">אפשר לדווח על התנהגות או שם פוגעני, או לחסום את המשתמש.</p>' +
+      '<div class="sk-menu">' +
+      '<button class="sk-btn" type="button" data-m="report">⚑ דווח על המשתמש</button>' +
+      (blocked ? '<button class="sk-btn" type="button" data-m="unblock">בטל חסימה</button>' : '<button class="sk-btn" type="button" data-m="block" style="color:#ff8a8e">⛔ חסום את המשתמש</button>') +
+      '<button class="sk-btn" type="button" data-m="close">סגור</button></div>';
+    sheet.querySelector('[data-m="close"]').onclick = function () { closeOverlay(memberO); };
+    sheet.querySelector('[data-m="report"]').onclick = function () { openReport(userId, shown, roomId); };
+    var bb = sheet.querySelector('[data-m="block"]');
+    if (bb) bb.onclick = function () {
+      blocks.add(userId); saveBlocks(); closeOverlay(memberO);
+      api('wwcd_blocks', { method: 'POST', body: { blocked_id: userId }, prefer: 'resolution=ignore-duplicates,return=minimal' }).catch(function () {});
+      toast('המשתמש נחסם — השם שלו מוסתר אצלך');
+    };
+    var ub = sheet.querySelector('[data-m="unblock"]');
+    if (ub) ub.onclick = function () {
+      blocks.delete(userId); saveBlocks(); closeOverlay(memberO);
+      api('wwcd_blocks?blocked_id=eq.' + encodeURIComponent(userId), { method: 'DELETE' }).catch(function () {});
+      toast('החסימה בוטלה');
+    };
+    openOverlay(memberO);
+  };
+  function openReport(userId, shown, roomId) {
+    var reasons = ['שם פוגעני או לא ראוי', 'התנהגות פוגענית או הטרדה', 'רמאות ברישום הסכומים', 'ספאם', 'אחר'];
+    var sheet = memberO.firstChild;
+    sheet.innerHTML = '<div class="sk-grab"></div><h3>דיווח על ' + esc(shown) + '</h3><p class="sk-note">הדיווח נשלח למנהל האפליקציה ומטופל תוך 24 שעות.</p>' +
+      '<div class="sk-reasons">' + reasons.map(function (r, i) { return '<label><input type="radio" name="sk-reason" value="' + esc(r) + '"' + (i === 0 ? ' checked' : '') + '>' + esc(r) + '</label>'; }).join('') + '</div>' +
+      '<label class="sk-field">פרטים (לא חובה)<input id="sk-report-text" maxlength="200" autocomplete="off"></label>' +
+      '<div class="sk-sheet-actions"><button class="sk-btn" type="button" data-m="cancel">ביטול</button><button class="sk-btn green" type="button" data-m="send">שלח דיווח</button></div>';
+    sheet.querySelector('[data-m="cancel"]').onclick = function () { closeOverlay(memberO); };
+    sheet.querySelector('[data-m="send"]').onclick = function () {
+      var r = sheet.querySelector('input[name="sk-reason"]:checked'), extra = $('sk-report-text').value.trim();
+      var reason = (r ? r.value : 'אחר') + (extra ? ' — ' + extra : '');
+      api('wwcd_reports', { method: 'POST', body: { reported_user_id: userId, room_id: roomId || null, reason: reason.slice(0, 300) }, prefer: 'return=minimal' })
+        .then(function () { closeOverlay(memberO); toast('הדיווח נשלח. תודה!'); })
+        .catch(function () { toast('שליחת הדיווח נכשלה. נסה שוב.'); });
+    };
+  }
+
   function mount() {
+    loadBlocks();
     addProfileLogout();
     addLegalLinks();
     var shell = document.querySelector('.shell'), hub = document.querySelector('.room-hub');

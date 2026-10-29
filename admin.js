@@ -12,8 +12,10 @@ let listenersAttached = false;
 let usersCache = [];
 let roomsCache = [];
 let dataCache = null;
-let dataTable = "users";
+let dataTable = "reports";
 const DATA_TABLES = {
+  reports: { label: "דיווחים", cols: { reported: "מדווח", reporter: "מי דיווח", room: "שולחן", reason: "סיבה", status: "מצב", created: "מתי" } },
+  blocks: { label: "חסימות", cols: { blocker: "חוסם", blocked: "נחסם", created: "מתי" } },
   users: { label: "חשבונות", cols: { email: "דוא״ל", guest: "אורח", provider: "התחברות", created: "נוצר", lastSignIn: "כניסה אחרונה", banned: "מושעה", id: "מזהה" } },
   profiles: { label: "פרופילים", cols: { user: "משתמש", displayName: "שם מוצג", hasPhoto: "תמונה", updated: "עודכן" } },
   stats: { label: "סטטיסטיקה", cols: { user: "משתמש", games: "משחקים", wins: "ניצחונות", pointsNis: "נקודות (₪)" } },
@@ -30,7 +32,7 @@ const fullDate = (v) => v ? new Intl.DateTimeFormat("he-IL", { dateStyle: "short
 function cellText(key, value) {
   if (DATE_COLS.has(key)) return fullDate(value);
   if (typeof value === "boolean") return value ? "כן" : "לא";
-  if (key === "status") return statusLabel(value);
+  if (key === "status") return value === "open" ? "פתוח" : value === "handled" ? "טופל" : statusLabel(value);
   if (key === "kind") return ({ buyin: "קנייה ראשונית", rebuy: "קנייה נוספת", cashout: "פדיון", adjustment: "תיקון", game_started: "משחק התחיל", game_finished: "משחק הסתיים", player_added: "שחקן נוסף", player_removed: "שחקן הוסר", ratio_changed: "שינוי יחס" })[value] || value;
   if (value === null || value === undefined || value === "") return "—";
   return String(value);
@@ -42,8 +44,9 @@ function renderData(search = $("adminDataSearch")?.value || "") {
   const q = search.trim().toLowerCase();
   const filtered = q ? rows.filter((r) => Object.values(r).some((v) => String(v ?? "").toLowerCase().includes(q))) : rows;
   const chips = Object.entries(DATA_TABLES).map(([key, t]) => `<button type="button" class="admin-data-chip" data-admin-action="data-table" data-table="${key}" aria-pressed="${key === dataTable}">${escapeHtml(t.label)} <b>${(tables[key] || []).length}</b></button>`).join("");
-  const head = Object.values(def.cols).map((h) => `<th>${escapeHtml(h)}</th>`).join("");
-  const body = filtered.slice(0, 500).map((r) => `<tr>${Object.keys(def.cols).map((k) => `<td>${escapeHtml(cellText(k, r[k]))}</td>`).join("")}</tr>`).join("");
+  const head = Object.values(def.cols).map((h) => `<th>${escapeHtml(h)}</th>`).join("") + (dataTable === "reports" ? "<th>פעולה</th>" : "");
+  const banCell = (r) => dataTable === "reports" && r.reportedId ? `<td><button class="btn danger" type="button" data-admin-action="ban" data-user-id="${escapeHtml(r.reportedId)}">השעה משתמש</button></td>` : "";
+  const body = filtered.slice(0, 500).map((r) => `<tr>${Object.keys(def.cols).map((k) => `<td>${escapeHtml(cellText(k, r[k]))}</td>`).join("")}${banCell(r)}</tr>`).join("");
   $("adminContent").innerHTML = `
     <div class="admin-toolbar"><div><h3>כל הנתונים</h3><div class="admin-muted">עודכן ${escapeHtml(fullDate(dataCache?.generatedAt))} · ${filtered.length} שורות${filtered.length > 500 ? " (מוצגות 500 ראשונות)" : ""}</div></div>
       <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn" type="button" data-admin-action="data-csv">הורד CSV</button><button class="btn" type="button" data-admin-action="data-json">הורד הכל (JSON)</button><button class="btn" type="button" data-admin-action="refresh">רענן</button></div></div>
@@ -256,9 +259,9 @@ function renderSettings(settings) {
 }
 
 async function setUserBan(userId, banned) {
-  const user = usersCache.find((item) => item.id === userId);
+  const user = usersCache.find((item) => item.id === userId) || { id: userId, email: "" };
   const action = banned ? "להשעות" : "להפעיל מחדש";
-  if (!user || !confirm(`ל${action} את ${user.email || "המשתמש הזה"}?`)) return;
+  if (!confirm(`ל${action} את ${user.email || "המשתמש הזה"}?`)) return;
   setFooter("מעדכן הרשאת משתמש...");
   try {
     await callAdmin("set-user-ban", { userId, banned });
