@@ -45,27 +45,70 @@
   function analyze(canvas) {
     var w = canvas.width, h = canvas.height, ctx = canvas.getContext('2d');
     var d = ctx.getImageData(0, 0, w, h).data, n = w * h, i, x, y;
-    // 1) צבע השולחן = חציון של פיקסלים בשולי התמונה
-    var bw = Math.max(3, Math.round(Math.min(w, h) * 0.04)), R = [], G = [], B = [];
-    for (y = 0; y < h; y += 2) for (x = 0; x < w; x += 2) {
-      if (x < bw || y < bw || x >= w - bw || y >= h - bw) { i = (y * w + x) * 4; R.push(d[i]); G.push(d[i + 1]); B.push(d[i + 2]); }
+    // 1) צבע השולחן נלמד בנפרד לכל אזור בתמונה (כדי להתמודד עם תאורה לא אחידה וצללים)
+    function bgModel(excl) {
+      var cs = Math.max(8, Math.round(Math.min(w, h) / 10)), gw = Math.ceil(w / cs), gh = Math.ceil(h / cs);
+      var grid = new Array(gw * gh), gx, gy, xx, yy, j;
+      for (gy = 0; gy < gh; gy++) for (gx = 0; gx < gw; gx++) {
+        var R = [], G = [], B = [], tot = 0;
+        for (yy = gy * cs; yy < Math.min(h, gy * cs + cs); yy += 2) for (xx = gx * cs; xx < Math.min(w, gx * cs + cs); xx += 2) {
+          tot++; j = yy * w + xx; if (excl && excl[j]) continue;
+          R.push(d[j * 4]); G.push(d[j * 4 + 1]); B.push(d[j * 4 + 2]);
+        }
+        grid[gy * gw + gx] = R.length >= Math.max(4, tot * 0.15) ? [median(R), median(G), median(B)] : null;
+      }
+      // אזורים שכולם ג'טונים — משלימים מהשכנים
+      for (var pass = 0; pass < gw + gh; pass++) {
+        var missing = 0, next = grid.slice();
+        for (gy = 0; gy < gh; gy++) for (gx = 0; gx < gw; gx++) {
+          if (grid[gy * gw + gx]) continue; missing++;
+          var acc = [0, 0, 0], cnt = 0;
+          [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (o) {
+            var ax = gx + o[0], ay = gy + o[1]; if (ax < 0 || ay < 0 || ax >= gw || ay >= gh) return;
+            var c = grid[ay * gw + ax]; if (c) { acc[0] += c[0]; acc[1] += c[1]; acc[2] += c[2]; cnt++; }
+          });
+          if (cnt) next[gy * gw + gx] = [acc[0] / cnt, acc[1] / cnt, acc[2] / cnt];
+        }
+        grid = next; if (!missing) break;
+      }
+      for (j = 0; j < grid.length; j++) if (!grid[j]) grid[j] = [128, 128, 128];
+      // מעבר חלק בין האזורים
+      var out = new Float32Array(n * 3);
+      for (yy = 0; yy < h; yy++) {
+        var fy = Math.min(gh - 1, Math.max(0, (yy + 0.5) / cs - 0.5)), y0 = Math.floor(fy), y1 = Math.min(gh - 1, y0 + 1), ty = fy - y0;
+        for (xx = 0; xx < w; xx++) {
+          var fx = Math.min(gw - 1, Math.max(0, (xx + 0.5) / cs - 0.5)), x0 = Math.floor(fx), x1 = Math.min(gw - 1, x0 + 1), tx = fx - x0;
+          var a = grid[y0 * gw + x0], b = grid[y0 * gw + x1], c2 = grid[y1 * gw + x0], e = grid[y1 * gw + x1];
+          for (var ch = 0; ch < 3; ch++) out[(yy * w + xx) * 3 + ch] = (a[ch] * (1 - tx) + b[ch] * tx) * (1 - ty) + (c2[ch] * (1 - tx) + e[ch] * tx) * ty;
+        }
+      }
+      return out;
     }
-    var br = median(R), bg = median(G), bb = median(B);
-    // 2) כמה כל פיקסל שונה מהשולחן (צבע + בהירות), וסף אוטומטי
-    var dist = new Uint8Array(n), hist = new Array(256).fill(0);
-    for (i = 0; i < n; i++) {
-      var dr = d[i * 4] - br, dg = d[i * 4 + 1] - bg, db = d[i * 4 + 2] - bb;
-      var v = Math.min(255, Math.round(Math.sqrt(dr * dr + dg * dg + db * db) / 1.2));
-      dist[i] = v; hist[v]++;
+    // 2) כמה כל פיקסל שונה מהשולחן שמתחתיו, וסף אוטומטי
+    var dist = new Uint8Array(n), mask = new Uint8Array(n);
+    function score(bgm, excl) {
+      var hist = new Array(256).fill(0), bd = [];
+      for (i = 0; i < n; i++) {
+        var dr = d[i * 4] - bgm[i * 3], dg = d[i * 4 + 1] - bgm[i * 3 + 1], db = d[i * 4 + 2] - bgm[i * 3 + 2];
+        var v = Math.min(255, Math.round(Math.sqrt(dr * dr + dg * dg + db * db) / 1.2));
+        dist[i] = v; hist[v]++;
+        if ((!excl || !excl[i]) && (i & 3) === 0) bd.push(v);
+      }
+      bd.sort(function (a, b) { return a - b; });
+      var noise = bd.length ? bd[Math.floor(bd.length * 0.95)] : 20;
+      var thr = Math.max(14, Math.min(otsu(hist, n), Math.round(noise * 1.6 + 12)));
+      // סף כפול: פיקסל "חלש" נחשב ג'טון אם הוא מחובר לפיקסל "חזק" (תופס שוליים כהים של ג'טונים)
+      var weak = Math.max(10, Math.round(thr * 0.55)), st = [];
+      for (i = 0; i < n; i++) { mask[i] = dist[i] > thr ? 1 : 0; if (mask[i]) st.push(i); }
+      while (st.length) {
+        var q0 = st.pop(), qx = q0 % w;
+        var nbs = [qx > 0 ? q0 - 1 : -1, qx < w - 1 ? q0 + 1 : -1, q0 >= w ? q0 - w : -1, q0 < n - w ? q0 + w : -1];
+        for (var t0 = 0; t0 < 4; t0++) { var u = nbs[t0]; if (u >= 0 && !mask[u] && dist[u] > weak) { mask[u] = 1; st.push(u); } }
+      }
     }
-    // סף: לפי Otsu, אבל לא גבוה מדי ביחס לרעש של השולחן עצמו (כדי לא לפספס ג'טונים בצבע קרוב לשולחן)
-    var bd = [];
-    for (y = 0; y < h; y += 2) for (x = 0; x < w; x += 2) if (x < bw || y < bw || x >= w - bw || y >= h - bw) bd.push(dist[y * w + x]);
-    bd.sort(function (a, b) { return a - b; });
-    var noise = bd.length ? bd[Math.floor(bd.length * 0.95)] : 20;
-    var thr = Math.max(16, Math.min(otsu(hist, n), Math.round(noise * 1.6 + 12)));
-    var mask = new Uint8Array(n);
-    for (i = 0; i < n; i++) mask[i] = dist[i] > thr ? 1 : 0;
+    score(bgModel(null), null);
+    var excl = morph(mask, w, h, Math.max(2, Math.round(Math.min(w, h) / 80)), true);
+    score(bgModel(excl), excl);
     // 3) ניקוי רעשים וסגירת חורים קטנים
     var r = Math.max(1, Math.round(Math.min(w, h) / 220));
     mask = morph(morph(mask, w, h, r, false), w, h, r, true);   // open
@@ -99,9 +142,14 @@
       comps.push({ id: id, A: A, cx: sx / A, cy: sy / A, w: bwid, h: bhei, fill: A / (bwid * bhei), aspect: bwid / bhei, edge: touches });
     }
     comps = comps.filter(function (c) { return c.A >= minA && c.A < n * 0.6; });
-    // 5) גודל של ג'טון בודד = חציון הכתמים העגולים
-    var round = comps.filter(function (c) { return c.aspect > 0.72 && c.aspect < 1.38 && c.fill > 0.62 && c.fill < 0.9; });
+    // דברים שנחתכים בשולי התמונה ולא נראים כמו ג'טון (קצה שולחן, יד, חפץ) — לא נספרים
+    function roundish(c) { return c.aspect > 0.72 && c.aspect < 1.38 && c.fill > 0.62 && c.fill < 0.9; }
+    // 5) גודל של ג'טון בודד = חציון הכתמים העגולים (בלי אלה שבשוליים)
+    var round = comps.filter(function (c) { return roundish(c) && !c.edge; });
+    if (!round.length) round = comps.filter(roundish);
     var unit = median((round.length ? round : comps).map(function (c) { return c.A; }));
+    // בשוליים: ג'טון חתוך או כמה צמודים נספרים; דבר גדול/מוזר (קצה שולחן, יד) — לא
+    comps = comps.filter(function (c) { return !c.edge || roundish(c) || (c.A < unit * 3.5 && c.fill > 0.45); });
     var total = 0;
     comps.forEach(function (c) {
       c.count = unit ? Math.round(c.A / unit) : 1;
