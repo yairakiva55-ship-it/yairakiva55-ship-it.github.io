@@ -605,7 +605,8 @@
     var step = Math.max(1, Math.round(Number(s.ratioChips) / 10));
     var chipRows = s.players.map(function (p, i) {
       return '<div class="sk-chiprow" data-id="' + esc(p.id) + '">' +
-        '<div class="sk-chipname"><span class="sk-dot" style="background:' + DOTS[i % DOTS.length] + '"></span>' + esc(p.name) + '</div><div></div>' +
+        '<div class="sk-chipname"><span class="sk-dot" style="background:' + DOTS[i % DOTS.length] + '"></span>' + esc(p.name) + '</div>' +
+        (window.wnChipScan ? '<button class="sk-scan" type="button" aria-label="ספור מתמונה" title="ספור ג׳טונים מתמונה"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>' : '<div></div>') +
         '<div class="sk-stepper"><button class="sk-pm minus" type="button" data-d="-1" aria-label="פחות">−</button>' +
         '<input type="number" inputmode="numeric" min="0" value="' + Math.round(p.finalChips || 0) + '" aria-label="ג׳טונים של ' + esc(p.name) + '">' +
         '<button class="sk-pm plus" type="button" data-d="1" aria-label="יותר">+</button></div></div>';
@@ -670,6 +671,11 @@
         b.onclick = function () { sound(); setVal(Number(input.value || 0) + Number(b.getAttribute('data-d')) * step); };
       });
       input.onchange = function () { setVal(input.value); };
+      var scan = row.querySelector('.sk-scan');
+      if (scan) scan.onclick = function () {
+        var pl = getState().players.find(function (x) { return x.id === id; });
+        window.wnChipScan.open(pl ? pl.name : '', function (v) { setVal(v); toast('עודכן: ' + num(v) + ' ג׳טונים'); });
+      };
       input.onkeydown = function (e) { if (e.key === 'Enter') input.blur(); };
     });
   }

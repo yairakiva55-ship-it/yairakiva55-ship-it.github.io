@@ -10,7 +10,7 @@ const SITE = path.resolve(APP, "..");
 const OUT = path.join(APP, "www");
 
 const FILES = [
-  "index.html", "rooms.js", "admin.js", "skin.js", "bottom-nav.js", "terms-gate.js",
+  "index.html", "rooms.js", "admin.js", "skin.js", "chip-scan.js", "bottom-nav.js", "terms-gate.js",
   "privacy.html", "data-deletion.html", "manifest.webmanifest",
   "spade-home-icon-v2.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png",
 ];
