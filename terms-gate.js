@@ -29,6 +29,10 @@
   ];
 
   // ---------- אחסון מקומי (מוגן מפני דפדפנים שחוסמים אותו) ----------
+  var GUEST_SESSION_KEY = 'wwcd_terms_guest_session_';
+  var guestMode = false;
+  function ssGet(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+  function ssSet(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
@@ -132,7 +136,7 @@
     var overlay = el('div', { id: 'wwcd-terms', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'wt-title' });
     var card = el('div', { 'class': 'wt-card' });
     card.appendChild(el('h2', { id: 'wt-title' }, 'לפני שמתחילים'));
-    card.appendChild(el('p', { 'class': 'wt-sub' }, 'יש לקרוא ולאשר פעם אחת בלבד.'));
+    card.appendChild(el('p', { 'class': 'wt-sub' }, guestMode ? 'כאורח יש לקרוא ולאשר את התנאים בכל כניסה.' : 'יש לקרוא ולאשר פעם אחת בלבד.'));
 
     var list = el('ul', { 'class': 'wt-list' });
     POINTS.forEach(function (text) { list.appendChild(el('li', null, text)); });
@@ -157,6 +161,7 @@
     go.addEventListener('click', function () {
       if (go.disabled) return;
       if (uid) lsSet(LOCAL_KEY + '_' + uid, new Date().toISOString());
+      if (uid && guestMode) ssSet(GUEST_SESSION_KEY + uid, '1');
       overlay.remove();
       document.documentElement.classList.remove('wt-lock');
       syncToDb();
@@ -179,6 +184,14 @@
       return;                             // עוד לא מחובר — מחכים
     }
     uid = session.user.id;
+    // אורח (כניסה כאורח): חייב לאשר מחדש בכל כניסה לאפליקציה
+    if (session.user.is_anonymous) {
+      guestMode = true;
+      if (ssGet(GUEST_SESSION_KEY + uid)) { syncToDb(); return; }
+      showGate();
+      return;
+    }
+    guestMode = false;
     if (lsGet(LOCAL_KEY + '_' + uid)) { syncToDb(); return; }   // כבר אישר במכשיר הזה
     checking = true;
     hasAcceptedInDb(session).then(function (yes) {
