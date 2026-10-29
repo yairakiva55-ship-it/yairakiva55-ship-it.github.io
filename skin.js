@@ -138,6 +138,7 @@
     '.admin-terms{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;margin-inline-end:8px;vertical-align:middle;font-size:13px;font-weight:900}',
     '.admin-terms.ok{background:rgba(47,212,124,.18);color:#2fd47c;box-shadow:0 0 0 1px rgba(47,212,124,.4)}',
     '.admin-terms.no{background:rgba(255,255,255,.06);color:#9fb3a6}',
+    'body.room-authenticated #sk-legal{display:none}',
     '.sk-headbtns{display:flex;gap:8px;flex:none}',
     '.sk-iconbtn.sk-out{width:auto;padding:0 12px;gap:6px;display:inline-flex;align-items:center;color:#ff8a8e;border-color:rgba(229,72,77,.3);background:rgba(229,72,77,.08);font:inherit;font-weight:800;font-size:13px}',
     '.sk-profile-logout{width:100%;margin-top:10px;min-height:46px;border-radius:14px;border:1px solid rgba(229,72,77,.35);background:rgba(229,72,77,.1);color:#ff8a8e;font:inherit;font-weight:800;cursor:pointer}',
@@ -318,7 +319,8 @@
           '<button class="sk-btn" type="button" data-act="new">' + ICON.reset + 'משחק חדש</button>' +
           (adminVisible ? '<button class="sk-btn" type="button" data-act="admin">' + ICON.gear + 'ADMIN</button>' : '') +
           '<button class="sk-btn" type="button" data-act="logout" style="color:#ff8a8e">' + ICON.back + 'התנתק</button>') +
-      '</div>';
+      '</div>' +
+      '<p style="text-align:center;margin:14px 0 0;font-size:13px"><a href="/privacy.html" target="_blank" rel="noopener" style="color:#f2c94c">מדיניות פרטיות</a> · <a href="/data-deletion.html" target="_blank" rel="noopener" style="color:#f2c94c">מחיקת חשבון</a></p>';
     $('sk-ratio-save').onclick = function () {
       var m = Number($('sk-rm').value), c = Number($('sk-rc').value);
       if (!(m > 0) || !(c > 0)) return toast('שני המספרים צריכים להיות גדולים מ-0');
@@ -636,6 +638,15 @@
   ].join('\n');
   document.head.appendChild(guestCss);
 
+  function addLegalLinks() {
+    var foot = document.querySelector('.login-footer');
+    if (!foot || $('sk-legal')) return;
+    var p = document.createElement('p');
+    p.id = 'sk-legal';
+    p.style.cssText = 'text-align:center;margin:10px 0 0;font-size:.76rem';
+    p.innerHTML = '<a href="/privacy.html" target="_blank" rel="noopener" style="color:#f2c94c">מדיניות פרטיות</a> · <a href="/data-deletion.html" target="_blank" rel="noopener" style="color:#f2c94c">מחיקת חשבון</a>';
+    foot.after(p);
+  }
   function addGuestButton() {
     var panel = $('roomAuthPanel'), google = $('googleSignInBtn');
     if (!panel || !google || $('sk-guest-btn')) return;
@@ -668,6 +679,7 @@
 
   function mount() {
     addProfileLogout();
+    addLegalLinks();
     var shell = document.querySelector('.shell'), hub = document.querySelector('.room-hub');
     if (!shell || !hub) return;
     hub.after(root);

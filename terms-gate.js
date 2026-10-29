@@ -142,7 +142,20 @@
 
     var list = el('ul', { 'class': 'wt-list' });
     card.appendChild(el('p', { 'class': 'wt-intro' }, INTRO));
-    POINTS.forEach(function (text) { list.appendChild(el('li', null, text)); });
+    POINTS.forEach(function (text) {
+      var li = el('li');
+      var key = 'מדיניות הפרטיות';
+      var i = text.indexOf(key);
+      if (i < 0) { li.textContent = text; }
+      else {
+        li.appendChild(document.createTextNode(text.slice(0, i)));
+        var a = el('a', { href: '/privacy.html', target: '_blank', rel: 'noopener' }, key);
+        a.style.color = '#f2c94c';
+        li.appendChild(a);
+        li.appendChild(document.createTextNode(text.slice(i + key.length)));
+      }
+      list.appendChild(li);
+    });
     card.appendChild(list);
 
     var label = el('label', { 'for': 'wt-c0' });
