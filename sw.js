@@ -1,6 +1,6 @@
 /* Service worker: network-first so updates always arrive; cache is only an offline fallback. */
-const CACHE = 'wwcd-v7';
-const CORE = ['/', '/index.html', '/chip-scan.js?v=4', '/skin.js?v=15', '/bottom-nav.js?v=4', '/terms-gate.js?v=7', '/rooms.js?v=5', '/admin.js?v=3', '/icon-192.png', '/spade-home-icon-v2.png'];
+const CACHE = 'wwcd-v8';
+const CORE = ['/', '/index.html', '/chip-scan.js?v=5', '/skin.js?v=15', '/bottom-nav.js?v=4', '/terms-gate.js?v=7', '/rooms.js?v=5', '/admin.js?v=3', '/icon-192.png', '/spade-home-icon-v2.png'];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE).catch(() => {})).then(() => self.skipWaiting()));
 });

@@ -41,7 +41,7 @@
     return out;
   }
 
-  function analyze(canvas) {
+  function analyze(canvas, side) {
     var w = canvas.width, h = canvas.height, ctx = canvas.getContext('2d');
     var d = ctx.getImageData(0, 0, w, h).data, n = w * h, i, x, y;
     // 1) צבע השולחן נלמד בנפרד לכל אזור בתמונה (כדי להתמודד עם תאורה לא אחידה וצללים)
@@ -138,9 +138,10 @@
         for (var k = 0; k < 4; k++) { var t = nb[k]; if (t >= 0 && mask[t] && !lab[t]) { lab[t] = id; q.push(t); } }
       }
       var bwid = x1 - x0 + 1, bhei = y1 - y0 + 1;
-      comps.push({ id: id, pix: pix, A: A, cx: sx / A, cy: sy / A, w: bwid, h: bhei, fill: A / (bwid * bhei), aspect: bwid / bhei, edge: touches });
+      comps.push({ id: id, pix: pix, x0: x0, x1: x1, y0: y0, y1: y1, A: A, cx: sx / A, cy: sy / A, w: bwid, h: bhei, fill: A / (bwid * bhei), aspect: bwid / bhei, edge: touches });
     }
     comps = comps.filter(function (c) { return c.A >= minA && c.A < n * 0.6; });
+    if (side) return stacks(d, lab, comps, w, h);
     // דברים שנחתכים בשולי התמונה ולא נראים כמו ג'טון (קצה שולחן, יד, חפץ) — לא נספרים
     function roundish(c) { return c.aspect > 0.72 && c.aspect < 1.38 && c.fill > 0.62 && c.fill < 0.9; }
     // 5) גודל של ג'טון בודד = חציון הכתמים העגולים (בלי אלה שבשוליים)
@@ -164,6 +165,59 @@
       c.pix = null;
     });
     return { comps: comps, chips: chips, total: chips.length, unit: unit, lab: lab, w: w, h: h };
+  }
+
+  /* ---------- ערימות מצולמות מהצד: כל ג'טון הוא פס, סופרים את הפסים ---------- */
+  function stacks(d, lab, comps, w, h) {
+    var out = [], chips = [];
+    comps.forEach(function (c) {
+      var D = c.x1 - c.x0 + 1, Hh = c.y1 - c.y0 + 1;
+      if (D < w * 0.03 || c.edge) return;
+      var widths = [], y, x, j;
+      for (y = c.y0; y <= c.y1; y++) { var cnt = 0; for (x = c.x0; x <= c.x1; x++) if (lab[y * w + x] === c.id) cnt++; widths.push(cnt); }
+      // החלק העליון (העיגול של הג'טון העליון) לא נספר כגובה
+      // רוחב "אמיתי" של הערימה = חציון הרוחב בחצי התחתון (הצדדים הכהים לא מטעים)
+      var Db = median(widths.slice(Math.floor(widths.length / 2))) || D;
+      var topRows = 0; while (topRows < widths.length && widths[topRows] < Db * 0.9) topRows++;
+      // משטח הג'טון העליון נראה כאליפסה מעל הצד; הצד של הערימה מתחיל בתחתית האליפסה
+      var eh = Math.min(Hh * 0.45, D * 0.35, 2 * topRows / 0.56), yTop = c.y0 + eh, yBot = c.y1, body = yBot - yTop;
+      var P0 = D * 0.085;
+      if (body < P0 * 0.5) return;
+      // אות: כמה השורה שונה מהשורה שמעליה (במרכז הערימה) — גבוה בגבול בין ג'טונים
+      var xa = Math.round(c.x0 + D * 0.15), xb = Math.round(c.x1 - D * 0.15), e = [];
+      for (y = Math.round(yTop); y <= yBot; y++) {
+        var acc = 0, m = 0;
+        for (x = xa; x <= xb; x++) { j = y * w + x; var k2 = j - w; acc += Math.abs(d[j * 4] - d[k2 * 4]) + Math.abs(d[j * 4 + 1] - d[k2 * 4 + 1]) + Math.abs(d[j * 4 + 2] - d[k2 * 4 + 2]); m++; }
+        e.push(m ? acc / m : 0);
+      }
+      var mean = e.reduce(function (a, b) { return a + b; }, 0) / (e.length || 1);
+      function at(pos) { var p = Math.round(pos), best = 0; for (var q = p - 1; q <= p + 1; q++) if (q >= 0 && q < e.length && e[q] > best) best = e[q]; return best; }
+      function lo(pos) { var p = Math.round(pos), sm = 0, cn = 0; for (var q = p - 1; q <= p + 1; q++) if (q >= 0 && q < e.length) { sm += e[q]; cn++; } return cn ? sm / cn : 0; }
+      // ציון לכל מספר אפשרי: הגבולות בין הג'טונים צריכים להיות "רועשים" ואמצע כל ג'טון "שקט"
+      var nMin = Math.max(2, Math.floor(body / (P0 * 1.8))), nMax = Math.max(2, Math.ceil(body / (P0 * 0.5))), best = -Infinity, n = 1;
+      for (var nn = nMin; nn <= nMax; nn++) {
+        var hi = 0, mid = 0;
+        for (var k = 1; k < nn; k++) hi += at(k * body / nn);
+        for (k = 0; k < nn; k++) mid += lo((k + 0.5) * body / nn);
+        var sc = hi / (nn - 1) - mid / nn;
+        if (sc > best) { best = sc; n = nn; }
+      }
+      if (best < Math.max(6, mean * 0.5)) n = Math.max(1, Math.round(body / P0));
+      // צבע של כל ג'טון בערימה
+      var layers = [];
+      for (var L = 0; L < n; L++) {
+        var ya = yTop + body * L / n, yb = yTop + body * (L + 1) / n, votes = {};
+        for (y = Math.round(ya + (yb - ya) * 0.25); y <= Math.round(yb - (yb - ya) * 0.25); y++) for (x = xa; x <= xb; x += 2) {
+          j = (y * w + x) * 4; var cc = colorOf(d[j], d[j + 1], d[j + 2]); votes[cc] = (votes[cc] || 0) + 1;
+        }
+        var bc = 'white', bv = -1; Object.keys(votes).forEach(function (k3) { var v = votes[k3] * (k3 === 'white' ? 0.8 : 1); if (v > bv) { bv = v; bc = k3; } });
+        layers.push(bc); chips.push({ x: c.x0 + D / 2, y: (ya + yb) / 2, color: bc });
+      }
+      out.push({ x0: c.x0, x1: c.x1, y0: c.y0, y1: c.y1, yTop: yTop, n: n, layers: layers, id: c.id });
+      c.pix = null;
+    });
+    var ids = {}; out.forEach(function (st) { ids[st.id] = 1; });
+    return { side: true, stacks: out, chips: chips, total: chips.length, comps: comps.filter(function (c) { return ids[c.id]; }), lab: lab, unit: 0, w: w, h: h };
   }
 
   // חלוקת כתם ל-k ג'טונים (k-means על המיקומים)
@@ -252,6 +306,22 @@
     ctx.putImageData(over, 0, 0);
     var rr = Math.max(8, Math.round(Math.sqrt(res.unit || 400) * 0.24)), hex = {};
     COLORS.forEach(function (c) { hex[c.k] = c.hex; });
+    if (res.side) {
+      var fs = Math.max(16, Math.round(w / 32));
+      (res.stacks || []).forEach(function (st) {
+        var sw = st.x1 - st.x0, body = st.y1 - st.yTop, tick = Math.max(6, sw * 0.12);
+        for (var L = 0; L < st.n; L++) {
+          var ya = st.yTop + body * L / st.n, yb = st.yTop + body * (L + 1) / st.n;
+          ctx.fillStyle = hex[st.layers[L]] || '#fff'; ctx.fillRect(st.x1 + 4, ya + 1, tick, Math.max(2, yb - ya - 2));
+          ctx.strokeStyle = '#36dd85'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(st.x0 - 3, yb); ctx.lineTo(st.x0 + sw * 0.18, yb); ctx.stroke();
+        }
+        ctx.font = '900 ' + fs + 'px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        var lx = (st.x0 + st.x1) / 2, ly = Math.max(fs + 6, st.y0 - 8);
+        ctx.fillStyle = '#36dd85'; ctx.beginPath(); ctx.arc(lx, ly - fs * 0.55, fs * 0.85, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#062012'; ctx.fillText(String(st.n), lx, ly - fs * 0.05);
+      });
+      return;
+    }
     (res.chips || []).forEach(function (c) {
       ctx.beginPath(); ctx.arc(c.x, c.y, rr + 3, 0, Math.PI * 2); ctx.fillStyle = '#36dd85'; ctx.fill();
       ctx.beginPath(); ctx.arc(c.x, c.y, rr, 0, Math.PI * 2); ctx.fillStyle = hex[c.color] || '#fff'; ctx.fill();
@@ -308,6 +378,10 @@
     '#cs-ov .cs-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;background:rgba(0,0,0,.25);color:#fff;font-weight:800;font-size:13px}',
     '#cs-ov .cs-pill i{width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 1px rgba(255,255,255,.5)}',
     '#cs-ov .cs-use{margin-top:2px;min-height:42px;border:0;border-radius:12px;background:#f2c94c;color:#1b1503;font:inherit;font-weight:900;cursor:pointer}',
+    '#cs-ov .cs-modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px}',
+    '#cs-ov .cs-mode{display:grid;justify-items:center;gap:2px;padding:12px 8px;border-radius:16px;border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#f3efe2;font:inherit;font-weight:900;font-size:15px;cursor:pointer;transition:all .15s}',
+    '#cs-ov .cs-mode b{font-size:24px}#cs-ov .cs-mode small{font-weight:600;font-size:12px;color:#9fb3a6}',
+    '#cs-ov .cs-mode.on{border-color:#36dd85;background:rgba(47,212,124,.12);box-shadow:0 0 0 3px rgba(47,212,124,.15)}',
     '#cs-ov .cs-busy{padding:40px 0;text-align:center;color:#b9c7bd}',
     '#cs-ov .cs-spin{width:44px;height:44px;margin:0 auto 12px;border-radius:50%;border:5px dashed #f2c94c;animation:csSpin 1s linear infinite}',
     '@keyframes csSpin{to{transform:rotate(360deg)}}',
@@ -332,14 +406,21 @@
   function body(html) { ov.querySelector('#cs-body').innerHTML = html; }
 
   function intro() {
+    var side = state.mode === 'side';
     body('<h3 id="cs-title">📸 ספירת ג׳טונים — ' + esc(state.name) + '</h3>' +
-      '<p class="cs-sub">מצלמים את הג׳טונים של השחקן, והאפליקציה סופרת אותם.</p>' +
-      '<div class="cs-tips"><div class="cs-tip"><b>🫳</b>לפזר על השולחן, בלי ערימות</div><div class="cs-tip"><b>⬇️</b>לצלם ישר מלמעלה</div><div class="cs-tip"><b>💡</b>תאורה טובה, רקע אחיד</div></div>' +
+      '<p class="cs-sub">איך הג׳טונים מסודרים?</p>' +
+      '<div class="cs-modes"><button type="button" class="cs-mode' + (side ? '' : ' on') + '" data-m="top"><b>🫳</b>מפוזרים<small>צילום מלמעלה</small></button>' +
+      '<button type="button" class="cs-mode' + (side ? ' on' : '') + '" data-m="side"><b>🗼</b>בערימות<small>צילום מהצד</small></button></div>' +
+      (side
+        ? '<div class="cs-tips"><div class="cs-tip"><b>↔️</b>לצלם מהצד, בגובה הערימות</div><div class="cs-tip"><b>🧱</b>רווח קטן בין ערימה לערימה</div><div class="cs-tip"><b>💡</b>תאורה טובה, רקע אחיד</div></div>'
+        : '<div class="cs-tips"><div class="cs-tip"><b>🫳</b>לפזר על השולחן, בלי ערימות</div><div class="cs-tip"><b>⬇️</b>לצלם ישר מלמעלה</div><div class="cs-tip"><b>💡</b>תאורה טובה, רקע אחיד</div></div>') +
       '<button class="cs-btn cs-go" type="button" id="cs-pick">צלם / בחר תמונה</button>' +
       '<button class="cs-btn cs-ghost" type="button" id="cs-cancel">ביטול</button>');
+    ov.querySelectorAll('.cs-mode').forEach(function (b2) { b2.onclick = function () { state.mode = b2.getAttribute('data-m'); lsSet(MODE_KEY, state.mode); intro(); }; });
     ov.querySelector('#cs-pick').onclick = function () { file.click(); };
     ov.querySelector('#cs-cancel').onclick = close;
   }
+  var MODE_KEY = 'wwcd_chip_mode';
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
   function run(f) {
@@ -347,12 +428,12 @@
     var url = URL.createObjectURL(f), img = new Image();
     img.onload = function () {
       setTimeout(function () {
-        var s = Math.min(1, MAXD / Math.max(img.naturalWidth, img.naturalHeight));
+        var side = state.mode === 'side', s = Math.min(1, (side ? 1280 : MAXD) / Math.max(img.naturalWidth, img.naturalHeight));
         var cv = document.createElement('canvas');
         cv.width = Math.max(1, Math.round(img.naturalWidth * s)); cv.height = Math.max(1, Math.round(img.naturalHeight * s));
         cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
         var res;
-        try { res = analyze(cv); } catch (e) { res = { total: 0, chips: [], comps: [], unit: 0, w: cv.width, h: cv.height, lab: new Int32Array(cv.width * cv.height) }; }
+        try { res = analyze(cv, side); } catch (e) { res = { total: 0, chips: [], comps: [], unit: 0, w: cv.width, h: cv.height, lab: new Int32Array(cv.width * cv.height) }; }
         drawResult(cv, img, res);
         // עותק איכותי יותר של התמונה בשביל בדיקת ה-AI
         var s2 = Math.min(1, 1280 / Math.max(img.naturalWidth, img.naturalHeight)), big = document.createElement('canvas');
@@ -385,7 +466,7 @@
     fetch(FN, {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + se.access_token, 'apikey': ANON, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: dataUrl, mime: 'image/jpeg' })
+      body: JSON.stringify({ image: dataUrl, mime: 'image/jpeg', mode: state.mode })
     }).then(function (r) { return r.json().catch(function () { return {}; }); })
       .then(function (j) {
         if (token !== state.run) return;
@@ -428,7 +509,8 @@
     }
     var found = COLORS.filter(function (c) { return counts[c.k] > 0; }), rest = COLORS.filter(function (c) { return !counts[c.k]; });
     body('<h3 id="cs-title">' + esc(state.name) + '</h3><div id="cs-img"></div>' +
-      (chips.length ? '<p class="cs-note">כל ג׳טון מסומן בצבע שזוהה. אם צבע לא נכון — מתקנים עם + / −.</p>' : '<p class="cs-note">לא זיהיתי ג׳טונים. נסו לפזר אותם על משטח בצבע אחיד ולצלם מלמעלה, או הוסיפו ידנית למטה.</p>') +
+      (chips.length && state.mode === 'side' ? '<p class="cs-note">מעל כל ערימה — כמה ג׳טונים יש בה. ליד הערימה — הצבע של כל ג׳טון.</p>' : '') +
+      (!chips.length ? '<p class="cs-note">לא זיהיתי ג׳טונים. ' + (state.mode === 'side' ? 'צלמו את הערימות מהצד, בגובה שלהן, על רקע אחיד' : 'נסו לפזר אותם על משטח בצבע אחיד ולצלם מלמעלה') + ', או הוסיפו ידנית למטה.</p>' : state.mode === 'side' ? '' : '<p class="cs-note">כל ג׳טון מסומן בצבע שזוהה. אם צבע לא נכון — מתקנים עם + / −.</p>') +
       '<div id="cs-ai"></div>' +
       '<div class="cs-head"><span>צבע</span><span>כמות</span><span>שווי כל ג׳טון</span></div>' +
       '<div class="cs-rows">' + found.map(row).join('') + '</div>' +
@@ -460,7 +542,7 @@
   }
 
   window.wnChipScan = {
-    open: function (name, cb) { build(); state = { name: name, cb: cb, run: 0 }; intro(); ov.classList.add('show'); },
+    open: function (name, cb) { build(); state = { name: name, cb: cb, run: 0, mode: lsGet(MODE_KEY) === 'side' ? 'side' : 'top' }; intro(); ov.classList.add('show'); },
     analyze: analyze
   };
 })();
