@@ -296,6 +296,18 @@
     '#cs-ov .cs-x{color:#8fa596;text-align:center}',
     '#cs-ov .cs-crow input{width:100%;box-sizing:border-box;padding:7px 4px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;font:inherit;font-weight:800;text-align:center}',
     '#cs-ov .cs-more{margin:0 0 12px}#cs-ov .cs-more summary{cursor:pointer;color:#f2c94c;font-size:13px;font-weight:800;padding:6px 4px;margin-bottom:6px}',
+    '#cs-ov .cs-ai{margin:0 0 12px;padding:12px 14px;border-radius:16px;font-size:14px;line-height:1.5;display:grid;gap:6px}',
+    '#cs-ov .cs-ai small{display:block;color:#b9c7bd;font-size:12px}',
+    '#cs-ov .cs-ai.wait{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#d9e3dc;display:flex;align-items:center;gap:10px}',
+    '#cs-ov .cs-dot{width:14px;height:14px;border-radius:50%;border:3px solid #f2c94c;border-top-color:transparent;animation:csSpin .8s linear infinite}',
+    '#cs-ov .cs-ai.mute{background:rgba(255,255,255,.04);color:#8fa596;font-size:12.5px}',
+    '#cs-ov .cs-ai.ok{background:rgba(47,212,124,.12);border:1px solid rgba(47,212,124,.4);color:#7af0b0;animation:csPop .4s ease}',
+    '#cs-ov .cs-ai.diff{background:rgba(242,201,76,.1);border:1px solid rgba(242,201,76,.4);color:#f6dc86;animation:csPop .4s ease}',
+    '@keyframes csPop{from{transform:scale(.96);opacity:0}}',
+    '#cs-ov .cs-pills{display:flex;flex-wrap:wrap;gap:6px}',
+    '#cs-ov .cs-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;background:rgba(0,0,0,.25);color:#fff;font-weight:800;font-size:13px}',
+    '#cs-ov .cs-pill i{width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 1px rgba(255,255,255,.5)}',
+    '#cs-ov .cs-use{margin-top:2px;min-height:42px;border:0;border-radius:12px;background:#f2c94c;color:#1b1503;font:inherit;font-weight:900;cursor:pointer}',
     '#cs-ov .cs-busy{padding:40px 0;text-align:center;color:#b9c7bd}',
     '#cs-ov .cs-spin{width:44px;height:44px;margin:0 auto 12px;border-radius:50%;border:5px dashed #f2c94c;animation:csSpin 1s linear infinite}',
     '@keyframes csSpin{to{transform:rotate(360deg)}}',
@@ -342,8 +354,15 @@
         var res;
         try { res = analyze(cv); } catch (e) { res = { total: 0, chips: [], comps: [], unit: 0, w: cv.width, h: cv.height, lab: new Int32Array(cv.width * cv.height) }; }
         drawResult(cv, img, res);
+        // עותק איכותי יותר של התמונה בשביל בדיקת ה-AI
+        var s2 = Math.min(1, 1280 / Math.max(img.naturalWidth, img.naturalHeight)), big = document.createElement('canvas');
+        big.width = Math.round(img.naturalWidth * s2); big.height = Math.round(img.naturalHeight * s2);
+        big.getContext('2d').drawImage(img, 0, 0, big.width, big.height);
         URL.revokeObjectURL(url);
-        result(cv, res.chips || []);
+        var token = ++state.run;
+        state.local = res.chips || [];
+        result(cv, state.local, null);
+        aiCheck(big.toDataURL('image/jpeg', 0.85), token, cv);
       }, 30);
     };
     img.onerror = function () { URL.revokeObjectURL(url); toast('לא הצלחתי לפתוח את התמונה'); intro(); };
@@ -353,10 +372,55 @@
   var VALS_KEY = 'wwcd_chip_values';
   function loadVals() { var v = {}; try { v = JSON.parse(lsGet(VALS_KEY) || '{}') || {}; } catch (e) {} COLORS.forEach(function (c) { if (!(Number(v[c.k]) > 0)) v[c.k] = c.def; }); return v; }
 
-  function result(cv, chips) {
+  /* ---------- בדיקת AI: כל תמונה נבדקת מחדש ע"י מודל ראייה, ומשווים לספירה של הטלפון ---------- */
+  var FN = 'https://ctrnlkfopahdtoiaakru.supabase.co/functions/v1/wwcd-chip-ai';
+  var ANON = 'sb_publishable_zpiuN3ZFGPTHr5ySfL-rOw_Ngfzl7hc';
+  function session() {
+    try { var x = JSON.parse(localStorage.getItem('sb-ctrnlkfopahdtoiaakru-auth-token') || 'null'); if (x && x.currentSession) x = x.currentSession; return x && x.access_token ? x : null; } catch (e) { return null; }
+  }
+  function aiCheck(dataUrl, token, cv) {
+    var se = session();
+    if (!se) { state.ai = { status: 'off', message: 'בדיקת AI זמינה אחרי התחברות.' }; return paintAi(); }
+    state.ai = { status: 'loading' }; paintAi();
+    fetch(FN, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + se.access_token, 'apikey': ANON, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: dataUrl, mime: 'image/jpeg' })
+    }).then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (j) {
+        if (token !== state.run) return;
+        state.ai = j && j.ok ? { status: 'done', r: j } : { status: (j && j.error) === 'setup' ? 'off' : 'error', message: (j && j.message) || 'בדיקת ה-AI נכשלה.' };
+        paintAi();
+      })
+      .catch(function () { if (token === state.run) { state.ai = { status: 'error', message: 'אין חיבור לאינטרנט — ממשיכים עם הספירה של הטלפון.' }; paintAi(); } });
+  }
+  function paintAi() {
+    var box = ov && ov.querySelector('#cs-ai'); if (!box) return;
+    var a = state.ai || {}, html = '';
+    if (a.status === 'loading') html = '<div class="cs-ai wait"><span class="cs-dot"></span>🤖 ה-AI בודק את התמונה…</div>';
+    else if (a.status === 'off' || a.status === 'error') html = '<div class="cs-ai mute">🤖 ' + esc(a.message || '') + '</div>';
+    else if (a.status === 'done') {
+      var r = a.r, mine = state.counts || {}, same = true;
+      COLORS.forEach(function (c) { if ((r.counts[c.k] || 0) !== (mine[c.k] || 0)) same = false; });
+      var parts = COLORS.filter(function (c) { return r.counts[c.k]; }).map(function (c) { return '<span class="cs-pill"><i style="background:' + c.hex + '"></i>' + r.counts[c.k] + '</span>'; }).join('');
+      var low = r.confidence === 'low' ? ' <small>(ה-AI לא בטוח)</small>' : '';
+      if (same) html = '<div class="cs-ai ok"><div>✓ <b>ה-AI אישר</b> — ' + r.total + ' ג׳טונים, אותה ספירה בדיוק' + low + '</div>' + (r.note ? '<small>' + esc(r.note) + '</small>' : '') + '</div>';
+      else html = '<div class="cs-ai diff"><div>⚠️ <b>ה-AI ספר ' + r.total + '</b> (הטלפון: ' + sumCounts(mine) + ')' + low + '</div><div class="cs-pills">' + parts + '</div>' + (r.note ? '<small>' + esc(r.note) + '</small>' : '') +
+        '<button type="button" class="cs-use" id="cs-use-ai">השתמש בספירת ה-AI</button></div>';
+    }
+    box.innerHTML = html;
+    var u = box.querySelector('#cs-use-ai');
+    if (u) u.onclick = function () { var c2 = {}; COLORS.forEach(function (c) { c2[c.k] = a.r.counts[c.k] || 0; }); state.override = c2; result(state.cv, state.local, c2); };
+  }
+  function sumCounts(c) { var n = 0; Object.keys(c).forEach(function (k) { n += c[k] || 0; }); return n; }
+
+  function result(cv, chips, forced) {
     var vals = loadVals(), counts = {};
+    state.cv = cv;
     COLORS.forEach(function (c) { counts[c.k] = 0; });
-    chips.forEach(function (c) { counts[c.color]++; });
+    if (forced) COLORS.forEach(function (c) { counts[c.k] = forced[c.k] || 0; });
+    else chips.forEach(function (c) { counts[c.color]++; });
+    state.counts = counts;
     function row(c) {
       return '<div class="cs-crow" data-k="' + c.k + '"><span class="cs-sw" style="background:' + c.hex + '"></span><b>' + c.n + '</b>' +
         '<div class="cs-mini"><button type="button" data-d="-1" aria-label="פחות">−</button><span class="cs-c">' + counts[c.k] + '</span><button type="button" data-d="1" aria-label="יותר">+</button></div>' +
@@ -365,6 +429,7 @@
     var found = COLORS.filter(function (c) { return counts[c.k] > 0; }), rest = COLORS.filter(function (c) { return !counts[c.k]; });
     body('<h3 id="cs-title">' + esc(state.name) + '</h3><div id="cs-img"></div>' +
       (chips.length ? '<p class="cs-note">כל ג׳טון מסומן בצבע שזוהה. אם צבע לא נכון — מתקנים עם + / −.</p>' : '<p class="cs-note">לא זיהיתי ג׳טונים. נסו לפזר אותם על משטח בצבע אחיד ולצלם מלמעלה, או הוסיפו ידנית למטה.</p>') +
+      '<div id="cs-ai"></div>' +
       '<div class="cs-head"><span>צבע</span><span>כמות</span><span>שווי כל ג׳טון</span></div>' +
       '<div class="cs-rows">' + found.map(row).join('') + '</div>' +
       '<details class="cs-more"' + (found.length ? '' : ' open') + '><summary>צבעים נוספים</summary>' + rest.map(row).join('') + '</details>' +
@@ -379,12 +444,14 @@
       tEl.innerHTML = n + ' ג׳טונים · סה״כ <b>' + t.toLocaleString('he-IL') + '</b>';
       return t;
     }
+    function sumAndAi() { var t = sum(); paintAi(); return t;
+    }
     ov.querySelectorAll('.cs-crow').forEach(function (r) {
       var k = r.getAttribute('data-k'), cEl = r.querySelector('.cs-c'), inp = r.querySelector('input');
-      r.querySelectorAll('[data-d]').forEach(function (b) { b.onclick = function () { counts[k] = Math.max(0, counts[k] + Number(b.getAttribute('data-d'))); cEl.textContent = counts[k]; sum(); }; });
+      r.querySelectorAll('[data-d]').forEach(function (b) { b.onclick = function () { counts[k] = Math.max(0, counts[k] + Number(b.getAttribute('data-d'))); cEl.textContent = counts[k]; sumAndAi(); }; });
       inp.oninput = function () { vals[k] = Math.max(1, Number(inp.value) || 1); sum(); };
     });
-    sum();
+    sum(); paintAi();
     ov.querySelector('#cs-again').onclick = function () { file.click(); };
     ov.querySelector('#cs-apply').onclick = function () {
       lsSet(VALS_KEY, JSON.stringify(vals));
@@ -393,7 +460,7 @@
   }
 
   window.wnChipScan = {
-    open: function (name, cb) { build(); state = { name: name, cb: cb }; intro(); ov.classList.add('show'); },
+    open: function (name, cb) { build(); state = { name: name, cb: cb, run: 0 }; intro(); ov.classList.add('show'); },
     analyze: analyze
   };
 })();
