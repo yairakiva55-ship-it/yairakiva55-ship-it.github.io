@@ -11,6 +11,59 @@ let activeTab = "overview";
 let listenersAttached = false;
 let usersCache = [];
 let roomsCache = [];
+let dataCache = null;
+let dataTable = "users";
+const DATA_TABLES = {
+  users: { label: "חשבונות", cols: { email: "דוא״ל", guest: "אורח", provider: "התחברות", created: "נוצר", lastSignIn: "כניסה אחרונה", banned: "מושעה", id: "מזהה" } },
+  profiles: { label: "פרופילים", cols: { user: "משתמש", displayName: "שם מוצג", hasPhoto: "תמונה", updated: "עודכן" } },
+  stats: { label: "סטטיסטיקה", cols: { user: "משתמש", games: "משחקים", wins: "ניצחונות", pointsNis: "נקודות (₪)" } },
+  savedGames: { label: "משחקים שמורים", cols: { user: "משתמש", players: "שחקנים", playerCount: "מס׳ שחקנים", potNis: "קופה (₪)", ratio: "יחס", updated: "עודכן" } },
+  rooms: { label: "שולחנות", cols: { name: "שם", code: "קוד", host: "מארח", status: "מצב", ratio: "יחס", created: "נוצר" } },
+  members: { label: "משתתפים בשולחנות", cols: { room: "שולחן", user: "משתמש", displayName: "שם בשולחן", joined: "הצטרף" } },
+  money: { label: "רישומי כסף", cols: { room: "שולחן", user: "משתמש", kind: "סוג", amountNis: "סכום (₪)", note: "הערה", created: "מתי" } },
+  results: { label: "תוצאות", cols: { room: "שולחן", user: "משתמש", profitNis: "רווח/הפסד (₪)", applied: "נספר", finished: "הסתיים" } },
+  events: { label: "אירועים", cols: { room: "שולחן", actor: "מי", kind: "פעולה", created: "מתי" } },
+  terms: { label: "אישורי תנאים", cols: { user: "משתמש", version: "גרסה", accepted: "אושר", device: "מכשיר" } },
+};
+const DATE_COLS = new Set(["created", "lastSignIn", "updated", "joined", "finished", "accepted"]);
+const fullDate = (v) => v ? new Intl.DateTimeFormat("he-IL", { dateStyle: "short", timeStyle: "short" }).format(new Date(v)) : "—";
+function cellText(key, value) {
+  if (DATE_COLS.has(key)) return fullDate(value);
+  if (typeof value === "boolean") return value ? "כן" : "לא";
+  if (key === "status") return statusLabel(value);
+  if (key === "kind") return ({ buyin: "קנייה ראשונית", rebuy: "קנייה נוספת", cashout: "פדיון", adjustment: "תיקון", game_started: "משחק התחיל", game_finished: "משחק הסתיים", player_added: "שחקן נוסף", player_removed: "שחקן הוסר", ratio_changed: "שינוי יחס" })[value] || value;
+  if (value === null || value === undefined || value === "") return "—";
+  return String(value);
+}
+function renderData(search = $("adminDataSearch")?.value || "") {
+  const tables = dataCache?.tables || {};
+  const def = DATA_TABLES[dataTable];
+  const rows = tables[dataTable] || [];
+  const q = search.trim().toLowerCase();
+  const filtered = q ? rows.filter((r) => Object.values(r).some((v) => String(v ?? "").toLowerCase().includes(q))) : rows;
+  const chips = Object.entries(DATA_TABLES).map(([key, t]) => `<button type="button" class="admin-data-chip" data-admin-action="data-table" data-table="${key}" aria-pressed="${key === dataTable}">${escapeHtml(t.label)} <b>${(tables[key] || []).length}</b></button>`).join("");
+  const head = Object.values(def.cols).map((h) => `<th>${escapeHtml(h)}</th>`).join("");
+  const body = filtered.slice(0, 500).map((r) => `<tr>${Object.keys(def.cols).map((k) => `<td>${escapeHtml(cellText(k, r[k]))}</td>`).join("")}</tr>`).join("");
+  $("adminContent").innerHTML = `
+    <div class="admin-toolbar"><div><h3>כל הנתונים</h3><div class="admin-muted">עודכן ${escapeHtml(fullDate(dataCache?.generatedAt))} · ${filtered.length} שורות${filtered.length > 500 ? " (מוצגות 500 ראשונות)" : ""}</div></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn" type="button" data-admin-action="data-csv">הורד CSV</button><button class="btn" type="button" data-admin-action="data-json">הורד הכל (JSON)</button><button class="btn" type="button" data-admin-action="refresh">רענן</button></div></div>
+    <div class="admin-data-chips">${chips}</div>
+    <label class="room-field" style="max-width:420px;margin:10px 0 12px">חיפוש בטבלה<input id="adminDataSearch" class="input" value="${escapeHtml(search)}" autocomplete="off"></label>
+    ${body ? `<div class="admin-table-wrap"><table class="admin-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>` : '<div class="admin-empty">אין נתונים בטבלה הזו.</div>'}`;
+}
+function download(name, text, type) {
+  const blob = new Blob([text], { type });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function downloadCsv() {
+  const def = DATA_TABLES[dataTable], rows = dataCache?.tables?.[dataTable] || [];
+  const esc = (v) => '"' + String(v ?? "").replaceAll('"', '""') + '"';
+  const lines = [Object.values(def.cols).map(esc).join(",")].concat(rows.map((r) => Object.keys(def.cols).map((k) => esc(cellText(k, r[k]))).join(",")));
+  download(`wwcd-${dataTable}-${new Date().toISOString().slice(0, 10)}.csv`, "\ufeff" + lines.join("\r\n"), "text/csv;charset=utf-8");
+}
 
 export function initAdminArea(user, supabase) {
   client = supabase;
@@ -48,6 +101,9 @@ function attachListeners() {
     const button = event.target.closest("[data-admin-action]");
     if (!button) return;
     if (button.dataset.adminAction === "refresh") void loadTab(activeTab);
+    if (button.dataset.adminAction === "data-table") { dataTable = button.dataset.table; renderData(""); }
+    if (button.dataset.adminAction === "data-csv") downloadCsv();
+    if (button.dataset.adminAction === "data-json" && dataCache) download(`wwcd-all-data-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(dataCache, null, 2), "application/json");
     if (button.dataset.adminAction === "ban") void setUserBan(button.dataset.userId, true);
     if (button.dataset.adminAction === "goto-users") void loadTab("users");
     if (button.dataset.adminAction === "unban") void setUserBan(button.dataset.userId, false);
@@ -56,6 +112,7 @@ function attachListeners() {
   });
   $("adminContent").addEventListener("input", (event) => {
     if (event.target.id === "adminUserSearch") renderUsers(usersCache, event.target.value);
+    if (event.target.id === "adminDataSearch") { const v = event.target.value; renderData(v); const el = $("adminDataSearch"); el.focus(); el.setSelectionRange(v.length, v.length); }
   });
   $("adminContent").addEventListener("submit", (event) => {
     if (event.target.id === "adminSettingsForm") {
@@ -118,6 +175,7 @@ async function loadTab(tab) {
       renderRooms(roomsCache);
     }
     if (tab === "settings") renderSettings(await callAdmin("settings"));
+    if (tab === "data") { dataCache = await callAdmin("all-data"); renderData(""); }
   } catch (error) {
     $("adminContent").innerHTML = `<div class="admin-error">${escapeHtml(error?.message || "לא ניתן לטעון את הנתונים.")}</div>`;
     setFooter("בדוק שהתחברת עם חשבון המנהל וששירות Supabase זמין.");

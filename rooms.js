@@ -1,6 +1,6 @@
 // Winner Winner Chicken Dinner — accounts, rooms, profile and cloud save.
 // v2026.10.26-claude
-import { initAdminArea } from "/admin.js";
+import { initAdminArea } from "/admin.js?v=2";
 
 const SUPABASE_URL = "https://ctrnlkfopahdtoiaakru.supabase.co";
 // Public publishable key (safe for browsers). Never put service-role or secret keys here.
