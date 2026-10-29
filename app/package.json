@@ -1,0 +1,30 @@
+{
+  "name": "winner-poker-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Winner winner chicken dinner — native app (iOS/Android) built from the website code, same Supabase backend.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-web.mjs",
+    "icons": "npx @capacitor/assets generate --iconBackgroundColor '#111111' --splashBackgroundColor '#07140f'",
+    "android": "npm run build && (test -d android || npx cap add android) && node scripts/patch-native.mjs && npx cap sync android",
+    "ios": "npm run build && (test -d ios || npx cap add ios) && node scripts/patch-native.mjs && npx cap sync ios && npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/browser": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/haptics": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "@capacitor/share": "^7.0.0",
+    "@capacitor/splash-screen": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0",
+    "@supabase/supabase-js": "2.118.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.0.0",
+    "esbuild": "^0.25.0"
+  }
+}

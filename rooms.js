@@ -9,7 +9,11 @@ const AUTH_STORAGE_KEY = "sb-ctrnlkfopahdtoiaakru-auth-token";
 const ALLOWED_SITES = ["https://yairakiva55-ship-it.github.io", "https://winner-poker-yair.netlify.app", "https://winner-poker-yair.brightflute34.chatgpt.site"];
 // Always return to the live site the user is on (never localhost).
 const SITE_AUTH_REDIRECT_URL = (ALLOWED_SITES.includes(location.origin) ? location.origin : ALLOWED_SITES[0]) + "/";
+// Native app (Capacitor): same site code and the same Supabase backend, so accounts and games are shared with the website.
+const IS_NATIVE = Boolean(window.Capacitor?.isNativePlatform?.());
+const NATIVE_REDIRECT = "com.winnerwinnerchickendinner.poker://auth-callback";
 const SDK_SOURCES = [
+  ...(IS_NATIVE ? ["/vendor/supabase.js"] : []),
   "https://esm.sh/@supabase/supabase-js@2.118.0",
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm"
 ];
@@ -397,13 +401,43 @@ async function refreshFacebookButton() {
     btn.hidden = !settings?.external?.facebook;
   } catch { btn.hidden = true; }
 }
+/* In the native app Google/Facebook can't run inside the app's web view, so sign-in opens the system browser
+   and comes back through the app's URL scheme (PKCE). On the website this is the normal redirect. */
+async function oauthCall(method, args) {
+  if (!IS_NATIVE) return client.auth[method](args);
+  const { data, error } = await client.auth[method]({ ...args, options: { ...(args.options || {}), redirectTo: NATIVE_REDIRECT, skipBrowserRedirect: true } });
+  if (error) return { error };
+  if (data?.url) {
+    if (window.wwcdNative?.openAuth) await window.wwcdNative.openAuth(data.url);
+    else location.href = data.url;
+  }
+  return { error: null };
+}
+window.addEventListener("wwcd-native-auth", async (event) => {
+  let url;
+  try { url = new URL(event.detail?.url || ""); } catch { return; }
+  const linking = safeSessionGet(LINK_KEY) === "1";
+  if (linking) safeSessionRemove(LINK_KEY);
+  const err = url.searchParams.get("error_description") || url.searchParams.get("error");
+  const code = url.searchParams.get("code");
+  if (err) {
+    if (linking) { $("profileLinkGoogleBtn").disabled = false; profileMessage(friendlyLinkError(err), "error"); }
+    else { loginGateOpen = false; showSignedOut("ההתחברות לא הושלמה: " + err); }
+    return;
+  }
+  if (!code || !client) return;
+  loginGateOpen = true;
+  const { error } = await client.auth.exchangeCodeForSession(code);
+  if (error) { if (!linking) showSignedOut("ההתחברות לא הושלמה. נסה שוב."); return; }
+  if (linking) await finishGoogleLink();
+});
 async function signInFacebook() {
   if (!client) return;
   loginGateOpen = true;
   safeSessionSet(LOGIN_TAP_KEY, "1");
   $("authMessage").textContent = "פותח התחברות Facebook...";
   $("facebookSignInBtn").disabled = true;
-  const { error } = await client.auth.signInWithOAuth({ provider: "facebook", options: { redirectTo: SITE_AUTH_REDIRECT_URL, scopes: "email" } });
+  const { error } = await oauthCall("signInWithOAuth", { provider: "facebook", options: { redirectTo: SITE_AUTH_REDIRECT_URL, scopes: "email" } });
   if (error) {
     loginGateOpen = false; safeSessionRemove(LOGIN_TAP_KEY);
     $("facebookSignInBtn").disabled = false;
@@ -417,7 +451,7 @@ async function signIn() {
   safeSessionSet(LOGIN_TAP_KEY, "1");
   $("authMessage").textContent = "פותח התחברות Google...";
   $("googleSignInBtn").disabled = true;
-  const { error } = await client.auth.signInWithOAuth({ provider: "google", options: { redirectTo: SITE_AUTH_REDIRECT_URL, queryParams: { prompt: "select_account" } } });
+  const { error } = await oauthCall("signInWithOAuth", { provider: "google", options: { redirectTo: SITE_AUTH_REDIRECT_URL, queryParams: { prompt: "select_account" } } });
   if (error) {
     loginGateOpen = false; safeSessionRemove(LOGIN_TAP_KEY);
     $("googleSignInBtn").disabled = false;
@@ -435,7 +469,7 @@ async function linkGoogle() {
   profileMessage("פותח את Google...");
   $("profileLinkGoogleBtn").disabled = true;
   safeSessionSet(LINK_KEY, "1");
-  const { error } = await client.auth.linkIdentity({ provider: "google", options: { redirectTo: SITE_AUTH_REDIRECT_URL, queryParams: { prompt: "select_account" } } });
+  const { error } = await oauthCall("linkIdentity", { provider: "google", options: { redirectTo: SITE_AUTH_REDIRECT_URL, queryParams: { prompt: "select_account" } } });
   if (error) {
     safeSessionRemove(LINK_KEY);
     $("profileLinkGoogleBtn").disabled = false;
@@ -838,7 +872,7 @@ async function loadSdk() {
     return;
   }
   client = createClient(SUPABASE_URL, SUPABASE_KEY, {
-    auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true, storageKey: AUTH_STORAGE_KEY }
+    auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: !IS_NATIVE, storageKey: AUTH_STORAGE_KEY, ...(IS_NATIVE ? { flowType: "pkce" } : {}) }
   });
   client.auth.onAuthStateChange((event, session) => {
     setTimeout(() => {
@@ -860,4 +894,7 @@ async function loadSdk() {
     else if (user && !isGuest()) await finishGoogleLink();
   }
   if (!user && !oauthError && !$("authMessage").textContent) $("roomConnectionStatus").textContent = "מוכן להתחברות";
+  window.wwcdRoomsReady = true;
+  const pendingAuth = window.wwcdNative?.takePendingAuth?.();
+  if (pendingAuth) window.dispatchEvent(new CustomEvent("wwcd-native-auth", { detail: { url: pendingAuth } }));
 })();

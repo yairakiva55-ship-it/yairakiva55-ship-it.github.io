@@ -1,0 +1,54 @@
+# Builds the Android app (APK for testing + AAB for Google Play) from the website code.
+# Runs on every push that changes the site or the app, and can be started by hand (Actions → Android app → Run workflow).
+name: Android app
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "*.html"
+      - "*.js"
+      - "*.png"
+      - "app/**"
+      - ".github/workflows/android-app.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Install
+        run: npm install --no-audit --no-fund
+      - name: Build web + Android project
+        run: |
+          npm run build
+          npx cap add android
+          npx @capacitor/assets generate --android --iconBackgroundColor '#111111' --splashBackgroundColor '#07140f' || echo "icons step skipped"
+          node scripts/patch-native.mjs
+          npx cap sync android
+      - name: Set version
+        run: |
+          sed -i "s/versionCode 1$/versionCode ${{ github.run_number }}/" android/app/build.gradle
+          sed -i "s/versionName \"1.0\"/versionName \"1.0.${{ github.run_number }}\"/" android/app/build.gradle
+      - name: Gradle build
+        working-directory: app/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug bundleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: winner-poker-android-${{ github.run_number }}
+          path: |
+            app/android/app/build/outputs/apk/debug/app-debug.apk
+            app/android/app/build/outputs/bundle/release/app-release.aab

@@ -1,0 +1,26 @@
+{
+  "appId": "com.winnerwinnerchickendinner.poker",
+  "appName": "Winner Poker",
+  "webDir": "www",
+  "backgroundColor": "#07140f",
+  "ios": {
+    "contentInset": "never",
+    "limitsNavigationsToAppBoundDomains": false
+  },
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "launchAutoHide": true,
+      "backgroundColor": "#07140f",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#07140f",
+      "overlaysWebView": true
+    }
+  }
+}
