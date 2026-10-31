@@ -18,16 +18,16 @@ body{{font-family:system-ui,"Segoe UI",Arial,sans-serif;margin:0;min-height:100v
 form{{background:#fff;padding:28px 24px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08);width:min(320px,88vw);text-align:center}}
 h1{{font-size:20px;margin:0 0 16px}}input{{width:100%;box-sizing:border-box;font-size:17px;padding:11px;border:1px solid #ccc;border-radius:8px;margin-bottom:12px;text-align:center}}
 button{{width:100%;font-size:17px;padding:11px;border:0;border-radius:8px;background:#1b4f9c;color:#fff;font-weight:600}}#e{{color:#b00020;font-size:14px;min-height:18px;margin-top:10px}}</style></head><body>
-<form id="f"><h1>🔒 הזן קוד כניסה</h1><input id="p" type="password" autocomplete="current-password" autofocus placeholder="קוד"><button>כניסה</button><div id="e"></div></form>
+<form id="f"><h1>🔒 הזן קוד כניסה</h1><input id="p" type="password" autocomplete="off" autofocus placeholder="קוד"><button>כניסה</button><div id="e"></div></form>
 <script>
 const S="{b(salt)}",I="{b(iv)}",C="{b(ct)}",N={it};
 const u=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 async function dec(pw){{const k0=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
 const k=await crypto.subtle.deriveKey({{name:'PBKDF2',salt:u(S),iterations:N,hash:'SHA-256'}},k0,{{name:'AES-GCM',length:256}},false,['decrypt']);
 return new TextDecoder().decode(await crypto.subtle.decrypt({{name:'AES-GCM',iv:u(I)}},k,u(C)));}}
-async function go(pw,save){{try{{const h=await dec(pw);try{{if(save)localStorage.setItem('obit_k',pw)}}catch(e){{}}document.open();document.write(h);document.close();}}catch(e){{try{{localStorage.removeItem('obit_k')}}catch(_){{}}if(save!==null)document.getElementById('e').textContent='קוד שגוי';}}}}
+async function go(pw,save){{try{{const h=await dec(pw);document.open();document.write(h);document.close();}}catch(e){{document.getElementById('e').textContent='קוד שגוי';}}}}
 document.getElementById('f').addEventListener('submit',ev=>{{ev.preventDefault();go(document.getElementById('p').value,true)}});
-try{{const s=localStorage.getItem('obit_k');if(s)go(s,null)}}catch(e){{}}
+try{{localStorage.removeItem('obit_k')}}catch(e){{}}
 </script></body></html>'''
 open(out,'w',encoding='utf-8').write(page)
 print('ok',len(page))
