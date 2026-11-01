@@ -769,7 +769,9 @@ async function flushCloudSave() {
 window.wwcdCloud = {
   queueSave: () => queueCloudSave(),
   saveNow: async () => { clearTimeout(cloudSaveTimer); return user && cloudReady && gamesTable ? pushCloudGame() : false; },
-  isSignedIn: () => Boolean(user)
+  isSignedIn: () => Boolean(user),
+  // fresh access token (the SDK refreshes it if it expired) — used by the chip scanner's AI check
+  accessToken: async () => { try { const { data } = await client.auth.getSession(); return data.session?.access_token || null; } catch { return null; } }
 };
 
 /* ---------- wire up ---------- */
