@@ -20,12 +20,13 @@ h1{{font-size:20px;margin:0 0 16px}}input{{width:100%;box-sizing:border-box;font
 button{{width:100%;font-size:17px;padding:11px;border:0;border-radius:8px;background:#1b4f9c;color:#fff;font-weight:600}}#e{{color:#b00020;font-size:14px;min-height:18px;margin-top:10px}}</style></head><body>
 <form id="f"><h1>🔒 הזן קוד כניסה</h1><input id="p" type="password" autocomplete="off" autofocus placeholder="קוד"><button>כניסה</button><div id="e"></div></form>
 <script>
-const S="{b(salt)}",I="{b(iv)}",C="{b(ct)}",N={it};
+let S="{b(salt)}",I="{b(iv)}",C="{b(ct)}",N={it};
+const fresh=fetch(location.pathname+'?nc='+Date.now(),{{cache:'no-store'}}).then(r=>r.text()).then(t=>{{const g=k=>(t.match(new RegExp('[ ,]'+k+'="([A-Za-z0-9+/=]+)"'))||[])[1];const s2=g('S'),i2=g('I'),c2=g('C');if(s2&&i2&&c2){{S=s2;I=i2;C=c2;}}}}).catch(()=>{{}});
 const u=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 async function dec(pw){{const k0=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
 const k=await crypto.subtle.deriveKey({{name:'PBKDF2',salt:u(S),iterations:N,hash:'SHA-256'}},k0,{{name:'AES-GCM',length:256}},false,['decrypt']);
 return new TextDecoder().decode(await crypto.subtle.decrypt({{name:'AES-GCM',iv:u(I)}},k,u(C)));}}
-async function go(pw,save){{try{{const h=await dec(pw);document.open();document.write(h);document.close();}}catch(e){{document.getElementById('e').textContent='קוד שגוי';}}}}
+async function go(pw,save){{try{{await fresh;const h=await dec(pw);document.open();document.write(h);document.close();}}catch(e){{document.getElementById('e').textContent='קוד שגוי';}}}}
 document.getElementById('f').addEventListener('submit',ev=>{{ev.preventDefault();go(document.getElementById('p').value,true)}});
 try{{localStorage.removeItem('obit_k')}}catch(e){{}}
 </script></body></html>'''
