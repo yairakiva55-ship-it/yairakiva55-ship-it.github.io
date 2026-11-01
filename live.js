@@ -186,6 +186,7 @@
     '.wl-pick{position:fixed;inset:0;z-index:2147483001;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;direction:rtl}',
     '.wl-pick .wl-card{width:min(520px,100%);border-radius:24px 24px 0 0;background:#0f2a1f;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px));display:grid;gap:10px;max-height:85vh;overflow:auto}',
     '#tableCard{display:none!important}',
+    '.sk-btn.sk-wa{width:100%;min-height:54px;font-size:16px;background:#25d366;color:#04230f;border:0;font-weight:850}',
     '.sk-live-pill{border:1px solid rgba(47,212,124,.35);background:rgba(47,212,124,.1);color:#9ff0c4;border-radius:999px;padding:7px 14px;font:inherit;font-size:13px;font-weight:800;display:inline-flex;align-items:center;gap:8px;cursor:pointer;margin-top:8px}'
   ].join('\n');
   document.head.appendChild(css);
@@ -396,6 +397,6 @@
     if (code) openViewer(code);
   }
 
-  window.wwcdLive = { share: share, queue: queue, end: end, finish: finish, open: openViewer };
+  window.wwcdLive = { share: share, queue: queue, end: end, finish: finish, open: openViewer, link: linkFor };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

@@ -73,6 +73,7 @@
   function totalIn(s) { return s.players.reduce(function (a, p) { return a + Number(p.buyIn || 0); }, 0); }
 
   var ICON = {
+    wa: '<svg viewBox="0 0 24 24"><path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.3z"/><path d="M9 8.5c0 3.5 2.6 6.5 6.5 6.5l1-1.6-2-1-1 .9c-1.2-.5-2.2-1.5-2.7-2.7l.9-1-1-2z"/></svg>',
     share: '<svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>',
     gear: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
     user: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>',
@@ -588,6 +589,29 @@
     return out;
   }
 
+  /* סיכום לוואטסאפ: מי מעביר למי + יתרות */
+  function summaryText(s) {
+    var ps = perShekel(s), tr = computeTransfers(s);
+    var lines = ['♠ סיכום ערב פוקר — Winner Poker', '', 'סה״כ בקופה: ' + money(totalIn(s)), ''];
+    lines.push('💸 מי מעביר למי:');
+    if (tr.length) tr.forEach(function (t) { lines.push('• ' + t.from + ' מעביר/ה ל' + t.to + ': ' + money(t.amount)); });
+    else lines.push('אין העברות — כולם מאוזנים');
+    lines.push('', '📊 יתרות:');
+    s.players.slice().sort(function (a, b) { return (b.finalChips / ps - b.buyIn) - (a.finalChips / ps - a.buyIn); })
+      .forEach(function (p) { lines.push('• ' + p.name + ': ' + signed(p.finalChips / ps - p.buyIn)); });
+    if (s.live && s.live.code && window.wwcdLive && window.wwcdLive.link) {
+      lines.push('', s.live.finished ? '✅ לאישור התוצאה ולנקודות בפרופיל:' : '👀 המשחק בזמן אמת:', window.wwcdLive.link(s.live.code));
+    }
+    return lines.join('\n');
+  }
+  function sendWhatsApp(s) {
+    var url = 'https://wa.me/?text=' + encodeURIComponent(summaryText(s));
+    var cap = window.Capacitor, br = cap && cap.Plugins && cap.Plugins.Browser;
+    if (cap && cap.isNativePlatform && cap.isNativePlatform() && br) { br.open({ url: url }); return; }
+    var w = window.open(url, '_blank', 'noopener');
+    if (!w) location.href = url;
+  }
+
   var lastDiff = null;
   var DOTS = ['#d93a3f', '#1f9d62', '#d9a21f', '#3b6fd9', '#8e44ad', '#e67e22', '#16a085', '#7f8c8d'];
   function renderSettle() {
@@ -629,11 +653,13 @@
       '<section class="sk-card"><div class="sk-sec-title" style="color:var(--sk-green)">תשלומים</div>' + (pays || '<div class="sk-zero" style="padding:6px 0">יופיעו כשהג׳טונים יתאזנו</div>') + '</section>' +
       (s.live && !s.live.finished ? '<button class="sk-btn green" type="button" id="sk-live-close" style="width:100%;min-height:54px;font-size:17px"' + (diff === 0 ? '' : ' disabled') + '>סגור משחק ושלח לחברים לאישור</button>' +
         '<div class="sk-zero" style="padding:0 4px 4px;font-size:12px;line-height:1.5">' + (diff === 0 ? 'אחרי הסגירה כל שחקן מאשר את התוצאה שלו בקישור, והנקודות נכנסות לפרופיל.' : 'אפשר לסגור את המשחק כשהג׳טונים מאוזנים.') + '</div>' : '') +
+      (diff === 0 ? '<button class="sk-btn sk-wa" type="button" id="sk-wa">' + ICON.wa + 'שלח בוואטסאפ מי מעביר למי</button>' : '') +
       (s.live && s.live.finished ? '<div class="sk-ok">✓ המשחק נסגר. החברים מאשרים את התוצאה בקישור ששלחת.</div>' : '') +
       '<button class="sk-btn' + (s.live && !s.live.finished ? '' : ' green') + '" type="button" id="sk-save" style="width:100%;min-height:54px;font-size:17px">שמור תוצאה</button>' +
       '<button class="sk-btn sk-reset" type="button" id="sk-reset">' + ICON.reset + 'איפוס שולחן</button></div>';
 
     $('sk-back').onclick = function () { view = 'game'; render(); };
+    if ($('sk-wa')) $('sk-wa').onclick = function () { sendWhatsApp(getState()); };
     if ($('sk-live-close')) $('sk-live-close').onclick = function () { if (window.wwcdLive) window.wwcdLive.finish(); };
     $('sk-reset').onclick = function () {
       function doReset() {
