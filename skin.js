@@ -440,22 +440,13 @@
   var view = 'game';
 
   function isAdmin() { var b = $('adminOpenBtn'); return !!(b && !b.hidden); }
-  function roomCode() {
-    var act = $('tableActive');
-    if (act && act.hidden) return '';
-    var el = $('tableCode') || $('activeRoomCode');
-    return el && el.textContent ? el.textContent.trim() : '';
-  }
   function invite() {
-    if (isGuestMode()) return askLogin('כדי להזמין חברים לשולחן משותף צריך להתחבר עם Google.');
-    var act = $('tableActive');
-    if (act && !act.hidden && $('copyRoomCodeBtn')) return $('copyRoomCodeBtn').click();
-    var b = $('openCreateRoomBtn') || $('openRoomsPanelBtn');
-    if (b) b.click();
+    if (isGuestMode()) return askLogin('כדי לשתף את המשחק עם החברים צריך להתחבר.');
+    if (window.wwcdLive) window.wwcdLive.share();
   }
 
   function renderGame() {
-    var s = getState(), pot = totalIn(s), code = roomCode();
+    var s = getState(), pot = totalIn(s), live = s.live || null;
     var rows = s.players.map(function (p, i) {
       return '<div class="sk-player" data-id="' + esc(p.id) + '">' +
         '<div class="sk-av' + (i === 0 ? ' host' : '') + '">' + (i === 0 ? ICON.crown : esc(initials(p.name))) + '</div>' +
@@ -478,7 +469,7 @@
       '</section>' +
       '<div class="sk-hero"><div class="sk-kicker">Winner winner chicken dinner</div>' +
       '<div class="sk-chips"><div class="sk-chip r">♦</div><div class="sk-chip g">♣</div><div class="sk-chip y">♠</div></div>' +
-      (code ? '<div class="sk-room">חדר <b>' + esc(code) + '</b></div>' : '') + '</div>' +
+      (live ? '<button type="button" class="sk-room sk-live-pill" id="sk-live-pill">' + (live.finished ? '✓ המשחק נסגר · ממתין לאישור החברים' : '<i class="sk-live-dot"></i>החברים רואים את המשחק בזמן אמת') + '</button>' : '') + '</div>' +
       '<div id="sk-table-slot"></div>' +
       '<section class="sk-card sk-ratio"><div class="sk-sec-title">' + (isPoints() ? 'יחס ג׳טונים לנקודות' : 'יחס ג׳טונים לשקל') + '<small>' + esc(chipLine(s)) + '</small></div>' +
       '<div class="sk-ratio-row"><label class="sk-rbox"><input id="sk-r-money" type="number" inputmode="decimal" min="0.01" value="' + s.ratioMoney + '" aria-label="' + (isPoints() ? 'נקודות' : 'שקלים') + '"><span>' + CUR() + '</span></label>' +
@@ -490,7 +481,7 @@
       '<div class="sk-list">' + (rows || '<div class="sk-empty sk-empty-rich"><div class="sk-empty-cards" aria-hidden="true"><span>A<i>♠</i></span><span class="red">K<i>♥</i></span></div><b>השולחן עוד ריק</b><span>מוסיפים שחקנים, והאפליקציה סופרת הכל לבד.</span><button class="sk-btn green" type="button" id="sk-add-first">' + ICON.addUser + 'הוסף את השחקן הראשון</button></div>') + '</div></section>' +
       '<div class="sk-actions">' +
       '<button class="sk-btn" type="button" id="sk-finish">' + ICON.flag + 'סיים משחק</button>' +
-      '<button class="sk-btn" type="button" id="sk-invite">' + ICON.link + 'הזמן</button>' +
+      '<button class="sk-btn" type="button" id="sk-invite">' + ICON.link + (live ? 'קישור למשחק' : 'שתף משחק') + '</button>' +
       '<button class="sk-btn green" type="button" id="sk-add-btn">' + ICON.addUser + 'הוסף שחקן</button>' +
       '</div></div>';
     countPot(pot);
@@ -515,6 +506,7 @@
     $('sk-add-btn').onclick = openAdd;
     if ($('sk-add-first')) $('sk-add-first').onclick = openAdd;
     $('sk-invite').onclick = invite;
+    if ($('sk-live-pill')) $('sk-live-pill').onclick = invite;
     $('sk-finish').onclick = function () {
       if (getState().players.length < 2) return toast('צריך לפחות שני שחקנים');
       view = 'settle'; render(); window.scrollTo({ top: 0 }); fx($('sk-root'), { cards: 5 });
@@ -635,13 +627,19 @@
       '</div><div class="sk-col sk-col-b">' +
       '<section class="sk-card"><div class="sk-sec-title" style="color:var(--sk-green)">יתרות</div>' + bal + '</section>' +
       '<section class="sk-card"><div class="sk-sec-title" style="color:var(--sk-green)">תשלומים</div>' + (pays || '<div class="sk-zero" style="padding:6px 0">יופיעו כשהג׳טונים יתאזנו</div>') + '</section>' +
-      '<button class="sk-btn green" type="button" id="sk-save" style="width:100%;min-height:54px;font-size:17px">שמור תוצאה</button>' +
+      (s.live && !s.live.finished ? '<button class="sk-btn green" type="button" id="sk-live-close" style="width:100%;min-height:54px;font-size:17px"' + (diff === 0 ? '' : ' disabled') + '>סגור משחק ושלח לחברים לאישור</button>' +
+        '<div class="sk-zero" style="padding:0 4px 4px;font-size:12px;line-height:1.5">' + (diff === 0 ? 'אחרי הסגירה כל שחקן מאשר את התוצאה שלו בקישור, והנקודות נכנסות לפרופיל.' : 'אפשר לסגור את המשחק כשהג׳טונים מאוזנים.') + '</div>' : '') +
+      (s.live && s.live.finished ? '<div class="sk-ok">✓ המשחק נסגר. החברים מאשרים את התוצאה בקישור ששלחת.</div>' : '') +
+      '<button class="sk-btn' + (s.live && !s.live.finished ? '' : ' green') + '" type="button" id="sk-save" style="width:100%;min-height:54px;font-size:17px">שמור תוצאה</button>' +
       '<button class="sk-btn sk-reset" type="button" id="sk-reset">' + ICON.reset + 'איפוס שולחן</button></div>';
 
     $('sk-back').onclick = function () { view = 'game'; render(); };
+    if ($('sk-live-close')) $('sk-live-close').onclick = function () { if (window.wwcdLive) window.wwcdLive.finish(); };
     $('sk-reset').onclick = function () {
       function doReset() {
         var s2 = getState();
+        if (window.wwcdLive) window.wwcdLive.end(s2.live);
+        delete s2.live;
         s2.players = [];
         save(s2);
         if (typeof window.clearTransfers === 'function') { try { window.clearTransfers(); } catch (e) {} }
@@ -701,10 +699,7 @@
     var tc = $('tableCard'), hub = document.querySelector('#roomDashboard');
     if (tc && hub && root.contains(tc)) { var notice = $('appNotice'); if (notice) notice.after(tc); else hub.appendChild(tc); }
   }
-  function placeTableCard() {
-    var tc = $('tableCard'), slot = $('sk-table-slot');
-    if (tc && slot) slot.appendChild(tc);
-  }
+  function placeTableCard() { /* השולחן המשותף הישן הוחלף ב"שתף משחק" (live.js) */ }
   // הקופה "סופרת" עד הסכום החדש
   function countPot(pot) {
     var el = root.querySelector('.sk-pot strong');
@@ -764,6 +759,7 @@
     else exitGuest();
   }
   window.wnGuest = { is: isGuestMode, exit: exitGuest, askLogin: askLogin };
+  window.wnSkin = { render: function () { render(); }, isPoints: isPoints, goGame: function () { view = 'game'; render(); } };
 
   var guestCss = document.createElement('style');
   guestCss.textContent = [

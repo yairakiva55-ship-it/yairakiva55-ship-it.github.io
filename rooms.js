@@ -348,6 +348,7 @@ async function enterUser(nextUser, { provisional = false } = {}) {
   notice();
   if (!$("roomActionModal").classList.contains("show")) $("roomActionName").value = safeGet("wwcd_display_name") || displayName();
   await Promise.allSettled([loadProfileRow(), loadWins(), loadCloudGame()]);
+  window.dispatchEvent(new CustomEvent("wwcd-auth", { detail: { signedIn: true } }));
   await loadRooms({ restoreActive: true });
 }
 function isFatalAuthError(error) {
@@ -855,6 +856,17 @@ $("copyRoomCodeBtn").addEventListener("click", async () => {
 $("settleRoomBtn").addEventListener("click", settleRoom);
 window.addEventListener("pagehide", () => { if (cloudSaveTimer) void pushCloudGame(); });
 window.addEventListener("online", () => { if (user && client) { notice(); void verifySession(); } });
+
+/* ---------- bridge for live.js (shared live game) ---------- */
+window.wwcdAuth = {
+  client: () => client,
+  user: () => user,
+  guest: () => Boolean(user && isGuest()),
+  name: () => displayName(),
+  signInGoogle: () => signIn(),
+  signInGuest: () => signInGuest(),
+  refreshStats: () => loadWins()
+};
 
 /* ---------- boot ---------- */
 async function loadSdk() {

@@ -1357,7 +1357,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     </aside>
   </section>
 
-  <div class="footer">המשחק נשמר במכשיר ובחשבון שלך. חדרים ורישומי כסף משותפים נשמרים בענן.<div class="app-version">גרסה 2026.10.27</div></div>
+  <div class="footer">המשחק נשמר במכשיר ובחשבון שלך. משחק ששיתפת עם חברים נשמר בענן.<div class="app-version">גרסה 2026.10.27</div></div>
 </div>
 <script>
 const $=id=>document.getElementById(id);
@@ -1378,6 +1378,8 @@ function sanitizeState(raw){
     return {id:String(p.id||uid("p")),name:String(p.name||("שחקן "+(i+1))),buyHistory:history,buyIn:history.reduce((a,b)=>a+b.amount,0),finalChips:Math.max(0,Number(p.finalChips||0))};
   });
   clean.savedAt=Number(s.savedAt||0)||0;
+  // Shared live game (live.js): the code friends watch, and whether the host already closed it.
+  if(s.live&&typeof s.live.code==="string"&&/^[A-Z2-9]{8}$/.test(s.live.code))clean.live={code:s.live.code,finished:Boolean(s.live.finished)};
   return clean;
 }
 state=sanitizeState(state);
@@ -1386,7 +1388,7 @@ let soundEnabled=readStored("wwcd_sound","on")!=="off";
 let rebuyPlayerId=null,historyPlayerId=null,pendingConfirm=null;
 
 function localSave(){try{localStorage.setItem("wwcd_state",JSON.stringify(state));return true}catch{showToast("לא ניתן לשמור במכשיר — בדוק את הרשאות האחסון בדפדפן");return false}}
-function persist(){state=sanitizeState(state);state.savedAt=Date.now();localSave();window.wwcdCloud?.queueSave()}
+function persist(){state=sanitizeState(state);state.savedAt=Date.now();localSave();window.wwcdCloud?.queueSave();window.wwcdLive?.queue()}
 // Bridge for rooms.js (cloud save of the main game).
 window.wwcdGame={get:()=>JSON.parse(JSON.stringify(sanitizeState(state))),replace:next=>{state=sanitizeState(next);localSave();clearTransfers();render()}};
 function signedMoney(n){n=Number(n||0);return n>.009?"+"+money(n):n<-.009?"−"+money(Math.abs(n)):money(0)}
@@ -1481,7 +1483,7 @@ function removePlayer(id){const p=state.players.find(x=>x.id===String(id));if(!p
 
 function openConfirm(t,x,o,a){$("confirmModal").style.zIndex="150";pendingConfirm=a;$("confirmTitle").textContent=t;$("confirmText").textContent=x;$("confirmOk").textContent=o;$("confirmModal").classList.add("show")}
 function closeConfirm(){pendingConfirm=null;$("confirmModal").classList.remove("show")}
-function newGame(){openConfirm("להתחיל משחק חדש?","כל השחקנים והקניות של המשחק הנוכחי יימחקו.","משחק חדש",()=>{state={ratioMoney:50,ratioChips:500,players:[]};persist();clearTransfers();render();showToast("נפתח משחק חדש")})}
+function newGame(){openConfirm("להתחיל משחק חדש?","כל השחקנים והקניות של המשחק הנוכחי יימחקו.","משחק חדש",()=>{window.wwcdLive?.end(state.live);state={ratioMoney:50,ratioChips:500,players:[]};persist();clearTransfers();render();showToast("נפתח משחק חדש")})}
 
 function render(rebuild=true){
   state=sanitizeState(state);
@@ -1685,11 +1687,12 @@ $("shareClose").addEventListener("click",()=>$("shareModal").classList.remove("s
 document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if($("confirmModal").classList.contains("show"))return closeConfirm();closeRebuy();closeBuyHistory();closePokerCalc();$("shareModal").classList.remove("show")});
 render();
 </script>
-<script type="module" src="/rooms.js?v=6"></script>
+<script type="module" src="/rooms.js?v=7"></script>
 <script src="/chip-scan.js?v=6" defer></script>
-<script src="/skin.js?v=15" defer></script>
+<script src="/skin.js?v=16" defer></script>
 <script src="/bottom-nav.js?v=4" defer></script>
 <script src="/terms-gate.js?v=7" defer></script>
+<script src="/live.js?v=1" defer></script>
 <script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})})}</script>
 
 </body>
