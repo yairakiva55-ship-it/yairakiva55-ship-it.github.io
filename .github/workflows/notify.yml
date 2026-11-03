@@ -11,11 +11,13 @@ jobs:
         env:
           MSG: ${{ github.event.head_commit.message }}
         run: |
-          FIRST="$(printf '%s' "$MSG" | head -n1)"
-          case "$FIRST" in
-            *"Update obituary list"*|*"new lead"*|*"test lead"*|*"notification"*) ;;
-            *) echo "skip: $FIRST"; exit 0;;
-          esac
-          BODY="$(printf '%s' "$MSG" | sed -n '3,4p' | grep -v '^Co-Authored' | head -n1)"
-          [ -z "$BODY" ] && BODY="הרשימה באתר עודכנה"
-          curl -s -H "Title: לידים חדשים – מצבות קוה" -H "Tags: bell" -H "Click: https://yairakiva55-ship-it.github.io/avel-k7q2/" -d "$BODY" "https://ntfy.sh/kave-leads-17285342"
+          python3 - <<'PY'
+          import os, json, urllib.request
+          lines = os.environ.get("MSG", "").splitlines()
+          first = lines[0] if lines else ""
+          body = next((l for l in lines[1:] if l.strip() and not l.startswith(("Co-Authored", "Claude-Session"))), "") or "הרשימה באתר עודכנה"
+          data = {"topic": "kave-leads-17285342", "title": "לידים חדשים – מצבות קוה", "message": body, "tags": ["bell"],
+                  "click": "https://yairakiva55-ship-it.github.io/avel-k7q2/", "priority": 4}
+          req = urllib.request.Request("https://ntfy.sh/", data=json.dumps(data).encode(), headers={"Content-Type": "application/json"})
+          print(urllib.request.urlopen(req).read().decode())
+          PY
